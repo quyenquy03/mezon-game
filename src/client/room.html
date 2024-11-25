@@ -4,10 +4,149 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
     <link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="stylesheet" href="./assets/css/room.css" />
   </head>
   <body>
-    <div>Room</div>
+    <div class="room-page-wrapper">
+      <div class="room-section">
+        <div class="room-section-header">
+          <div class="header-left">
+            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">+</span>
+          </div>
+          <div class="header-right">
+            <div class="coin-box">
+              <img class="coin-icon" src="./assets/images/coin.png" alt="" />
+              <span class="coin-text">1000</span>
+            </div>
+            <div class="account-box">
+              
+            </div>
+          </div>
+        </div>
+        <div class="row room-list">
+          <div class="col col-xs-12 col-sm-6 col-xl-4">
+            <div class="room-item">
+              <div class="room-name">
+                <span class="room-name-text">195384</span>
+              </div>
+              <div class="room-join">
+                <button class="room-join-btn">JOIN</button>
+              </div>
+              <div class="room-bet">
+                <img class="room-bet-bg" src="./assets/images/bg-cuoc.png" alt="" />
+                <div class="room-bet-info">
+                  <span class="room-bet-text">1000</span>
+                  <img class="room-bet-coin" src="./assets/images/coin.png" alt="" />
+                </div>
+              </div>
+              <div class="room-owner">
+                <img class="room-owner-icon" src="./assets/images/user.png" alt="" />
+                <span class="room-owner-name">username</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="user-section">
+        <h5 class="user-section-header">ONLINE</h5>
+        <div class="user-list">
+          <!-- <div class="user-item">
+            <div class="user-avatar">
+              <img src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="" />
+            </div>
+            <div class="user-info">
+              <span class="user-name">username</span>
+            </div>
+          </div>
+          <div class="user-item">
+            <div class="user-avatar">
+              <img src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="" />
+            </div>
+            <div class="user-info">
+              <span class="user-name">username</span>
+            </div>
+          </div>
+          <div class="user-item">
+            <div class="user-avatar">
+              <img src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="" />
+            </div>
+            <div class="user-info">
+              <span class="user-name">username</span>
+            </div>
+          </div> -->
+        </div>
+      </div>
+      <div class='modal-section'>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content custom-modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title text-center w-100" id="exampleModalLabel">
+                 <span class="font-weight-600 text-white">Tạo phòng</span> 
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+                <div class='form-create-room'>
+                  <div class='form-item'>
+                    <label for='room-name' class='label'>Tên phòng</label>
+                    <input autocomplete='false' type='text' id='room-name' class='form-control form-input' placeholder='Tên phòng của bạn...' />
+                  </div>
+                  <div class='row'>
+                    <div class='col col-sm-6'>
+                      <div class='form-item'>
+                        <label for='room-user' class='label'>Số người chơi</label>
+                        <select id='room-max-user' class="form-select form-select-lg" aria-label="Default select example">
+                          <option value="2" selected>2</option>
+                          <option value="4">4</option>
+                          <option value="8">8</option>
+                          <option value="16">16</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class='col col-sm-6'>
+                      <div class='form-item'>
+                        <label for='room-bet' class='label'>Mức cược</label>
+                        <input value='1' autocomplete='false' type='text' id='room-bet' class='form-control form-input' placeholder='Mức cược của bạn...' />
+                      </div>
+                    </div>
+                  </div>
+                  <div class='row'>
+                    <div class='col col-sm-6 d-flex align-items-center'>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="room-use-password">
+                        <label class="form-check-label text-white" for="room-use-password">
+                          Sử dụng mật khẩu
+                        </label>
+                      </div>
+                    </div>
+                    <div class='col col-sm-6'>
+                      <div class='form-item'>
+                        <label for='room-password' class='label'>Mật khẩu phòng</label>
+                        <input autocomplete='false' type='password' id='room-password' class='form-control form-input' placeholder='Mật khẩu phòng...' />
+                      </div>
+                    </div>
+                  </div>
+                  <div class='text-center mt-3'>
+                    <button class='btn btn-primary btn-create-room btn-danger' data-bs-dismiss="modal" aria-label="Close">Huỷ bỏ</button>
+                    <button onclick='createNewRoom()' class='btn btn-primary btn-create-room'>Tạo phòng</button>
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./assets/javascript/client.js"></script>
   </body>

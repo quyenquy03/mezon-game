@@ -1,0 +1,297 @@
+.room-page-wrapper {
+  display: flex;
+  background: rgb(34, 1, 6);
+  background: radial-gradient(
+    circle,
+    rgba(34, 1, 6, 0.9136904761904762) 0%,
+    rgba(34, 1, 6, 0.9108893557422969) 31%,
+    rgba(34, 1, 6, 0.8688725490196079) 86%,
+    rgba(34, 1, 6, 0.8072478991596639) 100%
+  );
+  min-height: 100vh;
+}
+
+.room-section {
+  flex: 1;
+  padding: 10px;
+  position: relative;
+}
+.user-section {
+  width: 300px;
+  background: rgb(34, 1, 6);
+  background: radial-gradient(
+    circle,
+    rgba(34, 1, 6, 0.9136904761904762) 0%,
+    rgba(34, 1, 6, 0.9108893557422969) 31%,
+    rgba(34, 1, 6, 0.8688725490196079) 86%,
+    rgba(34, 1, 6, 0.8072478991596639) 100%
+  );
+  box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
+}
+.user-section-header {
+  padding: 10px;
+  background: rgb(18, 3, 5);
+  color: #fff;
+  font-size: 20px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-list {
+  padding: 10px;
+}
+
+.user-list .user-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+.user-list .user-item .user-info {
+}
+.user-list .user-item .user-info .user-name {
+  font-size: 16px;
+  color: #fff;
+}
+.user-list .user-item .user-avatar,
+.user-list .user-item .user-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.room-section .room-section-header {
+  position: absolute;
+  top: 10px;
+  left: 30px;
+  right: 30px;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background: rgb(34, 1, 6);
+  background: radial-gradient(
+    circle,
+    rgba(34, 1, 6, 0.9136904761904762) 0%,
+    rgba(34, 1, 6, 0.9108893557422969) 31%,
+    rgba(34, 1, 6, 0.8688725490196079) 86%,
+    rgba(34, 1, 6, 0.8072478991596639) 100%
+  );
+  border-radius: 1000px;
+}
+.room-section-header .header-left .create-room-btn {
+  background-color: #fff;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+}
+.room-section-header .header-left .create-room-btn:hover {
+  background-color: #f1f1f1;
+}
+.room-section-header .header-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+}
+.room-section-header .coin-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #fff;
+  min-width: 130px;
+  height: 40px;
+  border-radius: 100px;
+  padding: 5px 10px;
+}
+.room-section-header .coin-box {
+}
+.room-section-header .coin-box .coin-icon {
+  width: 20px;
+}
+.room-section-header .account-box {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 130px;
+  min-height: 40px;
+  background-color: #fff;
+  padding: 5px 10px;
+  border-radius: 100px;
+}
+.room-section-header .account-box .avatar,
+.room-section-header .account-box .avatar img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.room-section .room-list {
+  margin-top: 100px;
+  overflow-y: scroll;
+  height: calc(100vh - 150px);
+}
+.room-section .room-list::-webkit-scrollbar {
+  display: none;
+}
+.room-list .room-item {
+  width: 100%;
+  aspect-ratio: 5/3;
+  background-image: url("../images/phong.png");
+  background-size: cover;
+  position: relative;
+}
+.room-list .room-item .room-name {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 40px;
+  background-image: url("../images/room-name.png");
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.room-list .room-item .room-name .room-name-img {
+  width: 120px;
+}
+.room-list .room-item .room-name .room-name-text {
+  font-size: 20px;
+  font-weight: 500;
+  color: #fff;
+}
+.room-item .room-bet {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100px;
+  height: 50px;
+}
+.room-item .room-bet .room-bet-coin {
+  width: 30px;
+  height: 30px;
+}
+.room-item .room-bet .room-bet-bg {
+  width: 50px;
+  height: 130px;
+  position: absolute;
+  transform: rotate(90deg);
+  bottom: -25px;
+  right: 50px;
+}
+.room-item .room-bet .room-bet-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  bottom: 24px;
+  right: 20px;
+  z-index: 1;
+  width: 100px;
+}
+.room-item .room-bet .room-bet-text {
+  font-size: 20px;
+  color: #fff;
+}
+
+.room-item .room-owner {
+  position: absolute;
+  bottom: 20px;
+  left: 12px;
+  min-width: 120px;
+  height: 40px;
+  background-color: #fff;
+  background-size: cover;
+  display: flex;
+  padding: 0 5px;
+  border-radius: 100px;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+.room-item .room-owner .room-owner-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.room-item .room-join {
+  position: absolute;
+  top: 50px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.room-item .room-join .room-join-btn {
+  width: 100px;
+  height: 40px;
+  outline: none;
+  border: none;
+  display: flex;
+  background: rgb(34, 1, 6);
+  background: radial-gradient(
+    circle,
+    rgba(34, 1, 6, 0.9136904761904762) 0%,
+    rgba(34, 1, 6, 0.9108893557422969) 31%,
+    rgba(34, 1, 6, 0.8688725490196079) 86%,
+    rgba(34, 1, 6, 0.8072478991596639) 100%
+  );
+  border-radius: 100px;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.room-join-btn:hover {
+  box-shadow: 0 0 10px rgba(123, 113, 113, 0.5);
+}
+.room-join-btn:active {
+  transform: scale(0.95);
+}
+
+.form-create-room {
+  padding: 10px;
+}
+
+.form-create-room .form-item {
+  margin-bottom: 10px;
+}
+
+.form-create-room .form-item .label {
+  font-size: 13px;
+  color: #fff;
+}
+.form-create-room .form-item .form-input {
+  height: 40px;
+  padding: 10px;
+  font-size: 15px;
+}
+.form-create-room .form-item .form-select {
+  height: 40px;
+  padding: 10px;
+  font-size: 15px;
+  width: 100%;
+}
+.form-create-room .btn-create-room {
+  width: 140px;
+  height: 40px;
+  font-size: 13px;
+  text-transform: uppercase;
+}
