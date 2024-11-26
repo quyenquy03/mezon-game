@@ -2,6 +2,7 @@ var socket = io();
 let roomUniqueId = null;
 let player1 = false;
 let choices = {};
+let round = 3;
 let countdownInterval = null;
 
 function createGame() {
@@ -20,7 +21,7 @@ socket.on("newGame", (data) => {
     document.getElementById('gamePlay').style.display = 'block';
     let copyButton = document.createElement('button');
     copyButton.style.display = 'block';
-    copyButton.classList.add('btn', 'btn-primary', 'py-2', 'my-2');
+    copyButton.classList.add('btn', 'btn-primary', 'py-2', 'my-2')
     copyButton.innerText = 'Copy Code';
     copyButton.addEventListener('click', () => {
         navigator.clipboard.writeText(roomUniqueId).then(function () {
@@ -37,8 +38,7 @@ socket.on("playersConnected", () => {
     document.getElementById('initial').style.display = 'none';
     document.getElementById('waitingArea').style.display = 'none';
     document.getElementById('gameArea').style.display = 'block';
-
-    startCountdown(); // Bắt đầu đếm ngược khi cả hai người chơi kết nối
+    startCountdown();
 });
 
 socket.on("p1Choice", (data) => {
@@ -53,87 +53,109 @@ socket.on("p2Choice", (data) => {
     }
 });
 
-// Đếm ngược khi bắt đầu
+socket.on("result", (data) => {
+    const countdownArea = document.getElementById('countdownArea');
+
+    if (!choices.p1 && !choices.p2) {
+        data.winner = 'd';
+    }
+
+    // let countdown = 10;
+    countdownArea.style.display = 'block';
+    winnerArea.innerHTML = '';
+
+    if (choices.p1 && choices.p2) {
+        // clearInterval(countdownInterval);
+        showResult(data);
+    }
+
+    // countdownInterval = setInterval(() => {
+    //     countdownArea.innerHTML = `${countdown}`;
+    //     countdown--;
+    //     if (countdown <= -1) {
+    //         clearInterval(countdownInterval);
+    //         showResult(data);
+    //     }
+    // }, 1000);
+});
+
+function showResult(data) {
+    let winnerText = '';
+    const playerChoice = document.querySelector('.player-choice');
+    const opponentChoice = document.querySelector('.opponent-choice');
+    const winnerArea = document.getElementById('winnerArea');
+    playerChoice.style.display = 'block';
+    playerChoice.src = `./assets/images/${choices.p1}.png`;
+    opponentChoice.style.display = 'block';
+    opponentChoice.src = `./assets/images/${choices.p2}.png`;
+
+    if (data.winner !== 'd') {
+        if (data.winner === 'p1' && player1) {
+            winnerText = 'You win';
+        } else if (data.winner === 'p1') {
+            winnerText = 'You lose';
+        } else if (data.winner === 'p2' && !player1) {
+            winnerText = 'You win';
+        } else if (data.winner === 'p2') {
+            winnerText = 'You lose';
+        }
+    } else {
+        winnerText = `It's a draw`;
+    }
+
+    winnerArea.innerHTML = winnerText;
+}
+
 function startCountdown() {
+    let countdown = 10;
     const countdownArea = document.getElementById('countdownArea');
     countdownArea.style.display = 'block';
-    let countdown = 10;
 
     countdownInterval = setInterval(() => {
         countdownArea.innerHTML = `${countdown}`;
         countdown--;
-
-        if (countdown < 0) {
+        if (countdown <= 0) {
             clearInterval(countdownInterval);
-            handleTimeout(); // Hết thời gian
+            checkChoicesTimeout();
         }
     }, 1000);
 }
 
-function handleTimeout() {
-    const winnerArea = document.getElementById('winnerArea');
+function checkChoicesTimeout() {
     if (!choices.p1 && !choices.p2) {
-        winnerArea.innerHTML = `It's a draw!`; // Hòa nếu không ai chọn
-    } else if (choices.p1 && !choices.p2) {
-        winnerArea.innerHTML = `You win!`;
-    } else if (!choices.p1 && choices.p2) {
-        winnerArea.innerHTML = `You lose!`;
-    }
-    resetGame();
-}
-
-function sendChoice(rpsValue) {
-    const choiceEvent = player1 ? "p1Choice" : "p2Choice";
-    choices[player1 ? 'p1' : 'p2'] = rpsValue;
-
-    socket.emit(choiceEvent, {
-        rpsValue: rpsValue,
-        roomUniqueId: roomUniqueId
-    });
-
-    checkChoices();
-}
-
-function genOpponentChoice(data) {
-    choices.p2 = data.rpsValue;
-    checkChoices();
-}
-
-function checkChoices() {
-    if (choices.p1 && choices.p2) {
-        clearInterval(countdownInterval);
+        socket.emit("result", { winner: 'd', roomUniqueId: roomUniqueId });
+    } else if (!choices.p1) {
+        socket.emit("result", { winner: 'p2', roomUniqueId: roomUniqueId });
+    } else if (!choices.p2) {
+        socket.emit("result", { winner: 'p1', roomUniqueId: roomUniqueId });
+    } else {
         determineWinner();
     }
 }
 
 function determineWinner() {
-    const playerChoice = document.querySelector('.player-choice');
-    const opponentChoice = document.querySelector('.opponent-choice');
-    const winnerArea = document.getElementById('winnerArea');
-
-    playerChoice.style.display = 'block';
-    playerChoice.src = choices.p1 ? `./assets/images/${choices.p1}.png` : './assets/images/default.png';
-    opponentChoice.style.display = 'block';
-    opponentChoice.src = choices.p2 ? `./assets/images/${choices.p2}.png` : './assets/images/default.png';
-
-    let winnerText = '';
     if (choices.p1 === choices.p2) {
-        winnerText = `It's a draw!`;
+        socket.emit("result", { winner: 'd', roomUniqueId: roomUniqueId });
     } else if (
         (choices.p1 === 'rock' && choices.p2 === 'scissors') ||
         (choices.p1 === 'scissors' && choices.p2 === 'paper') ||
         (choices.p1 === 'paper' && choices.p2 === 'rock')
     ) {
-        winnerText = player1 ? 'You win!' : 'You lose!';
+        socket.emit("result", { winner: 'p1', roomUniqueId: roomUniqueId });
     } else {
-        winnerText = player1 ? 'You lose!' : 'You win!';
+        socket.emit("result", { winner: 'p2', roomUniqueId: roomUniqueId });
     }
-
-    winnerArea.innerHTML = winnerText;
-    resetGame();
 }
 
-function resetGame() {
-    choices = {};
-    document.getElementById('countdownArea').innerHTML = '00';
+function sendChoice(rpsValue) {
+    const choiceEvent = player1 ? "p1Choice" : "p2Choice";
+    choices.p1 = rpsValue;
+    socket.emit(choiceEvent, {
+        rpsValue: rpsValue,
+        roomUniqueId: roomUniqueId
+    });
+}
+
+function genOpponentChoice(data) {
+    choices.p2 = data.rpsValue;
 }
