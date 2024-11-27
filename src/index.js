@@ -68,7 +68,7 @@ io.on("connection", (socket) => {
       socket.join(data.roomUniqueId);
       socket.to(data.roomUniqueId).emit("playersConnected", {});
       socket.emit("playersConnected");
-      socket.emit("playGame");
+      // socket.emit("playGame");
     }
   })
 
@@ -95,7 +95,7 @@ io.on("connection", (socket) => {
     if (room) {
       room.rounds++;
       if (room.rounds <= room.maxRounds) {
-        io.to(roomUniqueId).emit('newGame', { round: room.rounds });
+        io.to(roomUniqueId).emit('playGame', { round: room.rounds });
       } else {
         const winner = room.p1Wins > room.p2Wins ? 'p1' : (room.p1Wins < room.p2Wins ? 'p2' : 'd');
         io.to(roomUniqueId).emit('gameOver', { winner, p1Wins: room.p1Wins, p2Wins: room.p2Wins, rounds: room.maxRounds });

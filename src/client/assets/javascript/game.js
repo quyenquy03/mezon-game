@@ -38,7 +38,7 @@ socket.on("playersConnected", () => {
     document.getElementById('initial').style.display = 'none';
     document.getElementById('waitingArea').style.display = 'none';
     document.getElementById('gameArea').style.display = 'block';
-    // startCountdown(); // Start the countdown when both players are connected
+    startCountdown(); // Start the countdown when both players are connected
 });
 
 socket.on("p1Choice", (data) => {
@@ -143,7 +143,7 @@ function showResult(data) {
     }, 3000);
 }
 
-socket.on("newGame", (data) => {
+socket.on("playGame", (data) => {
     const countdownArea = document.getElementById('countdownArea');
     const winnerArea = document.getElementById('winnerArea');
     const playerChoice = document.querySelector('.player-choice');
