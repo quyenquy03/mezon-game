@@ -35,6 +35,7 @@ const createNewRoom = () => {
   const roomPassword = document.getElementById("room-password")?.value;
   const roomUsePassword = document.getElementById("room-use-password").checked;
   const roomBet = document.getElementById("room-bet")?.value;
+  const roomRound = document.getElementById("room-round")?.value;
 
   socket.emit("createRoom", {
     roomId: randomNumber(100000, 999999),
@@ -44,6 +45,7 @@ const createNewRoom = () => {
     roomUsePassword,
     roomBet,
     owner: user.userId,
+    roomRound,
   });
 };
 
@@ -56,7 +58,7 @@ const renderListRoom = (listRooms) => {
   listRoomElement.innerHTML = "";
   listRooms.forEach((room) => {
     const roomElement = document.createElement("div");
-    roomElement.classList.add("col", "col-xs-12", "col-sm-6", "col-xl-4");
+    roomElement.classList.add("col", "col-12", "col-md-6", "col-xl-4", "col-xxl-3");
     roomElement.innerHTML = `
       <div class="room-item">
               <div class="room-name">

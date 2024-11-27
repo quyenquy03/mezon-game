@@ -18,7 +18,15 @@
       <div class="room-section">
         <div class="room-section-header">
           <div class="header-left">
-            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">+</span>
+            <span class="create-room-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+              <img class="room-header-icon" src="./assets/images/menu.png" alt="" />
+            </span>
+            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-room">
+              <img class="room-header-icon" src="./assets/images/plus.png" alt="" />
+            </span>
+            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#modal-search-room">
+              <img class="room-header-icon" src="./assets/images/magnifier.png" alt="" />
+            </span>
           </div>
           <div class="header-right">
             <div class="coin-box">
@@ -30,62 +38,17 @@
             </div>
           </div>
         </div>
-        <div class="row room-list">
-          <div class="col col-xs-12 col-sm-6 col-xl-4">
-            <div class="room-item">
-              <div class="room-name">
-                <span class="room-name-text">195384</span>
-              </div>
-              <div class="room-join">
-                <button class="room-join-btn">JOIN</button>
-              </div>
-              <div class="room-bet">
-                <img class="room-bet-bg" src="./assets/images/bg-cuoc.png" alt="" />
-                <div class="room-bet-info">
-                  <span class="room-bet-text">1000</span>
-                  <img class="room-bet-coin" src="./assets/images/coin.png" alt="" />
-                </div>
-              </div>
-              <div class="room-owner">
-                <img class="room-owner-icon" src="./assets/images/user.png" alt="" />
-                <span class="room-owner-name">username</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="row room-list"></div>
       </div>
-      <div class="user-section">
-        <h5 class="user-section-header">ONLINE</h5>
-        <div class="user-list">
-          <!-- <div class="user-item">
-            <div class="user-avatar">
-              <img src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="" />
-            </div>
-            <div class="user-info">
-              <span class="user-name">username</span>
-            </div>
-          </div>
-          <div class="user-item">
-            <div class="user-avatar">
-              <img src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="" />
-            </div>
-            <div class="user-info">
-              <span class="user-name">username</span>
-            </div>
-          </div>
-          <div class="user-item">
-            <div class="user-avatar">
-              <img src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="" />
-            </div>
-            <div class="user-info">
-              <span class="user-name">username</span>
-            </div>
-          </div> -->
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+        <div class="user-section w-100 h-100">
+          <h5 class="user-section-header text-center">ONLINE</h5>
+          <div class="user-list"></div>
         </div>
       </div>
       <div class='modal-section'>
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
+        <div class="modal fade" id="modal-create-room" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content custom-modal-content">
               <div class="modal-header">
                 <h5 class="modal-title text-center w-100" id="exampleModalLabel">
@@ -94,10 +57,21 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
                 <div class='form-create-room'>
-                  <div class='form-item'>
-                    <label for='room-name' class='label'>Tên phòng</label>
-                    <input autocomplete='false' type='text' id='room-name' class='form-control form-input' placeholder='Tên phòng của bạn...' />
+                  <div class='row'>
+                    <div class='col col-sm-6'>
+                      <div class='form-item'>
+                        <label for='room-name' class='label'>Tên phòng</label>
+                        <input autocomplete='false' type='text' id='room-name' class='form-control form-input' placeholder='Tên phòng của bạn...' />
+                      </div>
+                    </div>
+                    <div class='col col-sm-6'>
+                      <div class='form-item'>
+                        <label for='room-round' class='label'>Số lượt mỗi vòng</label>
+                        <input autocomplete='false' type='number' max='10' min='1' id='room-round' class='form-control form-input' placeholder='Số lượt chơi mỗi vòng...' />
+                      </div>
+                    </div>
                   </div>
+                  
                   <div class='row'>
                     <div class='col col-sm-6'>
                       <div class='form-item'>
@@ -119,11 +93,9 @@
                   </div>
                   <div class='row'>
                     <div class='col col-sm-6 d-flex align-items-center'>
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="room-use-password">
-                        <label class="form-check-label text-white" for="room-use-password">
-                          Sử dụng mật khẩu
-                        </label>
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="room-use-password">
+                        <label class="form-check-label text-white" for="room-use-password">Sử dụng mật khẩu</label>
                       </div>
                     </div>
                     <div class='col col-sm-6'>
@@ -141,6 +113,26 @@
             </div>
           </div>
       </div>
+      <div class="modal fade" id="modal-search-room" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content custom-modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title text-center w-100" id="exampleModalLabel">
+               <span class="font-weight-600 text-white">Tìm kiếm phòng</span> 
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+              <div class='form-create-room'>
+                <div class='form-item'>
+                  <input autocomplete='false' type='text' id='room-name' class='form-control form-input' placeholder='Nhập ID phòng để tham gia' />
+                </div>
+                <div class='text-center mt-3'>
+                  <button onclick='' class='btn btn-primary btn-create-room'>Tham gia</button>
+                </div>
+            </div>
+          </div>
+        </div>
+    </div>
     </div>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"

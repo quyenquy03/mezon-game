@@ -1,13 +1,6 @@
 .room-page-wrapper {
   display: flex;
-  background: rgb(34, 1, 6);
-  background: radial-gradient(
-    circle,
-    rgba(34, 1, 6, 0.9136904761904762) 0%,
-    rgba(34, 1, 6, 0.9108893557422969) 31%,
-    rgba(34, 1, 6, 0.8688725490196079) 86%,
-    rgba(34, 1, 6, 0.8072478991596639) 100%
-  );
+  background: #202124;
   min-height: 100vh;
 }
 
@@ -18,26 +11,16 @@
 }
 .user-section {
   width: 300px;
-  background: rgb(34, 1, 6);
-  background: radial-gradient(
-    circle,
-    rgba(34, 1, 6, 0.9136904761904762) 0%,
-    rgba(34, 1, 6, 0.9108893557422969) 31%,
-    rgba(34, 1, 6, 0.8688725490196079) 86%,
-    rgba(34, 1, 6, 0.8072478991596639) 100%
-  );
+  background: #313338;
   box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
 }
 .user-section-header {
   padding: 10px;
-  background: rgb(18, 3, 5);
+  background: #202124;
   color: #fff;
   font-size: 20px;
   text-align: center;
   box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .user-list {
@@ -74,16 +57,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  background: rgb(34, 1, 6);
-  background: radial-gradient(
-    circle,
-    rgba(34, 1, 6, 0.9136904761904762) 0%,
-    rgba(34, 1, 6, 0.9108893557422969) 31%,
-    rgba(34, 1, 6, 0.8688725490196079) 86%,
-    rgba(34, 1, 6, 0.8072478991596639) 100%
-  );
+  background: #313338;
   border-radius: 1000px;
 }
+.room-section-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.room-section-header .room-header-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
 .room-section-header .header-left .create-room-btn {
   background-color: #fff;
   width: 40px;
@@ -108,7 +95,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background-color: #fff;
+  background-color: #202124;
+  color: #fff;
   min-width: 130px;
   height: 40px;
   border-radius: 100px;
@@ -126,7 +114,8 @@
   gap: 10px;
   min-width: 130px;
   min-height: 40px;
-  background-color: #fff;
+  background-color: #202124;
+  color: #fff;
   padding: 5px 10px;
   border-radius: 100px;
 }
@@ -151,6 +140,7 @@
   background-image: url("../images/phong.png");
   background-size: cover;
   position: relative;
+  margin-bottom: 10px;
 }
 .room-list .room-item .room-name {
   position: absolute;
@@ -213,7 +203,9 @@
   left: 12px;
   min-width: 120px;
   height: 40px;
-  background-color: #fff;
+  background-color: #4961abbd;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(123, 113, 113, 0.5);
   background-size: cover;
   display: flex;
   padding: 0 5px;
@@ -230,7 +222,8 @@
 
 .room-item .room-join {
   position: absolute;
-  top: 50px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 100%;
   display: flex;
   justify-content: center;
