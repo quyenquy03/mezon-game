@@ -24,8 +24,10 @@ const server = app.listen(3000, function () {
   console.log("Example app listening on port 3000 with domain http://localhost:3000");
 });
 
-const rooms = {};
-let rounds = 3;
+const room = {};
+let maxRounds = 0;
+let players = [];
+let maxPlayers = 0;
 const io = new SocketServer(server, {
   cors: {
     // origin: [ENV.ORIGIN],
@@ -43,16 +45,16 @@ io.on("connection", (socket) => {
 
   socket.on('createGame', (data) => {
     const roomUniqueId = makeid(6);
-    const maxRounds = data.maxRounds || 5;
-    rooms[roomUniqueId] = {
+    maxRounds = data.maxRounds;
+    maxPlayers = data.maxPlayers;
+    room[roomUniqueId] = {
       p1Choice: null,
       p2Choice: null,
       rounds: 0, // Số lượt chơi hiện tại
-      maxRounds: maxRounds, // Số lượt chơi tối đa
+      maxRounds: data.maxRounds, // Số lượt chơi tối đa
       p1Wins: 0, // Số lượt thắng của player 1
-      p2Wins: 0, // Số lượt thắng của player 2
-      p1Streak: 0, // Chuỗi thắng liên tiếp của player 1
-      p2Streak: 0, // Chuỗi thắng liên tiếp của player 2
+      p2Wins: 0,
+      maxPlayers: data.maxPlayers,
     };
 
     socket.join(roomUniqueId);
@@ -64,55 +66,57 @@ io.on("connection", (socket) => {
 
 
   socket.on('joinGame', (data) => {
-    if (rooms[data.roomUniqueId] != null) {
+    if (room[data.roomUniqueId] != null) {
       socket.join(data.roomUniqueId);
       socket.to(data.roomUniqueId).emit("playersConnected", {});
       socket.emit("playersConnected");
+      // socket.to(data.roomUniqueId).emit("playGame", {});
       // socket.emit("playGame");
+      if (players.length < maxPlayers) {
+        players.push({namePlayer: data.namePlayer, eliminated: false});
+      } else {
+        socket.emit("fullRoom");
+      }
     }
   })
 
   socket.on("p1Choice", (data) => {
     let rpsValue = data.rpsValue;
-    rooms[data.roomUniqueId].p1Choice = rpsValue;
+    room[data.roomUniqueId].p1Choice = rpsValue;
     socket.to(data.roomUniqueId).emit("p1Choice", { rpsValue: data.rpsValue });
-    if (rooms[data.roomUniqueId].p2Choice != null) {
-      declareWinner(data.roomUniqueId);
+    if (room[data.roomUniqueId].p2Choice != null) {
+      determineWinner(data.roomUniqueId);
     }
   });
 
   socket.on("p2Choice", (data) => {
     let rpsValue = data.rpsValue;
-    rooms[data.roomUniqueId].p2Choice = rpsValue;
+    room[data.roomUniqueId].p2Choice = rpsValue;
     socket.to(data.roomUniqueId).emit("p2Choice", { rpsValue: data.rpsValue });
-    if (rooms[data.roomUniqueId].p1Choice != null) {
-      declareWinner(data.roomUniqueId);
+    if (room[data.roomUniqueId].p1Choice != null) {
+      determineWinner(data.roomUniqueId);
     }
   });
 
-  socket.on('nextRound', ({ roomUniqueId }) => {
-    const room = rooms[roomUniqueId]; // Replace with your room tracking logic
+  socket.on('nextRound', (data) => {
+    const room = data.roomUniqueId; // Replace with your room tracking logic
     if (room) {
-      room.rounds++;
-      if (room.rounds <= room.maxRounds) {
-        io.to(roomUniqueId).emit('playGame', { round: room.rounds });
-      } else {
-        const winner = room.p1Wins > room.p2Wins ? 'p1' : (room.p1Wins < room.p2Wins ? 'p2' : 'd');
-        io.to(roomUniqueId).emit('gameOver', { winner, p1Wins: room.p1Wins, p2Wins: room.p2Wins, rounds: room.maxRounds });
-      }
+      if (data.rounds < maxRounds) {
+        console.log('da vao day');
+        io.to(room).emit('playGame', { round: room.rounds });
+      } 
     }
   });
 });
 
-function declareWinner(roomUniqueId) {
-  determineWinner(roomUniqueId); // Xác định kết quả khi hết thời gian
-}
-
 function determineWinner(roomUniqueId) {
-  let p1Choice = rooms[roomUniqueId].p1Choice;
-  let p2Choice = rooms[roomUniqueId].p2Choice;
+  let p1Choice = room[roomUniqueId].p1Choice;
+  let p2Choice = room[roomUniqueId].p2Choice;
   let winner = null;
-
+  console.log('p1Choice: ', p1Choice);
+  console.log('p2Choice: ', p2Choice);
+  console.log('room: ', room);
+  
   // Xử lý kết quả của mỗi round
   if (!p1Choice && !p2Choice) {
     winner = "d"; // Hòa nếu cả hai không chọn
@@ -123,82 +127,69 @@ function determineWinner(roomUniqueId) {
   } else if (p1Choice === p2Choice) {
     winner = "d"; // Hòa nếu cả hai chọn giống nhau
   } else if (p1Choice == "Paper") {
-    winner = (p2Choice == "Scissor") ? "p2" : "p1";
+    winner = (p2Choice == "Scissors") ? "p2" : "p1";
   } else if (p1Choice == "Rock") {
     winner = (p2Choice == "Paper") ? "p2" : "p1";
-  } else if (p1Choice == "Scissor") {
+  } else if (p1Choice == "Scissors") {
     winner = (p2Choice == "Rock") ? "p2" : "p1";
   }
 
   // Cập nhật số lượt thắng và chuỗi thắng
   if (winner === "p1") {
-    rooms[roomUniqueId].p1Wins++;
-    rooms[roomUniqueId].p1Streak++;
-    rooms[roomUniqueId].p2Streak = 0;
+    room[roomUniqueId].p1Wins++;
   } else if (winner === "p2") {
-    rooms[roomUniqueId].p2Wins++;
-    rooms[roomUniqueId].p2Streak++;
-    rooms[roomUniqueId].p1Streak = 0;
+    room[roomUniqueId].p2Wins++;
   }
 
   // Tăng số lượt chơi
-  rooms[roomUniqueId].rounds++;
+  room[roomUniqueId].rounds++;
+
+  // Gửi kết quả của lượt chơi
+  io.sockets.to(roomUniqueId).emit("result", {
+    winner: winner,
+    maxRounds: room[roomUniqueId].maxRounds,
+    rounds: room[roomUniqueId].rounds,
+    p1Wins: room[roomUniqueId].p1Wins,
+    p2Wins: room[roomUniqueId].p2Wins
+  });
 
   // Kiểm tra thắng liên tiếp
-  const requiredStreak = Math.ceil(rooms[roomUniqueId].maxRounds / 2);
-  if (rooms[roomUniqueId].p1Streak >= requiredStreak) {
+  const requiredStreak = maxRounds / 2;
+  if (room[roomUniqueId].p1Wins >= requiredStreak) {
     endGame(roomUniqueId, "p1");
     return;
   }
-  if (rooms[roomUniqueId].p2Streak >= requiredStreak) {
+  if (room[roomUniqueId].p2Wins >= requiredStreak) {
     endGame(roomUniqueId, "p2");
     return;
   }
 
   // Kiểm tra kết thúc game khi hết round
-  if (rooms[roomUniqueId].rounds >= rooms[roomUniqueId].maxRounds) {
+  if (room[roomUniqueId].rounds == room[roomUniqueId].maxRounds) {
     const finalWinner =
-      rooms[roomUniqueId].p1Wins > rooms[roomUniqueId].p2Wins
+      room[roomUniqueId].p1Wins > room[roomUniqueId].p2Wins
         ? "p1"
-        : rooms[roomUniqueId].p2Wins > rooms[roomUniqueId].p1Wins
+        : room[roomUniqueId].p2Wins > room[roomUniqueId].p1Wins
           ? "p2"
           : "d"; // Hòa nếu số lượt thắng bằng nhau
     endGame(roomUniqueId, finalWinner);
     return;
   }
 
-  // Gửi kết quả của lượt chơi
-  io.sockets.to(roomUniqueId).emit("result", {
-    winner: winner,
-    rounds: rooms[roomUniqueId].rounds,
-    p1Wins: rooms[roomUniqueId].p1Wins,
-    p2Wins: rooms[roomUniqueId].p2Wins
-  });
-
-  // Thông báo chuyển sang round mới sau 5 giây
-  // roundTransitionTimeout = setTimeout(() => {
-  if (rooms[roomUniqueId].rounds < rooms[roomUniqueId].maxRounds) {
-    // Reset lựa chọn cho round mới
-    rooms[roomUniqueId].p1Choice = null;
-    rooms[roomUniqueId].p2Choice = null;
-    io.sockets.to(roomUniqueId).emit("startNewRound", {
-      message: `Round ${rooms[roomUniqueId].rounds + 1} starting in 5 seconds...`
-    });
-    declareWinner(roomUniqueId);
-  }
-  // }, 5000); // Chờ 5 giây sau khi công bố kết quả để chuyển sang round mới
+  room[roomUniqueId].p1Choice = null;
+  room[roomUniqueId].p2Choice = null;
 }
 
 function endGame(roomUniqueId, finalWinner) {
   io.sockets.to(roomUniqueId).emit("gameOver", {
     winner: finalWinner,
-    p1Wins: rooms[roomUniqueId].p1Wins,
-    p2Wins: rooms[roomUniqueId].p2Wins,
-    rounds: rooms[roomUniqueId].rounds
+    p1Wins: room[roomUniqueId].p1Wins,
+    p2Wins: room[roomUniqueId].p2Wins,
+    rounds: room[roomUniqueId].rounds
   });
 
   // Xóa dữ liệu phòng khi game kết thúc (nếu cần)
-  // delete rooms[roomUniqueId];
+  delete room[roomUniqueId];
 }
 
 function makeid(length) {

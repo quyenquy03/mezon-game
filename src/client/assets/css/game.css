@@ -4,6 +4,12 @@
     font-family: Arial, Helvetica, sans-serif;
     box-sizing: border-box;
 }
+
+html {
+    background-color: rgb(153, 238, 166);
+    
+}
+
 .row {
     /* display: flex; */
     justify-content: space-around;
@@ -28,7 +34,7 @@
     background: url(../images/scissors.png);
 }
 
-.image {
+.btn-choice {
     color: transparent;
     background-position: center;
     background-repeat: no-repeat;
@@ -53,7 +59,7 @@
 }
 
 #player1Choice button:focus {
-    border: solid 3px #c0c0c0;
+    border: solid 10px #c0c0c0;
 }
 
 #displayResult {
