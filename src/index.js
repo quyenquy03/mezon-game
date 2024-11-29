@@ -133,6 +133,7 @@ const getCurrentRoomOfUser = (socketId) => {
 
 const checkMemberBeforeStartGame = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  console.log(room);
   if (room?.roomMember?.length < 2) {
     return false;
   }
@@ -295,6 +296,7 @@ const setupSocketServer = (server) => {
       for (let i = 0; i < currentRoom.currentRoundMembers.length / 2; i++) {
         const team1 = currentRoom.currentRoundMembers[i];
         const team2 = currentRoom.currentRoundMembers[currentRoom.currentRoundMembers.length - i - 1];
+
         io.to(getSocketIdOfUser(team1)).emit("startRoundGame", { team1, team2 });
         io.to(getSocketIdOfUser(team2)).emit("startRoundGame", { team1, team2 });
       }

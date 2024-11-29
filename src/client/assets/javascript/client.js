@@ -40,7 +40,7 @@ const createNewRoom = () => {
   socket.emit("createRoom", {
     roomId: randomNumber(100000, 999999) + "",
     roomName,
-    roomMaxUser,
+    roomMaxUser: +roomMaxUser,
     roomPassword,
     roomUsePassword,
     roomBet,
@@ -198,4 +198,9 @@ socket.on("startGameError", (message) => {
 
 socket.on("startRoundGame", (data) => {
   console.log("Start round game:", data);
+  const modalElement = document.getElementById("modal-start-round");
+
+  const modal = new bootstrap.Modal(modalElement);
+
+  modal.show();
 });
