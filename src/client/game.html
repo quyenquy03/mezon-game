@@ -1,14 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game</title>
-    <link rel="stylesheet" href="./assets/css/style.css" />
-  </head>
-  <body>
-    <div>Game</div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="./assets/javascript/client.js"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game</title>
+  <link rel="stylesheet" href="./assets/css/style.css" />
+  <link rel="stylesheet" href="./assets/css/game.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" 
+  integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" 
+  crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="container py-4 title">Welcome to Rock, Paper and Scissors game</h1>
+    <div id="initial" class="container col-md-6">
+      <button class="form-control btn btn-primary" onclick="createGame()">Create Game</button>
+      <div class="text-center display-3">or</div>
+      <input class="form-control my-2" placeholder="Enter Code" type="text" name="" id="roomUniqueId" />
+      <input class="form-control my-2" placeholder="Enter Your Name" type="text" name="" id="nameplayer" />
+      <button class="form-control btn btn-secondary" onclick="joinGame()">Join Game</button>
+    </div>
+    <div id="gamePlay" class="container" style="">
+      <div id="waitingArea" class="h4"></div>
+      <div id="gameArea" class="h3 row" style="display: ;">
+        <div id="displayResult">
+          <div class="ta-center">
+            <div>
+              <i class="fa-regular fa-circle-check"></i>
+              <i class="fa-regular fa-circle-xmark"></i>
+              <i class="fa-solid fa-circle-minus"></i>
+            </div>
+            <h3 class="mb-15">Player 1 Choice:</h3>
+            <div class="choice">
+              <img class="player1-choice"  src="./assets/images/rock-paper-scissors.png" alt="" />
+            </div>
+          </div>
+          <div id="countdownArea">00</div>
+          <div id="winnerArea" class="display-4">
+          </div>
+          <div class="ta-center">
+            <div>
+              <i class="fa-regular fa-circle-check"></i>
+              <i class="fa-regular fa-circle-xmark"></i>
+              <i class="fa-solid fa-circle-minus"></i>
+            </div>
+            <h3 class="mb-15">Player 2 Choice:</h3>
+            <div class="choice">
+              <img class="player2-choice" src="./assets/images/rock-paper-scissors.png" alt="" />
+            </div>
+          </div>
+        </div>
+        <div id="player1Choice">
+          <button class="btn-choice rock" onclick="sendChoice('Rock')">Rock</button>
+          <button class="btn-choice paper" onclick="sendChoice('Paper')">Paper</button>
+          <button class="btn-choice scissors" onclick="sendChoice('Scissors')">Scissors</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="./assets/javascript/client.js"></script>
+  <script src="./assets/javascript/game.js"></script>
+</body>
 </html>
