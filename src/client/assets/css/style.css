@@ -30,3 +30,9 @@ html {
   background: #4d4e54;
   box-shadow: 0 0 10px rgba(90, 80, 80, 0.5);
 }
+.content {
+  display: none;
+}
+.content.active {
+  display: block;
+}

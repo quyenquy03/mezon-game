@@ -1,10 +1,10 @@
-console.log("clientjs loader");
+function navigateTo(pageId) {
+  document.querySelectorAll(".content").forEach((page) => page.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+}
 
-const socket = io("http://localhost:3000"); // Kết nối đến server
+const socket = io("http://localhost:3000");
 
-// Gửi thông tin người dùng lên server
-
-// Xử lý ngắt kết nối (bên client)
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
 });
@@ -14,7 +14,7 @@ const randomNumber = (min, max) => {
 };
 
 const generateUser = () => {
-  const userId = randomNumber(1000, 9999);
+  const userId = randomNumber(1000, 9999) + "";
   return {
     userId: userId,
     name: "User " + userId,
@@ -38,7 +38,7 @@ const createNewRoom = () => {
   const roomRound = document.getElementById("room-round")?.value;
 
   socket.emit("createRoom", {
-    roomId: randomNumber(100000, 999999),
+    roomId: randomNumber(100000, 999999) + "",
     roomName,
     roomMaxUser,
     roomPassword,
@@ -62,15 +62,15 @@ const renderListRoom = (listRooms) => {
     roomElement.innerHTML = `
       <div class="room-item">
               <div class="room-name">
-                <span class="room-name-text">${room.roomId}</span>
+                <span class="room-name-text">${room?.roomInfo?.roomId}</span>
               </div>
               <div class="room-join">
-                <button class="room-join-btn">JOIN</button>
+                <button onclick="joinRoom('${room?.roomInfo?.roomId}')" class="room-join-btn">JOIN</button>
               </div>
               <div class="room-bet">
                 <img class="room-bet-bg" src="./assets/images/bg-cuoc.png" alt="" />
                 <div class="room-bet-info">
-                  <span class="room-bet-text">${room.roomBet}</span>
+                  <span class="room-bet-text">${room?.roomInfo?.roomBet}</span>
                   <img class="room-bet-coin" src="./assets/images/coin.png" alt="" />
                 </div>
               </div>
@@ -83,22 +83,69 @@ const renderListRoom = (listRooms) => {
     listRoomElement.appendChild(roomElement);
   });
 };
+
+const joinRoom = (roomId) => {
+  socket.emit("joinRoom", {
+    roomId,
+    userId: user.userId,
+  });
+};
+socket.on("joinRoomSuccess", (roomInfo) => {
+  navigateTo("room-content");
+});
+
 socket.emit("listRooms");
 socket.on("listRooms", (rooms) => {
   renderListRoom(rooms);
   console.log("List rooms:", rooms);
 });
 
+const renderCurrentRoomInfo = (roomInfo) => {
+  const roomMemberElement = document.querySelector(".game-members");
+  roomMemberElement.innerHTML = "";
+  const maxMember = roomInfo.roomInfo.roomMaxUser;
+
+  Array.from({ length: maxMember }).forEach((_, index) => {
+    const memberElement = document.createElement("div");
+    memberElement.classList.add("game-member-item");
+    memberElement.innerHTML = `
+      <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
+      <span class='member-name'>Waiting...</span>
+    `;
+    roomMemberElement.appendChild(memberElement);
+  });
+
+  const startGameButtonElement = document.querySelector(".btn-start-game");
+  startGameButtonElement.addEventListener("click", () => {
+    startGame(user.userId, roomInfo.roomInfo.roomId);
+  });
+};
+socket.on("currentRoom", (roomInfo) => {
+  renderCurrentRoomInfo(roomInfo);
+});
+
+const renderRoomMembers = (members) => {
+  const gameMemberItems = document.querySelectorAll(".game-member-item");
+  members.forEach((member, index) => {
+    const memberElement = gameMemberItems[index];
+    if (!memberElement) {
+      return;
+    }
+    memberElement.innerHTML = `
+      <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
+      <span class='member-name'>${member?.name}</span>
+    `;
+  });
+};
+socket.on("roomMembers", (members) => {
+  renderRoomMembers(members);
+  console.log("Room members:", members);
+});
+
 const renderListUser = (listUsers) => {
-  // Chọn đúng phần tử DOM có class "user-list"
   const listUserElement = document.querySelector(".user-list");
-
-  // Xóa nội dung hiện có trong phần tử
   listUserElement.innerHTML = "";
-
-  // Render danh sách người dùng
   listUsers.forEach((user) => {
-    // Tạo phần tử "user-item"
     const userElement = document.createElement("div");
     userElement.classList.add("user-item");
     userElement.innerHTML = `
@@ -109,11 +156,10 @@ const renderListUser = (listUsers) => {
         <span class="user-name">${user.name}</span>
       </div>
     `;
-
-    // Thêm phần tử vào danh sách
     listUserElement.appendChild(userElement);
   });
 };
+
 socket.emit("listUsers");
 socket.on("listUsers", (users) => {
   renderListUser(users);
@@ -138,3 +184,18 @@ const renderUserInfo = (userInfo) => {
   `;
 };
 renderUserInfo(user);
+
+// start game
+const startGame = (userId, roomId) => {
+  socket.emit("startGame", {
+    userId,
+    roomId,
+  });
+};
+socket.on("startGameError", (message) => {
+  alert(message);
+});
+
+socket.on("startRoundGame", (data) => {
+  console.log("Start round game:", data);
+});
