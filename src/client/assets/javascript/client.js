@@ -206,8 +206,41 @@ socket.on("startGameError", (message) => {
   alert(message);
 });
 
+const renderCurrentRoundInfo = (roundInfo) => {
+  const headerGameLeftElement = document.querySelector(".header-game-left");
+  const headerGameRightElement = document.querySelector(".header-game-right");
+
+  let listStar = Array.from({ length: roundInfo.roomInfo?.roomInfo?.roomRound }).map((_, index) => {
+    return `<span>&#9733;</span>`;
+  });
+  listStar.join("");
+
+  headerGameLeftElement.innerHTML = `
+    <div class='game-user game-user-left'>
+      <img class='game-user-avatar' src="${roundInfo.yourInfo?.avatar}" alt="">
+      <div class='game-user-info'>
+        <div class='game-user-name'>${roundInfo.yourInfo?.name}</div>
+        <div class='game-user-score'>
+          ${listStar.join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  headerGameRightElement.innerHTML = `
+    <div class='game-user game-user-right'>
+      <img class='game-user-avatar' src="${roundInfo.rivalInfo?.avatar}" alt="">
+      <div class='game-user-info'>
+        <div class='game-user-name'>${roundInfo.rivalInfo?.name}</div>
+        <div class='game-user-score'>
+          ${listStar.join("")}
+        </div>
+      </div>
+    </div>
+  `;
+};
 socket.on("startRoundGame", (data) => {
-  console.log("Start round game:", data);
+  renderCurrentRoundInfo(data);
   const modalElement = document.getElementById("modal-start-round");
   const modal = new bootstrap.Modal(modalElement);
   modal.show();

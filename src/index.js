@@ -50,6 +50,7 @@ const listRooms = [
       roomUsePassword: false,
       roomBet: 1000,
       owner: 1234,
+      roomRound: 5,
     },
     roomMember: [],
     currentRoundMembers: [],
@@ -64,6 +65,7 @@ const listRooms = [
       roomUsePassword: false,
       roomBet: 1000,
       owner: 1234,
+      roomRound: 5,
     },
     roomMember: [],
     currentRoundMembers: [],
@@ -78,6 +80,7 @@ const listRooms = [
       roomUsePassword: false,
       roomBet: 1000,
       owner: 1234,
+      roomRound: 5,
     },
     roomMember: [],
     currentRoundMembers: [],
@@ -93,6 +96,11 @@ let maxPlayers = 0;
 const getSocketIdOfUser = (userId) => {
   const user = connectedUsers.find((user) => user.userId === userId);
   return user?.id;
+};
+
+const getUserInfo = (userId) => {
+  const user = connectedUsers.find((user) => user.userId === userId);
+  return user;
 };
 const disconnectUser = (socket) => {
   const index = connectedUsers.findIndex((user) => user.id === socket.id);
@@ -333,8 +341,16 @@ const setupSocketServer = (server) => {
         const team1 = currentRoom.currentRoundMembers[i];
         const team2 = currentRoom.currentRoundMembers[currentRoom.currentRoundMembers.length - i - 1];
 
-        io.to(getSocketIdOfUser(team1)).emit("startRoundGame", { team1, team2 });
-        io.to(getSocketIdOfUser(team2)).emit("startRoundGame", { team1, team2 });
+        io.to(getSocketIdOfUser(team1)).emit("startRoundGame", {
+          yourInfo: getUserInfo(team1),
+          rivalInfo: getUserInfo(team2),
+          roomInfo: currentRoom,
+        });
+        io.to(getSocketIdOfUser(team2)).emit("startRoundGame", {
+          yourInfo: getUserInfo(team2),
+          rivalInfo: getUserInfo(team1),
+          roomInfo: currentRoom,
+        });
       }
     });
 

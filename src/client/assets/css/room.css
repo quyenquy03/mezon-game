@@ -370,3 +370,113 @@
 .game-user.game-user-right .game-user-info {
   text-align: end;
 }
+
+.body-game {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  margin-top: 50px;
+}
+.player-choice {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: #fff;
+  border: #fff;
+}
+
+.player-choice.choosing {
+  animation: spin 10s linear infinite;
+}
+
+.list-choice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 50px;
+}
+.rock {
+  background-image: url(../images/rock.png);
+}
+
+.paper {
+  background-image: url(../images/paper.png);
+}
+
+.scissors {
+  background-image: url(../images/scissors.png);
+}
+.list-choice .btn-choice {
+  width: 80px;
+  height: 80px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.list-choice .btn-choice:hover {
+  box-shadow: 0 0 10px rgba(123, 113, 113, 0.5);
+}
+.list-choice .btn-choice:active {
+  transform: scale(0.98);
+}
+.list-choice .btn-choice.active {
+  border: 2px solid #fff;
+}
+
+.body-game-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+}
+.body-game-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.body-game-center .countdown {
+  position: relative;
+}
+.body-game-center .countdown-bg {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background-image: url("../images/quay.png");
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: spin 30s linear infinite;
+}
+.body-game-center .countdown-time {
+  font-size: 50px;
+  font-weight: 500;
+  color: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg); /* Bắt đầu từ 0 độ */
+  }
+  to {
+    transform: rotate(360deg); /* Kết thúc ở 360 độ */
+  }
+}

@@ -21,7 +21,7 @@
             <span class="create-room-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
               <img class="room-header-icon" src="./assets/images/menu.png" alt="" />
             </span>
-            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#modal-start-round">
+            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-room">
               <img class="room-header-icon" src="./assets/images/plus.png" alt="" />
             </span>
             <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#modal-search-room">
@@ -146,12 +146,6 @@
         <div class="modal fade" id="modal-start-round" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-fullscreen">
             <div class="modal-content custom-modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title text-center w-100" id="exampleModalLabel">
-                <span class="font-weight-600 text-white">round...</span> 
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
               <div class='form-create-room'>
                 <div class='header-game'>
                   <div class='header-game-left'>
@@ -189,6 +183,35 @@
                       </div>
                     </div>
                   </div> 
+                </div>
+                <div class='row mt-4'>
+                  <div class="col col-4">
+                    <div class='body-game-left'>
+                      <div class='text-center'>
+                        <img class='player-choice ' src="./assets/images/rock-paper-scissors.png" alt="" />
+                      </div>
+                      <div class='list-choice'>
+                        <button class='btn-choice rock active'></button>
+                        <button class='btn-choice paper'></button>
+                        <button class='btn-choice scissors'></button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col col-4">
+                    <div class="body-game-center">
+                      <div class="countdown">
+                        <div class='countdown-bg'></div>
+                        <div class='countdown-time'>00</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col col-4">
+                    <div class='body-game-right'>
+                      <div class='text-center'>
+                        <img class='player-choice ' src="./assets/images/rock-paper-scissors.png" alt="" />
+                      </div>
+                    </div> 
+                  </div>
                 </div>
               </div>
             </div>
