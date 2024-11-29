@@ -50,7 +50,14 @@ const createNewRoom = () => {
 };
 
 socket.on("roomCreated", (roomInfo) => {
-  console.log("Room created:", roomInfo);
+  navigateTo("room-content");
+  socket.emit("joinRoom", {
+    roomId: roomInfo.roomId,
+    userId: user.userId,
+  });
+  const modalCreateRoom = document.getElementById("modal-create-room");
+  const modal = bootstrap.Modal.getInstance(modalCreateRoom);
+  modal.hide();
 });
 
 const renderListRoom = (listRooms) => {
@@ -201,6 +208,5 @@ socket.on("startRoundGame", (data) => {
   const modalElement = document.getElementById("modal-start-round");
 
   const modal = new bootstrap.Modal(modalElement);
-
   modal.show();
 });
