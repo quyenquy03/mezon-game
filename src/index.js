@@ -69,6 +69,20 @@ const listRooms = [
     currentRoundMembers: [],
     currentRound: 1,
   },
+  {
+    roomInfo: {
+      roomId: "345678",
+      roomName: "Phòng 2",
+      roomMaxUser: 2,
+      roomPassword: null,
+      roomUsePassword: false,
+      roomBet: 1000,
+      owner: 1234,
+    },
+    roomMember: [],
+    currentRoundMembers: [],
+    currentRound: 1,
+  },
 ];
 
 const room = {};
@@ -97,10 +111,26 @@ const createdRoom = (roomInfo) => {
   });
 };
 
+const checkBeforeJoinRoom = (data) => {
+  const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
+  if (!room) {
+    return "Phòng không tồn tại!";
+  }
+  const checkUser = room.roomMember.filter((member) => member !== null);
+  if (checkUser.length === room.roomInfo.roomMaxUser) {
+    return "Phòng đã đầy!";
+  }
+  if (room.roomMember.includes(data.userId)) {
+    return "Bạn đã ở trong phòng!";
+  }
+  return null;
+};
+
 const joinRoom = (data) => {
+  console.log("data: ", data);
   const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
   const checkIsMember = room?.roomMember?.find((member) => member.userId === data.userId);
-  if (room && !checkIsMember) {
+  if (room && !checkIsMember && data.userId) {
     room.roomMember.push(data.userId);
   }
 };
@@ -122,6 +152,8 @@ const getRoomMembers = (roomId) => {
   const listMemberOfRoom = room?.roomMember?.map((member) => {
     return connectedUsers.find((user) => user.userId === member);
   });
+  listMemberOfRoom.filter((member) => member !== null);
+  console.log(listMemberOfRoom);
   return listMemberOfRoom;
 };
 const getCurrentRoomOfUser = (socketId) => {
@@ -133,7 +165,6 @@ const getCurrentRoomOfUser = (socketId) => {
 
 const checkMemberBeforeStartGame = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
-  console.log(room);
   if (room?.roomMember?.length < 2) {
     return false;
   }
@@ -152,7 +183,6 @@ const startNewGame = (roomId) => {
 const setupSocketServer = (server) => {
   const io = new SocketServer(server, {
     cors: {
-      // origin: [ENV.ORIGIN],
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -264,8 +294,9 @@ const setupSocketServer = (server) => {
 
     // Tạo phòng mới
     socket.on("createRoom", (roomInfo) => {
+      console.log("roomInfo: ", roomInfo);
       createdRoom(roomInfo);
-      io.emit("roomCreated", roomInfo);
+      socket.emit("roomCreated", roomInfo);
       io.emit("listRooms", listRooms);
     });
 
@@ -274,6 +305,11 @@ const setupSocketServer = (server) => {
     });
 
     socket.on("joinRoom", (data) => {
+      const check = checkBeforeJoinRoom(data);
+      if (check !== null) {
+        socket.emit("joinRoomError", check);
+        return;
+      }
       joinRoom(data);
       socket.join(data.roomId);
       socket.emit("joinRoomSuccess", getCurrentRoom(data.roomId));
@@ -307,6 +343,7 @@ const setupSocketServer = (server) => {
       const roomOfUserWithSocketId = getCurrentRoomOfUser(socket.id);
       disconnectUser(socket);
       if (roomOfUserWithSocketId) {
+        console.log("roomOfUserWithSocketId: ", roomOfUserWithSocketId);
         socket
           .to(roomOfUserWithSocketId.roomInfo.roomId)
           .emit("roomMembers", getRoomMembers(roomOfUserWithSocketId.roomInfo.roomId));

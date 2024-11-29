@@ -100,6 +100,9 @@ const joinRoom = (roomId) => {
 socket.on("joinRoomSuccess", (roomInfo) => {
   navigateTo("room-content");
 });
+socket.on("joinRoomError", (message) => {
+  alert(message);
+});
 
 socket.emit("listRooms");
 socket.on("listRooms", (rooms) => {
@@ -206,7 +209,6 @@ socket.on("startGameError", (message) => {
 socket.on("startRoundGame", (data) => {
   console.log("Start round game:", data);
   const modalElement = document.getElementById("modal-start-round");
-
   const modal = new bootstrap.Modal(modalElement);
   modal.show();
 });
