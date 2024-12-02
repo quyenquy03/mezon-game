@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Server as SocketServer } from "socket.io";
+import { json } from "stream/consumers";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,22 +56,8 @@ const listRooms = [
     roomMember: [],
     currentRoundMembers: [],
     currentRound: 1,
+    room: []
   },
-  // {
-  //   roomInfo: {
-  //     roomId: "234567",
-  //     roomName: "Phòng 2",
-  //     roomMaxUser: 8,
-  //     roomPassword: null,
-  //     roomUsePassword: false,
-  //     roomBet: 1000,
-  //     owner: 1234,
-  //     roomRound: 5,
-  //   },
-  //   roomMember: [],
-  //   currentRoundMembers: [],
-  //   currentRound: 1,
-  // },
   {
     roomInfo: {
       roomId: "345678",
@@ -85,6 +72,7 @@ const listRooms = [
     roomMember: [],
     currentRoundMembers: [],
     currentRound: 1,
+    room: []
   },
 ];
 
@@ -118,6 +106,7 @@ const createdRoom = (roomInfo) => {
     roomInfo,
     roomMember: [],
     currentRoundMembers: [],
+    room: [],
   });
 };
 
@@ -137,7 +126,6 @@ const checkBeforeJoinRoom = (data) => {
 };
 
 const joinRoom = (data) => {
-  console.log("data: ", data);
   const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
   const checkIsMember = room?.roomMember?.find((member) => member.userId === data.userId);
   if (room && !checkIsMember && data.userId) {
@@ -159,11 +147,12 @@ const getCurrentRoom = (roomId) => {
 
 const getRoomMembers = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+
   const listMemberOfRoom = room?.roomMember?.map((member) => {
     return connectedUsers.find((user) => user.userId === member);
   });
+  console.log(listMemberOfRoom, 'listMemberOfRoom');
   listMemberOfRoom.filter((member) => member !== null);
-  console.log(listMemberOfRoom);
   return listMemberOfRoom;
 };
 const getCurrentRoomOfUser = (socketId) => {
@@ -175,6 +164,8 @@ const getCurrentRoomOfUser = (socketId) => {
 
 const checkMemberBeforeStartGame = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  console.log(room, 'room');
+  
   if (room?.roomMember?.length < 2) {
     return false;
   }
@@ -186,7 +177,9 @@ const checkMemberBeforeStartGame = (roomId) => {
 
 const startNewGame = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
-  room.currentRoundMembers = room.roomMember;
+  const player = room.roomMember;
+  // room.room = createTournamentRooms(player);
+  room.currentRoundMembers = player;
   room.currentRound = 1;
 };
 
@@ -212,7 +205,6 @@ const setupSocketServer = (server) => {
 
     // Tạo phòng mới
     socket.on("createRoom", (roomInfo) => {
-      console.log("roomInfo: ", roomInfo);
       createdRoom(roomInfo);
       socket.emit("roomCreated", roomInfo);
       io.emit("listRooms", listRooms);
@@ -253,19 +245,19 @@ const setupSocketServer = (server) => {
         const team2 = currentRoom.currentRoundMembers[currentRoom.currentRoundMembers.length - i - 1];
         player1 = team1;
         player2 = team2;
+
         io.to(getSocketIdOfUser(team1)).emit("startRoundGame", {
           yourInfo: getUserInfo(team1),
           rivalInfo: getUserInfo(team2),
           roomInfo: currentRoom,
-          // roomUniqueId: gameId,
+          // soloRoomId: gameId,
           roomUniqueId: currentRoom,
-
         });
         io.to(getSocketIdOfUser(team2)).emit("startRoundGame", {
           yourInfo: getUserInfo(team2),
           rivalInfo: getUserInfo(team1),
           roomInfo: currentRoom,
-          // roomUniqueId: gameId,
+          // soloRoomId: gameId,
           roomUniqueId: currentRoom,
         });
         // io.to(room).emit("playGame", {currentRoom, round: room.rounds });
@@ -277,16 +269,16 @@ const setupSocketServer = (server) => {
       const roomOfUserWithSocketId = getCurrentRoomOfUser(socket.id);
       disconnectUser(socket);
       if (roomOfUserWithSocketId) {
-        console.log("roomOfUserWithSocketId: ", roomOfUserWithSocketId);
         socket
           .to(roomOfUserWithSocketId.roomInfo.roomId)
           .emit("roomMembers", getRoomMembers(roomOfUserWithSocketId.roomInfo.roomId));
       }
       io.emit("listUsers", connectedUsers);
     });
+
     let roomUniqueId;
+
     socket.on("createGame", (data) => {
-      console.log(data);
       const f = data.roomUniqueId.roomInfo.roomId
       // roomUniqueId = makeid(6);
       maxRounds = data.maxRounds;
@@ -308,26 +300,7 @@ const setupSocketServer = (server) => {
       });
     });
 
-    // // socket.on("joinGame", (data) => {
-    //   if (game[roomUniqueId] != null) {
-    //     socket.join(roomUniqueId);
-    //     // socket.to(data.roomUniqueId).emit("playersConnected", {});
-    //     // socket.emit("playersConnected");
-    //     // socket.to(data.roomUniqueId).emit("playGame", {});
-    //     socket.emit("playGame");
-    //     // if (players.length < maxPlayers) {
-    //     //   players.push({ namePlayer: data.namePlayer, eliminated: false });
-    //     // } else {
-    //     //   socket.emit("fullRoom");
-    //     // }
-    //   }
-    // // });
-
     socket.on("player", (data) => {
-      // console.log('player1: ', player1);
-      // console.log('player2: ', player2);
-      // console.log('player: ', data);
-      // let player = {user: data.player.userId, value: data.rpsValue};
       let rpsValue = data.rpsValue;
       if (player1 == data.player) {
         console.log('da vao day p1: ', data);
@@ -346,17 +319,6 @@ const setupSocketServer = (server) => {
       }
     });
 
-    // socket.on("player2", (data) => {
-    //   console.log('player2: ', data);
-
-    //   let rpsValue = data.rpsValue;
-    //   game[data.roomUniqueId].p2Choice = rpsValue;
-    //   socket.to(data.roomUniqueId).emit("player2", { rpsValue: data.rpsValue });
-    //   if (game[data.roomUniqueId].p1Choice != null) {
-    //     determineWinner(data.roomUniqueId);
-    //   }
-    // });
-
     socket.on("nextRound", (data) => {
       const gameId = data.roomUniqueId; // Replace with your room tracking logic
       if (gameId) {
@@ -368,6 +330,7 @@ const setupSocketServer = (server) => {
   });
   function determineWinner(game) {
     const gameData = game;
+    console.log(game, 'game');
     
     // Lấy key đầu tiên của object
     const key = Object.keys(gameData)[0];
@@ -442,7 +405,6 @@ const setupSocketServer = (server) => {
       endGame(key, finalWinner, name);
       return;
     }
-    console.log('gameData:', gameData[key]);
     
     gameData[key].p1Choice = null;
     gameData[key].p2Choice = null;
@@ -470,6 +432,35 @@ const setupSocketServer = (server) => {
     }
     return result;
   }
+};
+
+
+const createTournamentRooms = (players) => {
+  const rooms = [];
+  let roomIdCounter = 1;
+
+  while (players.length > 1) {
+    const player1 = players.shift();
+    const player2 = players.shift();
+    const roomId = roomIdCounter++;
+    
+    rooms.push({ roomId, players: JSON.stringify([player1, player2]) });
+  }
+
+  const totalRooms = rooms.length;
+  const nextRoundRooms = totalRooms / 2;
+
+  for (let i = 0; i < nextRoundRooms; i++) {
+    const roomId = roomIdCounter++;
+    rooms.push({ roomId, players: JSON.stringify([]) });
+  }
+
+  if (nextRoundRooms > 1) {
+    const finalRoomId = roomIdCounter++;
+    rooms.push({ roomId: finalRoomId, players: JSON.stringify([]) });
+  }
+
+  return rooms;
 };
 
 setupSocketServer(server);
