@@ -285,10 +285,15 @@ const chooseOption = (option) => {
   choosedOption = option;
 };
 
-socket.on("startRoundGame", (data) => {
-  renderCurrentRoundInfo(data);
-  startCountdown();
-  const modalElement = document.getElementById("modal-start-round");
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
+socket.on("startGameSuccess", (data) => {
+  // renderCurrentRoundInfo(data);
+  // startCountdown();
+  // const modalElement = document.getElementById("modal-start-round");
+  // const modal = new bootstrap.Modal(modalElement);
+  // modal.show();
+  socket.emit("startRound", {
+    userId: user.userId,
+    roomId: data.roomInfo.roomId,
+    roundGame: data.currentRound,
+  });
 });

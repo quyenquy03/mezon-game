@@ -73,6 +73,7 @@ const listRooms = [
     currentRoundMembers: [],
     roundGames: [
       {
+        roundId: "123456",
         round: 1,
         listPlayer: ["1234", "1273"],
         group: [
@@ -353,12 +354,37 @@ const setupSocketServer = (server) => {
       io.emit("roomMembers", getRoomMembers(roomId));
     });
 
-    socket.on("startNewGame", (data) => {
+    socket.on("startGame", (data) => {
       if (!checkMemberBeforeStartGame(data.roomId)) {
         socket.emit("startGameError", "Số lượng người chơi chưa đủ để bắt đầu!");
         return;
       }
       startNewGame(data.roomId);
+      const currentRoom = getCurrentRoom(data.roomId);
+      socket.emit("startGameSuccess", {
+        currentRound: currentRoom.currentRound,
+        currentRoundMembers: currentRoom.currentRoundMembers,
+        roomInfo: currentRoom.roomInfo,
+      });
+    });
+    socket.on("startRound", (data) => {
+      const { roomId, userId, roundGame } = data;
+      const currentRoom = getCurrentRoom(roomId);
+      const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
+      const currentRoundGroup = currentRound.group;
+      for (let i = 0; i < currentRoundGroup.length; i++) {
+        const group = currentRoundGroup[i];
+        io.to(getSocketIdOfUser(group.player1)).emit("startTurn", {
+          yourInfo: getUserInfo(group.player1),
+          rivalInfo: getUserInfo(group.player2),
+          roomInfo: currentRoom.roomInfo,
+        });
+        io.to(getSocketIdOfUser(group.player2)).emit("startTurn", {
+          yourInfo: getUserInfo(group.player2),
+          rivalInfo: getUserInfo(group.player1),
+          roomInfo: currentRoom.roomInfo,
+        });
+      }
     });
 
     // start game
