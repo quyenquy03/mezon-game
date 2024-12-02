@@ -192,12 +192,12 @@
                   <div class="col col-4">
                     <div class='body-game-left'>
                       <div class='text-center'>
-                        <img class='player-choice ' src="./assets/images/rock-paper-scissors.png" alt="" />
+                        <img class='player-choice my-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
                       </div>
                       <div class='list-choice'>
-                        <button onclick='chooseOption("rock")' class='btn-choice rock '></button>
-                        <button onclick='chooseOption("paper")' class='btn-choice paper'></button>
-                        <button onclick='chooseOption("scissors")' class='btn-choice scissors'></button>
+                        <button data-choice="rock" onclick='chooseOption("rock")' class='btn-choice rock '></button>
+                        <button data-choice="paper" onclick='chooseOption("paper")' class='btn-choice paper'></button>
+                        <button data-choice="scissors" onclick='chooseOption("scissors")' class='btn-choice scissors'></button>
                       </div>
                     </div>
                   </div>
@@ -207,12 +207,13 @@
                         <div class='countdown-bg'></div>
                         <div class='countdown-time' id='countdown-time'>00</div>
                       </div>
+                      <div class='turn-result text-white'></div>
                     </div>
                   </div>
                   <div class="col col-4">
                     <div class='body-game-right'>
                       <div class='text-center'>
-                        <img class='player-choice ' src="./assets/images/rock-paper-scissors.png" alt="" />
+                        <img class='player-choice rival-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
                       </div>
                     </div> 
                   </div>

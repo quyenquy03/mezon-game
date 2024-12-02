@@ -259,8 +259,7 @@ const renderCurrentRoundInfo = (roundInfo) => {
 };
 
 // start countdown
-function startCountdown() {
-  let countdown = 9;
+function startCountdown(countdown = 9) {
   const countdownArea = document.getElementById("countdown-time");
   var countdownInterval = setInterval(() => {
     countdownArea.innerHTML = `0${countdown}`;
@@ -286,14 +285,98 @@ const chooseOption = (option) => {
 };
 
 socket.on("startGameSuccess", (data) => {
-  // renderCurrentRoundInfo(data);
-  // startCountdown();
-  // const modalElement = document.getElementById("modal-start-round");
-  // const modal = new bootstrap.Modal(modalElement);
-  // modal.show();
+  console.log("Start game success", data);
   socket.emit("startRound", {
     userId: user.userId,
     roomId: data.roomInfo.roomId,
     roundGame: data.currentRound,
+    roundId: data.roundId,
+    currentTurn: 1,
   });
+});
+
+socket.on("startTurn", (data) => {
+  console.log("Start turn", data);
+  renderCurrentRoundInfo(data);
+  refreshTurnResult();
+  startCountdown(5);
+  const modalElement = document.getElementById("modal-start-round");
+  const modal = new bootstrap.Modal(modalElement);
+  modal.show();
+});
+socket.on("submitTurnNow", (data) => {
+  const choosedOptionElement = document.querySelector(".btn-choice.active");
+  let choice = null;
+  if (choosedOptionElement) {
+    choice = choosedOptionElement.dataset.choice;
+  }
+  socket.emit("submitTurn", {
+    userId: user.userId,
+    roomId: data.roomId,
+    roundGame: data.roundGame,
+    currentTurn: data.currentTurn,
+    choosedOption: choice,
+  });
+  setTimeout(() => {
+    socket.emit("getTurnResult", {
+      userId: user.userId,
+      roomId: data.roomId,
+      roundGame: data.roundGame,
+      currentTurn: data.currentTurn,
+    });
+  }, 1000);
+});
+
+const renderTurnResult = (data) => {
+  const myChoiceElement = document.querySelector(".my-choice");
+  const rivalChoiceElement = document.querySelector(".rival-choice");
+
+  myChoiceElement.setAttribute("src", `./assets/images/${data.yourChoice ?? "rock-paper-scissors"}.png`);
+  rivalChoiceElement.setAttribute("src", `./assets/images/${data.rivalChoice ?? "rock-paper-scissors"}.png`);
+
+  const resultElement = document.querySelector(".turn-result");
+  resultElement.innerHTML = data.result;
+};
+const refreshTurnResult = () => {
+  const myChoiceElement = document.querySelector(".my-choice");
+  const rivalChoiceElement = document.querySelector(".rival-choice");
+
+  myChoiceElement.setAttribute("src", `./assets/images/rock-paper-scissors.png`);
+  rivalChoiceElement.setAttribute("src", `./assets/images/rock-paper-scissors.png`);
+
+  const resultElement = document.querySelector(".turn-result");
+  resultElement.innerHTML = "";
+};
+socket.on("getTurnResult", (data) => {
+  startCountdown(4);
+  renderTurnResult(data);
+  setTimeout(() => {
+    socket.emit("startRound", {
+      userId: user.userId,
+      roomId: data.roomId,
+      roundGame: data.roundGame,
+      roundId: data.roundId,
+      currentTurn: data.currentTurn + 1,
+    });
+  }, 5000);
+});
+
+socket.on("endOfRound", (data) => {
+  if (data.isWinner) {
+    console.log("You Win");
+    console.log(data);
+    socket.emit("continueJoin", {
+      userId: user.userId,
+      roomId: data.roomId,
+      roundGame: data.roundGame + 1,
+    });
+  } else {
+    alert("You Lose, wait for next game!");
+  }
+});
+
+socket.on("continueJoinSuccess", (data) => {
+  setTimeout(() => {
+    socket.emit("combineNextRound", data);
+  }, 5000);
 });
