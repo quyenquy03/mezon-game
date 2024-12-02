@@ -3,6 +3,14 @@ function navigateTo(pageId) {
   document.getElementById(pageId).classList.add("active");
 }
 
+// window.addEventListener("beforeunload", (event) => {
+//   // Ngăn hành động mặc định
+//   event.preventDefault();
+
+//   // Trả về một chuỗi (hoặc để trống, nếu không muốn hiển thị thông báo riêng)
+//   event.returnValue = "Bạn có chắc chắn muốn rời khỏi trang này?";
+// });
+let choosedOption = null;
 const socket = io("http://localhost:3000");
 
 socket.on("disconnect", () => {
@@ -91,6 +99,11 @@ const renderListRoom = (listRooms) => {
   });
 };
 
+const joinRoomWithSearch = () => {
+  const roomId = document.getElementById("room-id-search").value;
+  joinRoom(roomId);
+};
+
 const joinRoom = (roomId) => {
   socket.emit("joinRoom", {
     roomId,
@@ -99,6 +112,11 @@ const joinRoom = (roomId) => {
 };
 socket.on("joinRoomSuccess", (roomInfo) => {
   navigateTo("room-content");
+  const modalJoinRoom = document.getElementById("modal-search-room");
+  const modal = bootstrap.Modal.getInstance(modalJoinRoom);
+  if (modal) {
+    modal.hide();
+  }
 });
 socket.on("joinRoomError", (message) => {
   alert(message);
@@ -233,14 +251,43 @@ const renderCurrentRoundInfo = (roundInfo) => {
       <div class='game-user-info'>
         <div class='game-user-name'>${roundInfo.rivalInfo?.name}</div>
         <div class='game-user-score'>
-          ${listStar.join("")}
+          ${listStar.join("")}  
         </div>
       </div>
     </div>
   `;
 };
+
+// start countdown
+function startCountdown() {
+  let countdown = 9;
+  const countdownArea = document.getElementById("countdown-time");
+  var countdownInterval = setInterval(() => {
+    countdownArea.innerHTML = `0${countdown}`;
+    countdown--;
+
+    if (countdown < 0) {
+      console.log("Stopping interval");
+      clearInterval(countdownInterval);
+      countdownArea.innerHTML = `00`;
+    }
+  }, 1000);
+}
+
+const chooseOption = (option) => {
+  const choosedOptionElement = document.querySelector(".btn-choice.active");
+  if (choosedOptionElement) {
+    choosedOptionElement.classList.remove("active");
+  }
+  const choosedOptionElementNew = document.querySelector(`.btn-choice.${option}`);
+  choosedOptionElementNew.classList.add("active");
+
+  choosedOption = option;
+};
+
 socket.on("startRoundGame", (data) => {
   renderCurrentRoundInfo(data);
+  startCountdown();
   const modalElement = document.getElementById("modal-start-round");
   const modal = new bootstrap.Modal(modalElement);
   modal.show();

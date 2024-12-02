@@ -77,7 +77,11 @@
                     <div class='col col-sm-6'>
                       <div class='form-item'>
                         <label for='room-round' class='label'>Số lượt mỗi vòng</label>
-                        <input autocomplete='false' type='number' max='10' min='1' id='room-round' class='form-control form-input' placeholder='Số lượt chơi mỗi vòng...' />
+                        <select id='room-round' class="form-select form-select-lg" aria-label="Default select example">
+                          <option value="1" >1</option>
+                          <option value="3" selected>3</option>
+                          <option value="5">5</option>
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -134,16 +138,16 @@
               </div>
               <div class='form-create-room'>
                 <div class='form-item'>
-                  <input autocomplete='false' type='text' id='room-name' class='form-control form-input' placeholder='Nhập ID phòng để tham gia' />
+                  <input autocomplete='false' type='text' id='room-id-search' class='form-control form-input' placeholder='Nhập ID phòng để tham gia' />
                 </div>
                 <div class='text-center mt-3'>
-                  <button onclick='' class='btn btn-primary btn-create-room'>Tham gia</button>
+                  <button onclick='joinRoomWithSearch()' class='btn btn-primary btn-create-room'>Tham gia</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="modal fade" id="modal-start-round" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="modal-start-round" tabindex="-1" data-bs-keyboard="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-fullscreen">
             <div class="modal-content custom-modal-content">
               <div class='form-create-room'>
@@ -191,9 +195,9 @@
                         <img class='player-choice ' src="./assets/images/rock-paper-scissors.png" alt="" />
                       </div>
                       <div class='list-choice'>
-                        <button class='btn-choice rock active'></button>
-                        <button class='btn-choice paper'></button>
-                        <button class='btn-choice scissors'></button>
+                        <button onclick='chooseOption("rock")' class='btn-choice rock '></button>
+                        <button onclick='chooseOption("paper")' class='btn-choice paper'></button>
+                        <button onclick='chooseOption("scissors")' class='btn-choice scissors'></button>
                       </div>
                     </div>
                   </div>
@@ -201,7 +205,7 @@
                     <div class="body-game-center">
                       <div class="countdown">
                         <div class='countdown-bg'></div>
-                        <div class='countdown-time'>00</div>
+                        <div class='countdown-time' id='countdown-time'>00</div>
                       </div>
                     </div>
                   </div>

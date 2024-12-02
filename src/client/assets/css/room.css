@@ -454,7 +454,7 @@
 .body-game-center .countdown-bg {
   width: 250px;
   height: 250px;
-  border-radius: 50%;
+  /* border-radius: 50%; */
   background-image: url("../images/quay.png");
   background-size: cover;
   display: flex;
