@@ -12,6 +12,7 @@
     />
     <link rel="stylesheet" href="./assets/css/style.css" />
     <link rel="stylesheet" href="./assets/css/room.css" />
+    <link rel="stylesheet" href="./assets/css/game.css" />
   </head>
   <body>
     <div class="room-page-wrapper">
@@ -167,6 +168,7 @@
                     <span class='text-white'>
                       ROUND 1
                     </span>
+                    <div id="winnerArea" style="color: #ffffff"></div>
                   </div>
                   <div class='header-game-right'>
                     <div class='game-user game-user-right'>
@@ -188,12 +190,17 @@
                   <div class="col col-4">
                     <div class='body-game-left'>
                       <div class='text-center'>
-                        <img class='player-choice ' src="./assets/images/rock-paper-scissors.png" alt="" />
+                        <img class='player1-choice player-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
                       </div>
-                      <div class='list-choice'>
+                      <!-- <div class='list-choice'>
                         <button class='btn-choice rock active'></button>
                         <button class='btn-choice paper'></button>
                         <button class='btn-choice scissors'></button>
+                      </div> -->
+                      <div id="player1Choice">
+                        <button class="btn-choice rock" onclick="sendChoice('rock')">Rock</button>
+                        <button class="btn-choice paper" onclick="sendChoice('paper')">Paper</button>
+                        <button class="btn-choice scissors" onclick="sendChoice('scissors')">Scissors</button>
                       </div>
                     </div>
                   </div>
@@ -201,14 +208,14 @@
                     <div class="body-game-center">
                       <div class="countdown">
                         <div class='countdown-bg'></div>
-                        <div class='countdown-time'>00</div>
+                        <div class='countdown-time' id="countdownArea">00</div>
                       </div>
                     </div>
                   </div>
                   <div class="col col-4">
                     <div class='body-game-right'>
                       <div class='text-center'>
-                        <img class='player-choice ' src="./assets/images/rock-paper-scissors.png" alt="" />
+                        <img class='player2-choice player-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
                       </div>
                     </div> 
                   </div>
@@ -225,5 +232,6 @@
     ></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./assets/javascript/client.js"></script>
+    <!-- <script src="./assets/javascript/game.js"></script> -->
   </body>
 </html>

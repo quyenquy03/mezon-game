@@ -1,3 +1,12 @@
+let choices = {};
+let maxRounds = 0;
+let winnerArea = document.getElementById('winnerArea');
+let player1Choice = document.querySelector('.player1-choice');
+let player2Choice = document.querySelector('.player2-choice');
+let buttonChoices = document.querySelectorAll('.btn-choice');
+let gameId;
+let player1;
+let player2;
 function navigateTo(pageId) {
   document.querySelectorAll(".content").forEach((page) => page.classList.remove("active"));
   document.getElementById(pageId).classList.add("active");
@@ -99,6 +108,7 @@ const joinRoom = (roomId) => {
 };
 socket.on("joinRoomSuccess", (roomInfo) => {
   navigateTo("room-content");
+  roomId = roomInfo.roomId;
 });
 socket.on("joinRoomError", (message) => {
   alert(message);
@@ -244,4 +254,119 @@ socket.on("startRoundGame", (data) => {
   const modalElement = document.getElementById("modal-start-round");
   const modal = new bootstrap.Modal(modalElement);
   modal.show();
+  startCountdown();
+  player1 = data.yourInfo;
+  player2 = data.rivalInfo;
+  gameId = data.roomUniqueId;
+  socket.emit('createGame', { maxRounds: 3, roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo})
+});
+
+socket.on("playGame", (data) => {
+  player1Choice.src = './assets/images/rock-paper-scissors.png';
+  player2Choice.src = './assets/images/rock-paper-scissors.png';
+  choices = {};
+  winnerArea.innerHTML = '';
+  startCountdown();
+});
+
+socket.on("result", (data) => {
+  let requiredStreak = data.maxRounds / 2;
+  player1Choice.src = `./assets/images/${choices.p1 || 'rock-paper-scissors'}.png`;
+  player2Choice.src = `./assets/images/${choices.p2 || 'rock-paper-scissors'}.png`;
+  switch (data.winner) {
+    case 'p1':
+      winnerArea.innerHTML = `${data.nameWinner} win`;
+      break;
+    case 'p2':
+      winnerArea.innerHTML = `${data.nameWinner} win`;
+      break;
+    default:
+      winnerArea.innerHTML = `It's a draw`;
+      break;
+  }
+  const handleGameOver = (data) => {
+      switch (data.winner) {
+        case 'p1':
+          message = `Game Over! ${data.nameWinner} is the overall winner!`;
+          break;
+        case 'p2':
+          message = `Game Over! ${data.nameWinner} is the overall winner!`;
+          break;
+        default:
+          message = `Game Over! It's a draw.`;
+          break;
+      }
+      alert(message);
+      buttonChoices.forEach(button => {
+          button.setAttribute('disabled', true);
+      });
+  };
+
+  if (data.rounds == data.maxRounds || data.p1Wins > requiredStreak || data.p2Wins > requiredStreak) {
+      socket.on("gameOver", handleGameOver);
+  } else if (data.rounds < data.maxRounds) {
+      setTimeout(() => {
+          console.log('next round');
+          socket.emit("nextRound", { roomUniqueId: "345678", rounds: data.rounds });
+      }, 3000);
+  }
+});
+
+socket.on("playGame", (data) => {
+  player1Choice.src = './assets/images/rock-paper-scissors.png';
+  player2Choice.src = './assets/images/rock-paper-scissors.png';
+  choices = {};
+  winnerArea.innerHTML = '';
+  startCountdown();
+});
+
+function startCountdown() {
+  let countdown = 5;
+  const countdownArea = document.getElementById('countdownArea');
+  countdownArea.style.display = 'block';
+  var countdownInterval = setInterval(() => {
+      countdownArea.innerHTML = `0${countdown}`;
+      countdown--;
+
+      if (choices.p1 && choices.p2) {
+          console.log('Stopping interval by f');
+          clearInterval(countdownInterval);
+          countdownArea.innerHTML = `00`;
+      }
+
+      if (countdown < 0) {
+          console.log('Stopping interval');
+          clearInterval(countdownInterval);
+          countdownArea.innerHTML = `00`;
+      }
+  }, 1000);
+}
+
+function sendChoice(rpsValue) {
+  const choiceEvent = player1 ? "player1" : "player2";
+  choices[player1 ? 'p1' : 'p2'] = rpsValue;
+  socket.emit('player', {
+      rpsValue: rpsValue,
+      // roomUniqueId: gameId,
+      roomUniqueId: "345678",
+      player: player1.userId,
+  });
+}
+
+socket.on("player2", (data) => {
+  console.log('player1: ', data.data.player);
+  console.log('player1.: ', player1.userId);  
+  console.log('player2.: ', player2.userId);  
+  if (player2.userId == data.data.player) {
+    choices.p2 = data.data.rpsValue; 
+  }
+});
+
+socket.on("player2", (data) => {
+  console.log('player2: ', data);
+  console.log('player1.: ', player1.userId);  
+  console.log('player2.: ', player2.userId);  
+  if (player2.userId == data.data.player) {
+    choices.p2 = data.data.rpsValue; 
+  }
 });

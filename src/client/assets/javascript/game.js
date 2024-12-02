@@ -8,16 +8,16 @@ let player1Choice = document.querySelector('.player1-choice');
 let player2Choice = document.querySelector('.player2-choice');
 let buttonChoices = document.querySelectorAll('.btn-choice');
 let f = true;
-function createGame() {
-    player1 = true;
-    socket.emit('createGame', { maxRounds: 3, maxPlayers: 4 });
-}
+// function createGame() {
+//     player1 = true;
+//     socket.emit('createGame', { maxRounds: 3, maxPlayers: 4 });
+// }
 
-function joinGame() {
-    roomUniqueId = document.getElementById('roomUniqueId').value;
-    let namePlayer = document.getElementById('nameplayer').value;
-    socket.emit('joinGame', { roomUniqueId: roomUniqueId, namePlayer: namePlayer});
-}
+// function joinGame() {
+//     roomUniqueId = document.getElementById('roomUniqueId').value;
+//     let namePlayer = document.getElementById('nameplayer').value;
+//     socket.emit('joinGame', { roomUniqueId: roomUniqueId, namePlayer: namePlayer});
+// }
 
 // socket.on("fullRoom", () => {
 //     alert("Full room!");
@@ -49,13 +49,13 @@ socket.on("playersConnected", () => {
     startCountdown(); // Start the countdown when both players are connected
 });
 
-socket.on("p1Choice", (data) => {
+socket.on("player1", (data) => {
     if (!player1) {
         genOpponentChoice(data);
     }
 });
 
-socket.on("p2Choice", (data) => {
+socket.on("player2", (data) => {
     if (player1) {
         genOpponentChoice(data);
     }
@@ -121,7 +121,7 @@ socket.on("playGame", (data) => {
 });
 
 function sendChoice(rpsValue) {
-    const choiceEvent = player1 ? "p1Choice" : "p2Choice";
+    const choiceEvent = player1 ? "player1" : "player2";
     choices[player1 ? 'p1' : 'p2'] = rpsValue;
     socket.emit(choiceEvent, {
         rpsValue: rpsValue,
