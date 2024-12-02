@@ -41,21 +41,21 @@ const connectedUsers = [
   },
 ];
 const listRooms = [
-  // {
-  //   roomInfo: {
-  //     roomId: "123456",
-  //     roomName: "Phòng 1",
-  //     roomMaxUser: 4,
-  //     roomPassword: null,
-  //     roomUsePassword: false,
-  //     roomBet: 1000,
-  //     owner: 1234,
-  //     roomRound: 5,
-  //   },
-  //   roomMember: [],
-  //   currentRoundMembers: [],
-  //   currentRound: 1,
-  // },
+  {
+    roomInfo: {
+      roomId: "123456",
+      roomName: "Phòng 1",
+      roomMaxUser: 4,
+      roomPassword: null,
+      roomUsePassword: false,
+      roomBet: 1000,
+      owner: 1234,
+      roomRound: 5,
+    },
+    roomMember: [],
+    currentRoundMembers: [],
+    currentRound: 1,
+  },
   // {
   //   roomInfo: {
   //     roomId: "234567",

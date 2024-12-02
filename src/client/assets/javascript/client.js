@@ -257,8 +257,8 @@ socket.on("startRoundGame", (data) => {
   startCountdown();
   player1 = data.yourInfo;
   player2 = data.rivalInfo;
-  gameId = data.roomUniqueId;
-  socket.emit('createGame', { maxRounds: 3, roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo})
+  gameId = data.roomUniqueId.roomInfo.roomId;
+  socket.emit('createGame', { maxRounds: 3, roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo })
 });
 
 socket.on("playGame", (data) => {
@@ -285,88 +285,83 @@ socket.on("result", (data) => {
       break;
   }
   const handleGameOver = (data) => {
-      switch (data.winner) {
-        case 'p1':
-          message = `Game Over! ${data.nameWinner} is the overall winner!`;
-          break;
-        case 'p2':
-          message = `Game Over! ${data.nameWinner} is the overall winner!`;
-          break;
-        default:
-          message = `Game Over! It's a draw.`;
-          break;
-      }
-      alert(message);
-      buttonChoices.forEach(button => {
-          button.setAttribute('disabled', true);
-      });
+    switch (data.winner) {
+      case 'p1':
+        message = `Game Over! ${data.nameWinner} is the overall winner!`;
+        break;
+      case 'p2':
+        message = `Game Over! ${data.nameWinner} is the overall winner!`;
+        break;
+      default:
+        message = `Game Over! It's a draw.`;
+        break;
+    }
+    alert(message);
+    buttonChoices.forEach(button => {
+      button.setAttribute('disabled', true);
+    });
   };
 
   if (data.rounds == data.maxRounds || data.p1Wins > requiredStreak || data.p2Wins > requiredStreak) {
-      socket.on("gameOver", handleGameOver);
+    socket.on("gameOver", handleGameOver);
   } else if (data.rounds < data.maxRounds) {
-      setTimeout(() => {
-          console.log('next round');
-          socket.emit("nextRound", { roomUniqueId: "345678", rounds: data.rounds });
-      }, 3000);
+    setTimeout(() => {
+      console.log('next round');
+      socket.emit("nextRound", { roomUniqueId: gameId, rounds: data.rounds });
+    }, 3000);
   }
 });
 
 socket.on("playGame", (data) => {
+  const round = document.querySelector(".round");
+  round.innerHTML = `ROUND ${data.round + 1}`;
   player1Choice.src = './assets/images/rock-paper-scissors.png';
   player2Choice.src = './assets/images/rock-paper-scissors.png';
   choices = {};
   winnerArea.innerHTML = '';
+  round.innerHTML = `ROUND ${data.round + 1}`;
   startCountdown();
 });
 
 function startCountdown() {
-  let countdown = 5;
+  let countdown = 9;
   const countdownArea = document.getElementById('countdownArea');
   countdownArea.style.display = 'block';
   var countdownInterval = setInterval(() => {
-      countdownArea.innerHTML = `0${countdown}`;
-      countdown--;
+    countdownArea.innerHTML = `0${countdown}`;
+    countdown--;
 
-      if (choices.p1 && choices.p2) {
-          console.log('Stopping interval by f');
-          clearInterval(countdownInterval);
-          countdownArea.innerHTML = `00`;
-      }
+    if (choices.p1 && choices.p2) {
+      console.log('Stopping interval by f');
+      clearInterval(countdownInterval);
+      countdownArea.innerHTML = `00`;
+    }
 
-      if (countdown < 0) {
-          console.log('Stopping interval');
-          clearInterval(countdownInterval);
-          countdownArea.innerHTML = `00`;
-      }
+    if (countdown < 0) {
+      console.log('Stopping interval');
+      clearInterval(countdownInterval);
+      countdownArea.innerHTML = `00`;
+    }
   }, 1000);
 }
 
 function sendChoice(rpsValue) {
-  const choiceEvent = player1 ? "player1" : "player2";
   choices[player1 ? 'p1' : 'p2'] = rpsValue;
   socket.emit('player', {
-      rpsValue: rpsValue,
-      // roomUniqueId: gameId,
-      roomUniqueId: "345678",
-      player: player1.userId,
+    rpsValue: rpsValue,
+    roomUniqueId: gameId,
+    player: player1.userId,
   });
 }
 
 socket.on("player2", (data) => {
-  console.log('player1: ', data.data.player);
-  console.log('player1.: ', player1.userId);  
-  console.log('player2.: ', player2.userId);  
   if (player2.userId == data.data.player) {
-    choices.p2 = data.data.rpsValue; 
+    choices.p2 = data.data.rpsValue;
   }
 });
 
-socket.on("player2", (data) => {
-  console.log('player2: ', data);
-  console.log('player1.: ', player1.userId);  
-  console.log('player2.: ', player2.userId);  
-  if (player2.userId == data.data.player) {
-    choices.p2 = data.data.rpsValue; 
-  }
-});
+// socket.on("player2", (data) => {
+//   if (player2.userId == data.data.player) {
+//     choices.p2 = data.data.rpsValue;
+//   }
+// });
