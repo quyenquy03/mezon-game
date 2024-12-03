@@ -479,6 +479,20 @@
   display: inline-block;
 }
 
+.end-round-result {
+  font-weight: 600;
+  font-size: 30px;
+  color: #fff;
+  text-align: center;
+}
+.end-round-desc {
+  font-size: 20px;
+  color: #fff;
+  text-align: center;
+  margin-top: 20px;
+  display: block;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg); /* Bắt đầu từ 0 độ */

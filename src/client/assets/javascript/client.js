@@ -11,7 +11,7 @@ function navigateTo(pageId) {
 //   event.returnValue = "Bạn có chắc chắn muốn rời khỏi trang này?";
 // });
 let choosedOption = null;
-const socket = io("http://localhost:3000");
+const socket = io();
 
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
@@ -285,7 +285,11 @@ const chooseOption = (option) => {
 };
 
 socket.on("startGameSuccess", (data) => {
-  console.log("Start game success", data);
+  const modalElement = document.getElementById("modal-start-round");
+  if (!modalElement.classList.contains("show")) {
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  }
   socket.emit("startRound", {
     userId: user.userId,
     roomId: data.roomInfo.roomId,
@@ -300,9 +304,9 @@ socket.on("startTurn", (data) => {
   renderCurrentRoundInfo(data);
   refreshTurnResult();
   startCountdown(5);
-  const modalElement = document.getElementById("modal-start-round");
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
+  // const modalElement = document.getElementById("modal-start-round");
+  // const modal = new bootstrap.Modal(modalElement);
+  // modal.show();
 });
 socket.on("submitTurnNow", (data) => {
   const choosedOptionElement = document.querySelector(".btn-choice.active");
@@ -362,25 +366,57 @@ socket.on("getTurnResult", (data) => {
 });
 
 socket.on("endOfRound", (data) => {
+  const endRoundElement = document.querySelector(".turn-result");
   if (data.isWinner) {
-    console.log("You Win");
-    console.log(data);
+    endRoundElement.innerHTML = `
+      <h5 class='end-round-result'>Bạn thắng</h5>
+      <span class='end-round-desc'>Vui lòng chờ để chuyển qua vòng đấu tiếp theo</span>
+    `;
     socket.emit("continueJoin", {
       userId: user.userId,
       roomId: data.roomId,
       roundGame: data.roundGame + 1,
     });
   } else {
-    alert("You Lose, wait for next game!");
+    endRoundElement.innerHTML = `
+      <h5 class='end-round-result'>Bạn thua rồi</h5>
+      <span class='end-round-desc'>Ngồi chờ mọi người chơi xong để bắt đầu trận mới nhé!</span>
+    `;
   }
+  // modal.show();
 });
 
 socket.on("continueJoinSuccess", (data) => {
+  const modalEndRoundElement = document.getElementById("modal-end-round");
+  const modal = new bootstrap.Modal(modalEndRoundElement);
   setTimeout(() => {
-    socket.emit("combindNextRound", data);
+    socket.emit("combindNextRound", {
+      ...data,
+      userId: user.userId,
+    });
+    modal.hide();
   }, 5000);
 });
 socket.on("endOfGame", (data) => {
-  alert("End of game");
-  console.log(data);
+  const endRoundElement = document.querySelector(".turn-result");
+  if (data.winner === user.userId) {
+    endRoundElement.innerHTML = `
+      <h5 class='end-round-result'>Kết thúc trận đấu</h5>
+      <div class='end-round-desc'>Chúc mừng! Bạn đã thắng trận 😍😍</div>
+      <div class='end-round-desc'>Trở về phòng sau 10s</div>
+    `;
+  } else {
+    endRoundElement.innerHTML = `
+      <h5 class='end-round-result'>Kết thúc trận đấu</h5>
+      <div class='end-round-desc'>Oh noo! Bạn thua rồi 😥</div>
+      <div class='end-round-desc'>Trở về phòng sau 10s</div>
+    `;
+  }
+  setTimeout(() => {
+    const modalStartRound = document.getElementById("modal-start-round");
+    const modal = bootstrap.Modal.getInstance(modalStartRound);
+    modal.hide();
+    navigateTo("room-content");
+  }, 10000);
+  startCountdown(9);
 });
