@@ -5,6 +5,7 @@ let player1Choice = document.querySelector('.player1-choice');
 let player2Choice = document.querySelector('.player2-choice');
 let buttonChoices = document.querySelectorAll('.btn-choice');
 let gameId;
+let soloRoomId;
 let player1;
 let player2;
 function navigateTo(pageId) {
@@ -62,8 +63,11 @@ socket.on("roomCreated", (roomInfo) => {
   navigateTo("room-content");
   socket.emit("joinRoom", {
     roomId: roomInfo.roomId,
+    roomChildId: roomInfo.roomChildId,
+    soloRoomId: roomInfo.soloRoomId,
     userId: user.userId,
   });
+  
   const modalCreateRoom = document.getElementById("modal-create-room");
   const modal = bootstrap.Modal.getInstance(modalCreateRoom);
   modal.hide();
@@ -104,6 +108,7 @@ const joinRoom = (roomId) => {
   socket.emit("joinRoom", {
     roomId,
     userId: user.userId,
+    soloRoomId: soloRoomId
   });
 };
 socket.on("joinRoomSuccess", (roomInfo) => {
@@ -219,7 +224,6 @@ socket.on("startGameError", (message) => {
 const renderCurrentRoundInfo = (roundInfo) => {
   const headerGameLeftElement = document.querySelector(".header-game-left");
   const headerGameRightElement = document.querySelector(".header-game-right");
-
   let listStar = Array.from({ length: roundInfo.roomInfo?.roomInfo?.roomRound }).map((_, index) => {
     return `<span>&#9733;</span>`;
   });
@@ -258,18 +262,13 @@ socket.on("startRoundGame", (data) => {
   player1 = data.yourInfo;
   player2 = data.rivalInfo;
   gameId = data.roomUniqueId.roomInfo.roomId;
+  soloRoomId = data.soloRoomId;
   socket.emit('createGame', { maxRounds: 3, roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo })
 });
 
-socket.on("playGame", (data) => {
-  player1Choice.src = './assets/images/rock-paper-scissors.png';
-  player2Choice.src = './assets/images/rock-paper-scissors.png';
-  choices = {};
-  winnerArea.innerHTML = '';
-  startCountdown();
-});
-
 socket.on("result", (data) => {
+  if (!checkUser(data.gameData)) return;
+
   let requiredStreak = data.maxRounds / 2;
   player1Choice.src = `./assets/images/${choices.p1 || 'rock-paper-scissors'}.png`;
   player2Choice.src = `./assets/images/${choices.p2 || 'rock-paper-scissors'}.png`;
@@ -307,12 +306,17 @@ socket.on("result", (data) => {
   } else if (data.rounds < data.maxRounds) {
     setTimeout(() => {
       console.log('next round');
-      socket.emit("nextRound", { roomUniqueId: gameId, rounds: data.rounds });
+      socket.emit("nextRound", { roomUniqueId: gameId, rounds: data.rounds, roomId: data.gameData.roomId });
     }, 3000);
   }
 });
 
+const checkUser = (data) =>{
+  return data.player1 === player1.userId || data.player2 === player2.userId;
+}
+
 socket.on("playGame", (data) => {
+  if (data.gameId !== soloRoomId) return;
   const round = document.querySelector(".round");
   round.innerHTML = `ROUND ${data.round + 1}`;
   player1Choice.src = './assets/images/rock-paper-scissors.png';
@@ -350,6 +354,7 @@ function sendChoice(rpsValue) {
   socket.emit('player', {
     rpsValue: rpsValue,
     roomUniqueId: gameId,
+    soloRoomId: soloRoomId,
     player: player1.userId,
   });
 }
@@ -359,9 +364,3 @@ socket.on("player2", (data) => {
     choices.p2 = data.data.rpsValue;
   }
 });
-
-// socket.on("player2", (data) => {
-//   if (player2.userId == data.data.player) {
-//     choices.p2 = data.data.rpsValue;
-//   }
-// });
