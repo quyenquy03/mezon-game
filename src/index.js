@@ -390,7 +390,16 @@ const setupSocketServer = (server) => {
             loseCount++;
           }
         }
-
+        if (currentRound.listPlayer.length === 2 && winCount > loseCount) {
+          socket.emit("endOfGame", {
+            roundGame,
+            roundId,
+            roomId,
+            currentTurn: currentRound.currentTurn,
+            isWinner: winCount > loseCount,
+          });
+          return;
+        }
         socket.emit("endOfRound", {
           roundGame,
           roundId,
@@ -400,27 +409,28 @@ const setupSocketServer = (server) => {
         });
         return;
       }
-
       for (let i = 0; i < currentRoundGroup.length; i++) {
         const group = currentRoundGroup[i];
-        socket.emit("startTurn", {
-          currentRoom,
-          yourInfo: getUserInfo(userId),
-          rivalInfo: getUserInfo(group.player1 === userId ? group.player2 : group.player1),
-          roomInfo: currentRoom.roomInfo,
-          currentTurn: currentRound.currentTurn,
-        });
-        socket.join(roundId);
+        if (group.player1 === userId || group.player2 === userId) {
+          socket.emit("startTurn", {
+            currentRoom,
+            yourInfo: getUserInfo(userId),
+            rivalInfo: getUserInfo(group.player1 === userId ? group.player2 : group.player1),
+            roomInfo: currentRoom.roomInfo,
+            currentTurn: currentRound.currentTurn,
+          });
+          socket.join(roundId);
+        }
       }
 
-      // setTimeout(() => {
-      //   socket.emit("submitTurnNow", {
-      //     roomId,
-      //     roundGame,
-      //     roundId,
-      //     currentTurn: currentRound.currentTurn,
-      //   });
-      // }, 5000);
+      setTimeout(() => {
+        socket.emit("submitTurnNow", {
+          roomId,
+          roundGame,
+          roundId,
+          currentTurn: currentRound.currentTurn,
+        });
+      }, 5000);
     });
     socket.on("continueJoin", (data) => {
       const { roomId, userId, roundGame } = data;
@@ -501,8 +511,8 @@ const setupSocketServer = (server) => {
       const checkResult = checkResultOfOneGame(
         group.player1,
         group.player2,
-        group.result[currentTurn - 1].player1Choice,
-        group.result[currentTurn - 1].player2Choice
+        group.result[currentTurn - 1]?.player1Choice,
+        group.result[currentTurn - 1]?.player2Choice
       );
       if (checkResult === group.player1) {
         group.result[currentTurn - 1].winner = group.player1;

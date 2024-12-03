@@ -377,6 +377,10 @@ socket.on("endOfRound", (data) => {
 
 socket.on("continueJoinSuccess", (data) => {
   setTimeout(() => {
-    socket.emit("combineNextRound", data);
+    socket.emit("combindNextRound", data);
   }, 5000);
+});
+socket.on("endOfGame", (data) => {
+  alert("End of game");
+  console.log(data);
 });
