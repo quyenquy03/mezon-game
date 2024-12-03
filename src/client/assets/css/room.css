@@ -447,6 +447,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 .body-game-center .countdown {
   position: relative;
@@ -454,7 +455,7 @@
 .body-game-center .countdown-bg {
   width: 250px;
   height: 250px;
-  border-radius: 50%;
+  /* border-radius: 50%; */
   background-image: url("../images/quay.png");
   background-size: cover;
   display: flex;
@@ -470,6 +471,12 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+.body-game-center .turn-result {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 20px;
+  display: inline-block;
 }
 
 @keyframes spin {

@@ -55,8 +55,60 @@ const listRooms = [
     },
     roomMember: [],
     currentRoundMembers: [],
+    currentRoundGroup: [],
     currentRound: 1,
-    room: []
+    isPlaying: false,
+  },
+  {
+    roomInfo: {
+      roomId: "234567",
+      roomName: "Phòng 2",
+      roomMaxUser: 8,
+      roomPassword: null,
+      roomUsePassword: false,
+      roomBet: 1000,
+      owner: 1234,
+      roomRound: 3,
+    },
+    roomMember: [],
+    currentRoundMembers: [],
+    roundGames: [
+      {
+        roundId: "123456",
+        round: 1,
+        listPlayer: ["1234", "1273"],
+        currentTurn: 1,
+        group: [
+          {
+            groupId: 1,
+            player1: 1234,
+            player2: 5678,
+            result: [
+              {
+                turnId: 1,
+                player1Choice: "rock",
+                player2Choice: "scissors",
+                winner: 1234,
+              },
+              {
+                turnId: 2,
+                player1Choice: "rock",
+                player2Choice: "scissors",
+                winner: 1234,
+              },
+              {
+                turnId: 3,
+                player1Choice: "rock",
+                player2Choice: "scissors",
+                winner: 1234,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    currentRound: 1,
+    isPlaying: false,
   },
   {
     roomInfo: {
@@ -67,12 +119,13 @@ const listRooms = [
       roomUsePassword: false,
       roomBet: 1000,
       owner: 1234,
-      roomRound: 5,
+      roomRound: 3,
     },
     roomMember: [],
     currentRoundMembers: [],
+    currentRoundGroup: [],
     currentRound: 1,
-    room: []
+    isPlaying: false,
   },
 ];
 
@@ -92,6 +145,7 @@ const getUserInfo = (userId) => {
   const user = connectedUsers.find((user) => user.userId === userId);
   return user;
 };
+
 const disconnectUser = (socket) => {
   const index = connectedUsers.findIndex((user) => user.id === socket.id);
   const user = connectedUsers[index];
@@ -118,6 +172,9 @@ const checkBeforeJoinRoom = (data) => {
   const checkUser = room.roomMember.filter((member) => member !== null);
   if (checkUser.length === room.roomInfo.roomMaxUser) {
     return "Phòng đã đầy!";
+  }
+  if (room.isPlaying) {
+    return "Phòng này đang trong trạng thái chơi!";
   }
   if (room.roomMember.includes(data.userId)) {
     return "Bạn đã ở trong phòng!";
@@ -175,13 +232,91 @@ const checkMemberBeforeStartGame = (roomId) => {
   return true;
 };
 
+const refreshGroupOfRoom = (roomId) => {
+  const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  room.currentRoundGroup = room.currentRoundGroup.map((group) => {
+    group.player1.choices = "";
+    group.player2.choices = "";
+    return group;
+  });
+};
+
 const startNewGame = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
   const player = room.roomMember;
   // room.room = createTournamentRooms(player);
   room.currentRoundMembers = player;
   room.currentRound = 1;
+  room.isPlaying = true;
+  room.roundGames = [];
+  const listGroup = [];
+  for (let i = 0; i < room.currentRoundMembers.length / 2; i++) {
+    const turnCount = room.roomInfo.roomRound;
+    const turnResult = [];
+    for (let j = 0; j < turnCount; j++) {
+      turnResult.push({
+        turn: j + 1,
+        player1Choice: "",
+        player2Choice: "",
+        winner: null,
+      });
+    }
+    listGroup.push({
+      groupId: makeid(6),
+      player1: room.currentRoundMembers[i],
+      player2: room.currentRoundMembers[room.currentRoundMembers.length - i - 1],
+      result: turnResult,
+    });
+  }
+  const newRound = {
+    roundId: makeid(6),
+    round: room.currentRound,
+    listPlayer: room.roomMember,
+    group: listGroup,
+    currentTurn: 1,
+  };
+  room.roundGames.push(newRound);
 };
+
+const checkResultOfOneGame = (player1, player2, player1Choice, player2Choice) => {
+  if (player1Choice === player2Choice) {
+    return null;
+  }
+  if (!player1Choice) {
+    return player2;
+  }
+  if (!player2Choice) {
+    return player1;
+  }
+  if (player1Choice === "rock" && player2Choice === "scissors") {
+    return player1;
+  }
+  if (player1Choice === "rock" && player2Choice === "paper") {
+    return player2;
+  }
+  if (player1Choice === "paper" && player2Choice === "rock") {
+    return player1;
+  }
+  if (player1Choice === "paper" && player2Choice === "scissors") {
+    return player2;
+  }
+  if (player1Choice === "scissors" && player2Choice === "rock") {
+    return player2;
+  }
+  if (player1Choice === "scissors" && player2Choice === "paper") {
+    return player1;
+  }
+};
+
+function makeid(length) {
+  var result = "";
+  var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
 
 const setupSocketServer = (server) => {
   const io = new SocketServer(server, {
@@ -231,7 +366,6 @@ const setupSocketServer = (server) => {
       io.emit("roomMembers", getRoomMembers(roomId));
     });
 
-    // start game
     socket.on("startGame", (data) => {
       if (!checkMemberBeforeStartGame(data.roomId)) {
         socket.emit("startGameError", "Số lượng người chơi chưa đủ để bắt đầu!");
@@ -239,29 +373,175 @@ const setupSocketServer = (server) => {
       }
       startNewGame(data.roomId);
       const currentRoom = getCurrentRoom(data.roomId);
-      const gameId = makeid(6);
-      for (let i = 0; i < currentRoom.currentRoundMembers.length / 2; i++) {
-        const team1 = currentRoom.currentRoundMembers[i];
-        const team2 = currentRoom.currentRoundMembers[currentRoom.currentRoundMembers.length - i - 1];
-        player1 = team1;
-        player2 = team2;
+      io.to(data.roomId).emit("startGameSuccess", {
+        round: currentRoom,
+        currentRound: currentRoom.currentRound,
+        roundId: currentRoom.roundGames[0].roundId,
+        currentRoundMembers: currentRoom.currentRoundMembers,
+        roomInfo: currentRoom.roomInfo,
+      });
+    });
+    socket.on("startRound", (data) => {
+      const { roomId, userId, roundGame, roundId, currentTurn } = data;
+      const currentRoom = getCurrentRoom(roomId);
+      const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
+      const currentRoundGroup = currentRound.group;
+      currentRound.currentTurn = currentTurn;
 
-        io.to(getSocketIdOfUser(team1)).emit("startRoundGame", {
-          yourInfo: getUserInfo(team1),
-          rivalInfo: getUserInfo(team2),
-          roomInfo: currentRoom,
-          // soloRoomId: gameId,
-          roomUniqueId: currentRoom,
+      if (currentRound.currentTurn > currentRoom.roomInfo.roomRound) {
+        const group = currentRoundGroup.find((group) => group.player1 === userId || group.player2 === userId);
+        let winCount = 0;
+        let loseCount = 0;
+        for (let i = 0; i < group.result.length; i++) {
+          if (group.result[i].winner === userId) {
+            winCount++;
+          }
+          if (group.result[i].winner !== userId && group.result[i].winner !== null) {
+            loseCount++;
+          }
+        }
+        if (currentRound.listPlayer.length === 2 && winCount > loseCount) {
+          socket.emit("endOfGame", {
+            roundGame,
+            roundId,
+            roomId,
+            currentTurn: currentRound.currentTurn,
+            isWinner: winCount > loseCount,
+          });
+          return;
+        }
+        socket.emit("endOfRound", {
+          roundGame,
+          roundId,
+          roomId,
+          currentTurn: currentRound.currentTurn,
+          isWinner: winCount > loseCount,
         });
-        io.to(getSocketIdOfUser(team2)).emit("startRoundGame", {
-          yourInfo: getUserInfo(team2),
-          rivalInfo: getUserInfo(team1),
-          roomInfo: currentRoom,
-          // soloRoomId: gameId,
-          roomUniqueId: currentRoom,
+        return;
+      }
+      for (let i = 0; i < currentRoundGroup.length; i++) {
+        const group = currentRoundGroup[i];
+        if (group.player1 === userId || group.player2 === userId) {
+          socket.emit("startTurn", {
+            currentRoom,
+            yourInfo: getUserInfo(userId),
+            rivalInfo: getUserInfo(group.player1 === userId ? group.player2 : group.player1),
+            roomInfo: currentRoom.roomInfo,
+            currentTurn: currentRound.currentTurn,
+          });
+          socket.join(roundId);
+        }
+      }
+
+      setTimeout(() => {
+        socket.emit("submitTurnNow", {
+          roomId,
+          roundGame,
+          roundId,
+          currentTurn: currentRound.currentTurn,
+        });
+      }, 5000);
+    });
+    socket.on("continueJoin", (data) => {
+      const { roomId, userId, roundGame } = data;
+      const currentRoom = getCurrentRoom(roomId);
+      const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
+      if (!currentRound) {
+        currentRoom.roundGames.push({
+          roundId: makeid(6),
+
+          round: roundGame,
+          listPlayer: [],
+          group: [],
+          currentTurn: 1,
         });
         // io.to(room).emit("playGame", {currentRoom, round: room.rounds });
       }
+      const currentRoundNew = currentRoom.roundGames.find((round) => round.round === roundGame);
+      currentRoundNew.listPlayer.push(userId);
+
+      socket.emit("continueJoinSuccess", {
+        roomId,
+        roundGame,
+        roundId: currentRoundNew.roundId,
+        currentTurn: currentRoundNew.currentTurn,
+      });
+    });
+    socket.on("combindNextRound", (data) => {
+      const { roomId, userId, roundGame, roundId } = data;
+      const currentRoom = getCurrentRoom(roomId);
+      const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
+      for (let i = 0; i < currentRound.listPlayer?.length / 2; i++) {
+        const turnCount = currentRoom.roomInfo.roomRound;
+        const turnResult = [];
+        for (let j = 0; j < turnCount; j++) {
+          turnResult.push({
+            turn: j + 1,
+            player1Choice: "",
+            player2Choice: "",
+            winner: null,
+          });
+        }
+        currentRound.group.push({
+          groupId: makeid(6),
+          player1: currentRound.listPlayer[i],
+          player2: currentRound.listPlayer[currentRound.listPlayer.length - i - 1],
+          result: turnResult,
+        });
+      }
+
+      socket.emit("startGameSuccess", {
+        currentRound: roundGame,
+        roundId: currentRound.roundId,
+        currentRoundMembers: currentRoom.currentRoundMembers,
+        roomInfo: currentRoom.roomInfo,
+      });
+    });
+    socket.on("submitTurn", (data) => {
+      const { roomId, userId, roundGame, currentTurn, choosedOption } = data;
+      console.log(currentTurn);
+      const currentRoom = getCurrentRoom(roomId);
+      const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
+      const currentRoundGroup = currentRound.group;
+      for (let i = 0; i < currentRoundGroup.length; i++) {
+        const group = currentRoundGroup[i];
+        if (group.player1 === userId && group.result[currentTurn - 1]) {
+          group.result[currentTurn - 1].player1Choice = choosedOption;
+        }
+        if (group.player2 === userId && group.result[currentTurn - 1]) {
+          group.result[currentTurn - 1].player2Choice = choosedOption;
+        }
+      }
+    });
+    socket.on("getTurnResult", (data) => {
+      const { roomId, userId, roundGame, roundId, currentTurn } = data;
+      const currentRoom = getCurrentRoom(roomId);
+      const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
+      const currentRoundGroup = currentRound.group;
+      const group = currentRoundGroup.find((group) => group.player1 === userId || group.player2 === userId);
+      const checkResult = checkResultOfOneGame(
+        group.player1,
+        group.player2,
+        group.result[currentTurn - 1]?.player1Choice,
+        group.result[currentTurn - 1]?.player2Choice
+      );
+      if (checkResult === group.player1) {
+        group.result[currentTurn - 1].winner = group.player1;
+      }
+      if (checkResult === group.player2) {
+        group.result[currentTurn - 1].winner = group.player2;
+      }
+      socket.emit("getTurnResult", {
+        roomId,
+        roundGame,
+        roundId,
+        currentTurn,
+        yourChoice:
+          group.player1 === userId ? group.result[currentTurn - 1].player1Choice : group.result[currentTurn - 1].player2Choice,
+        rivalChoice:
+          group.player1 === userId ? group.result[currentTurn - 1].player2Choice : group.result[currentTurn - 1].player1Choice,
+        result: `Bạn ${checkResult === userId ? "thắng" : "thua"}`,
+      });
     });
 
     // Khi client ngắt kết nối
@@ -274,58 +554,6 @@ const setupSocketServer = (server) => {
           .emit("roomMembers", getRoomMembers(roomOfUserWithSocketId.roomInfo.roomId));
       }
       io.emit("listUsers", connectedUsers);
-    });
-
-    let roomUniqueId;
-
-    socket.on("createGame", (data) => {
-      const f = data.roomUniqueId.roomInfo.roomId
-      // roomUniqueId = makeid(6);
-      maxRounds = data.maxRounds;
-      game[f] = {
-        player1: player1,
-        player2: player2,
-        p1Choice: null,
-        p2Choice: null,
-        rounds: 0, // Số lượt chơi hiện tại
-        maxRounds: data.maxRounds, // Số lượt chơi tối đa
-        p1Wins: 0, // Số lượt thắng của player 1
-        p2Wins: 0,
-      };
-
-      socket.join(roomUniqueId);
-      socket.emit("newGame", {
-        roomUniqueId: roomUniqueId,
-        maxRounds: maxRounds,
-      });
-    });
-
-    socket.on("player", (data) => {
-      let rpsValue = data.rpsValue;
-      if (player1 == data.player) {
-        console.log('da vao day p1: ', data);
-        
-        game[data.roomUniqueId].p1Choice = rpsValue;
-        socket.to(data.roomUniqueId).emit("player2", { data: data });
-      }
-      if (player2 == data.player) {
-        console.log('da vao day p2: ', data);
-
-        game[data.roomUniqueId].p2Choice = rpsValue;
-        socket.to(data.roomUniqueId).emit("player2", { data: data });
-      }
-      if (game[data.roomUniqueId].p2Choice && game[data.roomUniqueId].p1Choice) {
-        determineWinner(game);
-      }
-    });
-
-    socket.on("nextRound", (data) => {
-      const gameId = data.roomUniqueId; // Replace with your room tracking logic
-      if (gameId) {
-        if (data.rounds < maxRounds) {
-          io.to(gameId).emit("playGame", { round: data.rounds });
-        }
-      }
     });
   });
   function determineWinner(game) {

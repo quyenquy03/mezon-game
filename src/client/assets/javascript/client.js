@@ -12,6 +12,14 @@ function navigateTo(pageId) {
   document.getElementById(pageId).classList.add("active");
 }
 
+// window.addEventListener("beforeunload", (event) => {
+//   // Ngăn hành động mặc định
+//   event.preventDefault();
+
+//   // Trả về một chuỗi (hoặc để trống, nếu không muốn hiển thị thông báo riêng)
+//   event.returnValue = "Bạn có chắc chắn muốn rời khỏi trang này?";
+// });
+let choosedOption = null;
 const socket = io("http://localhost:3000");
 
 socket.on("disconnect", () => {
@@ -100,6 +108,11 @@ const renderListRoom = (listRooms) => {
   });
 };
 
+const joinRoomWithSearch = () => {
+  const roomId = document.getElementById("room-id-search").value;
+  joinRoom(roomId);
+};
+
 const joinRoom = (roomId) => {
   socket.emit("joinRoom", {
     roomId,
@@ -108,7 +121,11 @@ const joinRoom = (roomId) => {
 };
 socket.on("joinRoomSuccess", (roomInfo) => {
   navigateTo("room-content");
-  roomId = roomInfo.roomId;
+  const modalJoinRoom = document.getElementById("modal-search-room");
+  const modal = bootstrap.Modal.getInstance(modalJoinRoom);
+  if (modal) {
+    modal.hide();
+  }
 });
 socket.on("joinRoomError", (message) => {
   alert(message);
@@ -243,14 +260,55 @@ const renderCurrentRoundInfo = (roundInfo) => {
       <div class='game-user-info'>
         <div class='game-user-name'>${roundInfo.rivalInfo?.name}</div>
         <div class='game-user-score'>
-          ${listStar.join("")}
+          ${listStar.join("")}  
         </div>
       </div>
     </div>
   `;
 };
-socket.on("startRoundGame", (data) => {
+
+// start countdown
+function startCountdown(countdown = 9) {
+  const countdownArea = document.getElementById("countdown-time");
+  var countdownInterval = setInterval(() => {
+    countdownArea.innerHTML = `0${countdown}`;
+    countdown--;
+
+    if (countdown < 0) {
+      console.log("Stopping interval");
+      clearInterval(countdownInterval);
+      countdownArea.innerHTML = `00`;
+    }
+  }, 1000);
+}
+
+const chooseOption = (option) => {
+  const choosedOptionElement = document.querySelector(".btn-choice.active");
+  if (choosedOptionElement) {
+    choosedOptionElement.classList.remove("active");
+  }
+  const choosedOptionElementNew = document.querySelector(`.btn-choice.${option}`);
+  choosedOptionElementNew.classList.add("active");
+
+  choosedOption = option;
+};
+
+socket.on("startGameSuccess", (data) => {
+  console.log("Start game success", data);
+  socket.emit("startRound", {
+    userId: user.userId,
+    roomId: data.roomInfo.roomId,
+    roundGame: data.currentRound,
+    roundId: data.roundId,
+    currentTurn: 1,
+  });
+});
+
+socket.on("startTurn", (data) => {
+  console.log("Start turn", data);
   renderCurrentRoundInfo(data);
+  refreshTurnResult();
+  startCountdown(5);
   const modalElement = document.getElementById("modal-start-round");
   const modal = new bootstrap.Modal(modalElement);
   modal.show();
@@ -260,108 +318,83 @@ socket.on("startRoundGame", (data) => {
   gameId = data.roomUniqueId.roomInfo.roomId;
   socket.emit('createGame', { maxRounds: 3, roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo })
 });
-
-socket.on("playGame", (data) => {
-  player1Choice.src = './assets/images/rock-paper-scissors.png';
-  player2Choice.src = './assets/images/rock-paper-scissors.png';
-  choices = {};
-  winnerArea.innerHTML = '';
-  startCountdown();
-});
-
-socket.on("result", (data) => {
-  let requiredStreak = data.maxRounds / 2;
-  player1Choice.src = `./assets/images/${choices.p1 || 'rock-paper-scissors'}.png`;
-  player2Choice.src = `./assets/images/${choices.p2 || 'rock-paper-scissors'}.png`;
-  switch (data.winner) {
-    case 'p1':
-      winnerArea.innerHTML = `${data.nameWinner} win`;
-      break;
-    case 'p2':
-      winnerArea.innerHTML = `${data.nameWinner} win`;
-      break;
-    default:
-      winnerArea.innerHTML = `It's a draw`;
-      break;
+socket.on("submitTurnNow", (data) => {
+  const choosedOptionElement = document.querySelector(".btn-choice.active");
+  let choice = null;
+  if (choosedOptionElement) {
+    choice = choosedOptionElement.dataset.choice;
   }
-  const handleGameOver = (data) => {
-    switch (data.winner) {
-      case 'p1':
-        message = `Game Over! ${data.nameWinner} is the overall winner!`;
-        break;
-      case 'p2':
-        message = `Game Over! ${data.nameWinner} is the overall winner!`;
-        break;
-      default:
-        message = `Game Over! It's a draw.`;
-        break;
-    }
-    alert(message);
-    buttonChoices.forEach(button => {
-      button.setAttribute('disabled', true);
-    });
-  };
-
-  if (data.rounds == data.maxRounds || data.p1Wins > requiredStreak || data.p2Wins > requiredStreak) {
-    socket.on("gameOver", handleGameOver);
-  } else if (data.rounds < data.maxRounds) {
-    setTimeout(() => {
-      console.log('next round');
-      socket.emit("nextRound", { roomUniqueId: gameId, rounds: data.rounds });
-    }, 3000);
-  }
-});
-
-socket.on("playGame", (data) => {
-  const round = document.querySelector(".round");
-  round.innerHTML = `ROUND ${data.round + 1}`;
-  player1Choice.src = './assets/images/rock-paper-scissors.png';
-  player2Choice.src = './assets/images/rock-paper-scissors.png';
-  choices = {};
-  winnerArea.innerHTML = '';
-  round.innerHTML = `ROUND ${data.round + 1}`;
-  startCountdown();
-});
-
-function startCountdown() {
-  let countdown = 9;
-  const countdownArea = document.getElementById('countdownArea');
-  countdownArea.style.display = 'block';
-  var countdownInterval = setInterval(() => {
-    countdownArea.innerHTML = `0${countdown}`;
-    countdown--;
-
-    if (choices.p1 && choices.p2) {
-      console.log('Stopping interval by f');
-      clearInterval(countdownInterval);
-      countdownArea.innerHTML = `00`;
-    }
-
-    if (countdown < 0) {
-      console.log('Stopping interval');
-      clearInterval(countdownInterval);
-      countdownArea.innerHTML = `00`;
-    }
-  }, 1000);
-}
-
-function sendChoice(rpsValue) {
-  choices[player1 ? 'p1' : 'p2'] = rpsValue;
-  socket.emit('player', {
-    rpsValue: rpsValue,
-    roomUniqueId: gameId,
-    player: player1.userId,
+  socket.emit("submitTurn", {
+    userId: user.userId,
+    roomId: data.roomId,
+    roundGame: data.roundGame,
+    currentTurn: data.currentTurn,
+    choosedOption: choice,
   });
-}
+  setTimeout(() => {
+    socket.emit("getTurnResult", {
+      userId: user.userId,
+      roomId: data.roomId,
+      roundGame: data.roundGame,
+      currentTurn: data.currentTurn,
+    });
+  }, 1000);
+});
 
-socket.on("player2", (data) => {
-  if (player2.userId == data.data.player) {
-    choices.p2 = data.data.rpsValue;
+const renderTurnResult = (data) => {
+  const myChoiceElement = document.querySelector(".my-choice");
+  const rivalChoiceElement = document.querySelector(".rival-choice");
+
+  myChoiceElement.setAttribute("src", `./assets/images/${data.yourChoice ?? "rock-paper-scissors"}.png`);
+  rivalChoiceElement.setAttribute("src", `./assets/images/${data.rivalChoice ?? "rock-paper-scissors"}.png`);
+
+  const resultElement = document.querySelector(".turn-result");
+  resultElement.innerHTML = data.result;
+};
+const refreshTurnResult = () => {
+  const myChoiceElement = document.querySelector(".my-choice");
+  const rivalChoiceElement = document.querySelector(".rival-choice");
+
+  myChoiceElement.setAttribute("src", `./assets/images/rock-paper-scissors.png`);
+  rivalChoiceElement.setAttribute("src", `./assets/images/rock-paper-scissors.png`);
+
+  const resultElement = document.querySelector(".turn-result");
+  resultElement.innerHTML = "";
+};
+socket.on("getTurnResult", (data) => {
+  startCountdown(4);
+  renderTurnResult(data);
+  setTimeout(() => {
+    socket.emit("startRound", {
+      userId: user.userId,
+      roomId: data.roomId,
+      roundGame: data.roundGame,
+      roundId: data.roundId,
+      currentTurn: data.currentTurn + 1,
+    });
+  }, 5000);
+});
+
+socket.on("endOfRound", (data) => {
+  if (data.isWinner) {
+    console.log("You Win");
+    console.log(data);
+    socket.emit("continueJoin", {
+      userId: user.userId,
+      roomId: data.roomId,
+      roundGame: data.roundGame + 1,
+    });
+  } else {
+    alert("You Lose, wait for next game!");
   }
 });
 
-// socket.on("player2", (data) => {
-//   if (player2.userId == data.data.player) {
-//     choices.p2 = data.data.rpsValue;
-//   }
-// });
+socket.on("continueJoinSuccess", (data) => {
+  setTimeout(() => {
+    socket.emit("combindNextRound", data);
+  }, 5000);
+});
+socket.on("endOfGame", (data) => {
+  alert("End of game");
+  console.log(data);
+});
