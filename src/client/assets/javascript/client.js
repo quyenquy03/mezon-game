@@ -5,12 +5,17 @@ let player1Choice = document.querySelector('.player1-choice');
 let player2Choice = document.querySelector('.player2-choice');
 let buttonChoices = document.querySelectorAll('.btn-choice');
 let gameId;
-let soloRoomId;
+let childRoomId;
+let currentRoomId = null;
+let storedChoice = null;
 let player1;
 let player2;
 function navigateTo(pageId) {
   document.querySelectorAll(".content").forEach((page) => page.classList.remove("active"));
   document.getElementById(pageId).classList.add("active");
+  if (pageId === "room-content" && currentRoomId) {
+    alert("Returning to your room. Click to continue.");
+  }
 }
 
 const socket = io("http://localhost:3000");
@@ -64,7 +69,7 @@ socket.on("roomCreated", (roomInfo) => {
   socket.emit("joinRoom", {
     roomId: roomInfo.roomId,
     roomChildId: roomInfo.roomChildId,
-    soloRoomId: roomInfo.soloRoomId,
+    childRoomId: roomInfo.childRoomId,
     userId: user.userId,
   });
   
@@ -108,12 +113,17 @@ const joinRoom = (roomId) => {
   socket.emit("joinRoom", {
     roomId,
     userId: user.userId,
-    soloRoomId: soloRoomId
+    childRoomId: childRoomId
   });
 };
 socket.on("joinRoomSuccess", (roomInfo) => {
+  currentRoomId = roomInfo.roomId;
   navigateTo("room-content");
   roomId = roomInfo.roomId;
+});
+socket.on("opponentDisconnected", (message) => {
+  alert(message);
+  navigateTo("room-content");
 });
 socket.on("joinRoomError", (message) => {
   alert(message);
@@ -164,7 +174,6 @@ const renderRoomMembers = (members) => {
 };
 socket.on("roomMembers", (members) => {
   renderRoomMembers(members);
-  console.log("Room members:", members);
 });
 
 const renderListUser = (listUsers) => {
@@ -262,7 +271,7 @@ socket.on("startRoundGame", (data) => {
   player1 = data.yourInfo;
   player2 = data.rivalInfo;
   gameId = data.roomUniqueId.roomInfo.roomId;
-  soloRoomId = data.soloRoomId;
+  childRoomId = data.childRoomId;
   socket.emit('createGame', { maxRounds: 3, roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo })
 });
 
@@ -300,13 +309,13 @@ socket.on("result", (data) => {
       button.setAttribute('disabled', true);
     });
   };
-
+  console.log(data, 'data');
+  
   if (data.rounds == data.maxRounds || data.p1Wins > requiredStreak || data.p2Wins > requiredStreak) {
     socket.on("gameOver", handleGameOver);
   } else if (data.rounds < data.maxRounds) {
     setTimeout(() => {
-      console.log('next round');
-      socket.emit("nextRound", { roomUniqueId: gameId, rounds: data.rounds, roomId: data.gameData.roomId });
+      socket.emit("nextRound", { roomUniqueId: gameId, rounds: data.rounds, roomId: data.gameData.roomId, gameData: data.gameData });
     }, 3000);
   }
 });
@@ -316,7 +325,10 @@ const checkUser = (data) =>{
 }
 
 socket.on("playGame", (data) => {
-  if (data.gameId !== soloRoomId) return;
+  console.log(data.roomId !== childRoomId, 'data.gameId !== childRoomId');
+  
+  if (data.roomId !== childRoomId) return;
+
   const round = document.querySelector(".round");
   round.innerHTML = `ROUND ${data.round + 1}`;
   player1Choice.src = './assets/images/rock-paper-scissors.png';
@@ -328,7 +340,7 @@ socket.on("playGame", (data) => {
 });
 
 function startCountdown() {
-  let countdown = 9;
+  let countdown = 5;
   const countdownArea = document.getElementById('countdownArea');
   countdownArea.style.display = 'block';
   var countdownInterval = setInterval(() => {
@@ -345,18 +357,22 @@ function startCountdown() {
       console.log('Stopping interval');
       clearInterval(countdownInterval);
       countdownArea.innerHTML = `00`;
+
+      choices[player1 ? 'p1' : 'p2'] = storedChoice ?? '';
+      socket.emit('player', {
+          rpsValue: storedChoice ?? '',
+          roomUniqueId: gameId,
+          childRoomId: childRoomId,
+          player: player1.userId,
+      });
+      storedChoice = null;
+      document.activeElement.blur();
     }
   }, 1000);
 }
 
 function sendChoice(rpsValue) {
-  choices[player1 ? 'p1' : 'p2'] = rpsValue;
-  socket.emit('player', {
-    rpsValue: rpsValue,
-    roomUniqueId: gameId,
-    soloRoomId: soloRoomId,
-    player: player1.userId,
-  });
+  storedChoice = rpsValue;
 }
 
 socket.on("player2", (data) => {

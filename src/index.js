@@ -266,14 +266,12 @@ const setupSocketServer = (server) => {
           yourInfo: getUserInfo(player1),
           rivalInfo: getUserInfo(player2),
           roomInfo: currentRoom,
-          soloRoomId: currentRoom.room[i].roomId,
           roomUniqueId: currentRoom,
         });
         io.to(getSocketIdOfUser(player2)).emit("startRoundGame", {
           yourInfo: getUserInfo(player2),
           rivalInfo: getUserInfo(player1),
           roomInfo: currentRoom,
-          soloRoomId: currentRoom.room[i].roomId,
           roomUniqueId: currentRoom,
         });
         // io.to(room).emit("playGame", {currentRoom, round: room.rounds });
