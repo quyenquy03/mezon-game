@@ -7,12 +7,13 @@ let buttonChoices = document.querySelectorAll('.btn-choice');
 let gameId;
 let player1;
 let player2;
+let roomMembers;
 function navigateTo(pageId) {
   document.querySelectorAll(".content").forEach((page) => page.classList.remove("active"));
   document.getElementById(pageId).classList.add("active");
 }
 
-const socket = io("http://localhost:3000");
+const socket = io();
 
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
@@ -158,8 +159,9 @@ const renderRoomMembers = (members) => {
   });
 };
 socket.on("roomMembers", (members) => {
+  roomMembers = members;
   renderRoomMembers(members);
-  console.log("Room members:", members);
+  console.log("Room members:", roomMembers);
 });
 
 const renderListUser = (listUsers) => {
@@ -183,7 +185,7 @@ const renderListUser = (listUsers) => {
 socket.emit("listUsers");
 socket.on("listUsers", (users) => {
   renderListUser(users);
-  console.log("List users:", users);
+  // console.log("List users:", users);
 });
 
 const renderUserInfo = (userInfo) => {
@@ -257,8 +259,9 @@ socket.on("startRoundGame", (data) => {
   startCountdown();
   player1 = data.yourInfo;
   player2 = data.rivalInfo;
-  gameId = data.roomUniqueId.roomInfo.roomId;
-  socket.emit('createGame', { maxRounds: 3, roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo })
+  roomId = data.roomUniqueId.roomInfo.roomId;
+  gameId = data.gameId;
+  socket.emit('createGame', { roomUniqueId: data.roomUniqueId, player1: data.yourInfo, player2: data.rivalInfo, gameId: gameId })
 });
 
 socket.on("playGame", (data) => {
@@ -268,7 +271,7 @@ socket.on("playGame", (data) => {
   winnerArea.innerHTML = '';
   startCountdown();
 });
-
+let filteredUsers = [];
 socket.on("result", (data) => {
   let requiredStreak = data.maxRounds / 2;
   player1Choice.src = `./assets/images/${choices.p1 || 'rock-paper-scissors'}.png`;
@@ -296,10 +299,13 @@ socket.on("result", (data) => {
         message = `Game Over! It's a draw.`;
         break;
     }
-    alert(message);
+    // alert(message);
     buttonChoices.forEach(button => {
       button.setAttribute('disabled', true);
     });
+    console.log(data.winnerId);
+    
+    socket.emit("handleWinner", {winnerId: data.winnerId, user: data.nameWinner, roomId: data.roomId});
   };
 
   if (data.rounds == data.maxRounds || data.p1Wins > requiredStreak || data.p2Wins > requiredStreak) {
@@ -311,6 +317,7 @@ socket.on("result", (data) => {
     }, 3000);
   }
 });
+
 
 socket.on("playGame", (data) => {
   const round = document.querySelector(".round");
@@ -346,10 +353,12 @@ function startCountdown() {
 }
 
 function sendChoice(rpsValue) {
+  console.log('gameId', gameId);
+  
   choices[player1 ? 'p1' : 'p2'] = rpsValue;
   socket.emit('player', {
     rpsValue: rpsValue,
-    roomUniqueId: gameId,
+    gameId: gameId,
     player: player1.userId,
   });
 }

@@ -24,22 +24,7 @@ const server = app.listen(3000, function () {
   console.log("Example app listening on port 3000 with domain http://localhost:3000");
 });
 
-const connectedUsers = [
-  {
-    id: "1234",
-    userId: 1234,
-    name: "User 1234",
-    avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
-    socketId: "socket-1234",
-  },
-  {
-    id: "5678",
-    userId: 5678,
-    name: "User 5678",
-    avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
-    socketId: "socket-5678",
-  },
-];
+const connectedUsers = [];
 const listRooms = [
   {
     roomInfo: {
@@ -50,7 +35,7 @@ const listRooms = [
       roomUsePassword: false,
       roomBet: 1000,
       owner: 1234,
-      roomRound: 5,
+      roomRound: 3,
     },
     roomMember: [],
     currentRoundMembers: [],
@@ -90,10 +75,8 @@ const listRooms = [
 
 const game = {};
 let maxRounds = 0;
-let players = [];
-let maxPlayers = 0;
-let player1;
-let player2;
+let players = new Set();
+
 
 const getSocketIdOfUser = (userId) => {
   const user = connectedUsers.find((user) => user.userId === userId);
@@ -124,14 +107,14 @@ const createdRoom = (roomInfo) => {
 const checkBeforeJoinRoom = (data) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
   if (!room) {
-    return "Phòng không tồn tại!";
+    return "Room does not exist!";
   }
   const checkUser = room.roomMember.filter((member) => member !== null);
   if (checkUser.length === room.roomInfo.roomMaxUser) {
-    return "Phòng đã đầy!";
+    return "This room is full!";
   }
   if (room.roomMember.includes(data.userId)) {
-    return "Bạn đã ở trong phòng!";
+    return "You were in the room!";
   }
   return null;
 };
@@ -247,25 +230,28 @@ const setupSocketServer = (server) => {
       }
       startNewGame(data.roomId);
       const currentRoom = getCurrentRoom(data.roomId);
-      const gameId = makeid(6);
       for (let i = 0; i < currentRoom.currentRoundMembers.length / 2; i++) {
         const team1 = currentRoom.currentRoundMembers[i];
         const team2 = currentRoom.currentRoundMembers[currentRoom.currentRoundMembers.length - i - 1];
-        player1 = team1;
-        player2 = team2;
-        io.to(getSocketIdOfUser(team1)).emit("startRoundGame", {
+        const gameId = makeid(6);
+        // socket.join(gameId);
+        const socketId1 = getSocketIdOfUser(team1);
+        const socketId2 = getSocketIdOfUser(team2);
+        io.sockets.sockets.get(socketId1)?.join(gameId);
+        io.sockets.sockets.get(socketId2)?.join(gameId);
+
+        io.to(socketId1).emit("startRoundGame", {
           yourInfo: getUserInfo(team1),
           rivalInfo: getUserInfo(team2),
           roomInfo: currentRoom,
-          // roomUniqueId: gameId,
+          gameId: gameId,
           roomUniqueId: currentRoom,
-
         });
-        io.to(getSocketIdOfUser(team2)).emit("startRoundGame", {
+        io.to(socketId2).emit("startRoundGame", {
           yourInfo: getUserInfo(team2),
           rivalInfo: getUserInfo(team1),
           roomInfo: currentRoom,
-          // roomUniqueId: gameId,
+          gameId: gameId,
           roomUniqueId: currentRoom,
         });
         // io.to(room).emit("playGame", {currentRoom, round: room.rounds });
@@ -284,65 +270,47 @@ const setupSocketServer = (server) => {
       }
       io.emit("listUsers", connectedUsers);
     });
-    let roomUniqueId;
+
     socket.on("createGame", (data) => {
-      console.log(data);
-      const f = data.roomUniqueId.roomInfo.roomId
-      // roomUniqueId = makeid(6);
-      maxRounds = data.maxRounds;
-      game[f] = {
-        player1: player1,
-        player2: player2,
+      console.log('gameInfo:', data);
+      maxRounds = data.roomUniqueId.roomInfo.roomRound;
+      game[data.gameId] = {
+        player1: data.player1,
+        player2: data.player2,
         p1Choice: null,
         p2Choice: null,
         rounds: 0, // Số lượt chơi hiện tại
-        maxRounds: data.maxRounds, // Số lượt chơi tối đa
+        maxRounds: maxRounds, // Số lượt chơi tối đa
         p1Wins: 0, // Số lượt thắng của player 1
         p2Wins: 0,
+        roomId: data.roomUniqueId.roomInfo.roomId,
       };
-
-      socket.join(roomUniqueId);
-      socket.emit("newGame", {
-        roomUniqueId: roomUniqueId,
-        maxRounds: maxRounds,
-      });
+      // socket.join(data.gameId);
     });
 
-    // // socket.on("joinGame", (data) => {
-    //   if (game[roomUniqueId] != null) {
-    //     socket.join(roomUniqueId);
-    //     // socket.to(data.roomUniqueId).emit("playersConnected", {});
-    //     // socket.emit("playersConnected");
-    //     // socket.to(data.roomUniqueId).emit("playGame", {});
-    //     socket.emit("playGame");
-    //     // if (players.length < maxPlayers) {
-    //     //   players.push({ namePlayer: data.namePlayer, eliminated: false });
-    //     // } else {
-    //     //   socket.emit("fullRoom");
-    //     // }
-    //   }
-    // // });
+    // socket.emit("newGame", {
+    //     roomUniqueId: roomUniqueId,
+    //     maxRounds: maxRounds,
+    //   });
 
     socket.on("player", (data) => {
-      // console.log('player1: ', player1);
-      // console.log('player2: ', player2);
       // console.log('player: ', data);
       // let player = {user: data.player.userId, value: data.rpsValue};
       let rpsValue = data.rpsValue;
-      if (player1 == data.player) {
-        console.log('da vao day p1: ', data);
-        
-        game[data.roomUniqueId].p1Choice = rpsValue;
-        socket.to(data.roomUniqueId).emit("player2", { data: data });
-      }
-      if (player2 == data.player) {
-        console.log('da vao day p2: ', data);
+      if (game[data.gameId].player1.userId == data.player) {
+        // console.log('da vao day p1: ', data);
 
-        game[data.roomUniqueId].p2Choice = rpsValue;
-        socket.to(data.roomUniqueId).emit("player2", { data: data });
+        game[data.gameId].p1Choice = rpsValue;
+        socket.to(data.gameId).emit("player2", { data: data });
       }
-      if (game[data.roomUniqueId].p2Choice && game[data.roomUniqueId].p1Choice) {
-        determineWinner(game);
+      if (game[data.gameId].player2.userId == data.player) {
+        // console.log('da vao day p2: ', data);
+
+        game[data.gameId].p2Choice = rpsValue;
+        socket.to(data.gameId).emit("player2", { data: data });
+      }
+      if (game[data.gameId].p2Choice && game[data.gameId].p1Choice) {
+        determineWinner(game[data.gameId], data.gameId);
       }
     });
 
@@ -365,100 +333,118 @@ const setupSocketServer = (server) => {
         }
       }
     });
+
+    socket.on("handleWinner", (data) => {      
+      players.add(data.winnerId);
+      console.log('winners:', players);
+      
+      if (players.size > 1) {
+        let currentRoom = getCurrentRoom(data.roomId);
+        console.log(currentRoom.roomMember);
+          currentRoom.roomMember = currentRoom.roomMember.filter(member => players.has(member));
+        console.log('currentRoom:', currentRoom);
+      }
+    })
   });
-  function determineWinner(game) {
+  function determineWinner(game, gameId) {
     const gameData = game;
-    
+    console.log('gameData:', game);
+
     // Lấy key đầu tiên của object
-    const key = Object.keys(gameData)[0];
-    
+    // const keys = Object.keys(gameData);
+
     // Truy cập p1Choice và p2Choice
-    const p1Choice = gameData[key].p1Choice;
-    const p2Choice = gameData[key].p2Choice;
-    
+    const p1Choice = gameData.p1Choice;
+    const p2Choice = gameData.p2Choice;
+
     let winner;
     let name;
+    let winnerId;
     // Xử lý kết quả của mỗi round
     if (!p1Choice && !p2Choice) {
       winner = "d"; // Hòa nếu cả hai không chọn
     } else if (!p1Choice) {
       winner = "p2"; // Player 1 không chọn
-      name = player2;
+      name = gameData.player2.name;
     } else if (!p2Choice) {
       winner = "p1"; // Player 2 không chọn
-      name = player1;
+      name = gameData.player1.name;
     } else if (p1Choice === p2Choice) {
       winner = "d"; // Hòa nếu cả hai chọn giống nhau
     } else if (p1Choice == "paper") {
       winner = p2Choice == "scissors" ? "p2" : "p1";
-      name = p2Choice == "scissors" ? player2 : player1;
+      name = p2Choice == "scissors" ? gameData.player2.name : gameData.player1.name;
+      winnerId = p2Choice == "scissors" ? gameData.player2.userId : gameData.player1.userId;
     } else if (p1Choice == "rock") {
       winner = p2Choice == "paper" ? "p2" : "p1";
-      name = p2Choice == "paper" ? player2 : player1;
+      name = p2Choice == "paper" ? gameData.player2.name : gameData.player1.name;
+      winnerId = p2Choice == "paper" ? gameData.player2.userId : gameData.player1.userId;
     } else if (p1Choice == "scissors") {
       winner = p2Choice == "rock" ? "p2" : "p1";
-      name = p2Choice == "rock" ? player2 : player1;
+      name = p2Choice == "rock" ? gameData.player2.name : gameData.player1.name;
+      winnerId = p2Choice == "rock" ? gameData.player2.userId : gameData.player1.userId;
     }
 
     // Cập nhật số lượt thắng và chuỗi thắng
     if (winner == "p1") {
-      gameData[key].p1Wins++;
+      gameData.p1Wins++;
     } else if (winner == "p2") {
-      gameData[key].p2Wins++;
+      gameData.p2Wins++;
     }
 
     // Tăng số lượt chơi
-    gameData[key].rounds++;
-    
+    gameData.rounds++;
+
     // Gửi kết quả của lượt chơi
-    io.sockets.to(key).emit("result", {
+    io.sockets.to(gameId).emit("result", {
       winner: winner,
       nameWinner: name,
-      maxRounds: gameData[key].maxRounds,
-      rounds: gameData[key].rounds,
-      p1Wins: gameData[key].p1Wins,
-      p2Wins: gameData[key].p2Wins,
+      maxRounds: gameData.maxRounds,
+      rounds: gameData.rounds,
+      p1Wins: gameData.p1Wins,
+      p2Wins: gameData.p2Wins,
+      roomId: gameData.roomId,
     });
 
     // Kiểm tra thắng liên tiếp
-    const requiredStreak = gameData[key].maxRounds / 2;
-    if (gameData[key].p1Wins >= requiredStreak) {
-      endGame(key, "p1", name);
+    const requiredStreak = gameData.maxRounds / 2;
+    if (gameData.p1Wins >= requiredStreak) {
+      endGame(gameId, "p1", name);
       return;
     }
-    if (gameData[key].p2Wins >= requiredStreak) {
-      endGame(key, "p2", name);
+    if (gameData.p2Wins >= requiredStreak) {
+      endGame(gameId, "p2", name);
       return;
     }
 
     // Kiểm tra kết thúc game khi hết round
-    if (gameData[key].rounds == gameData[key].maxRounds) {
+    if (gameData.rounds == gameData.maxRounds) {
       const finalWinner =
-      gameData[key].p1Wins > gameData[key].p2Wins
+        gameData.p1Wins > gameData.p2Wins
           ? "p1"
-          : gameData[key].p2Wins > gameData[key].p1Wins
+          : gameData.p2Wins > gameData.p1Wins
             ? "p2"
             : "d"; // Hòa nếu số lượt thắng bằng nhau
-      endGame(key, finalWinner, name);
+      endGame(gameId, finalWinner, name, winnerId);
       return;
     }
-    console.log('gameData:', gameData[key]);
-    
-    gameData[key].p1Choice = null;
-    gameData[key].p2Choice = null;
+    gameData.p1Choice = null;
+    gameData.p2Choice = null;
   }
 
-  function endGame(roomUniqueId, finalWinner, name) {
-    io.sockets.to(roomUniqueId).emit("gameOver", {
+  function endGame(gameId, finalWinner, name, winnerId) {
+    io.sockets.to(gameId).emit("gameOver", {
       winner: finalWinner,
       nameWinner: name,
-      p1Wins: game[roomUniqueId].p1Wins,
-      p2Wins: game[roomUniqueId].p2Wins,
-      rounds: game[roomUniqueId].rounds,
+      winnerId: winnerId,
+      p1Wins: game[gameId].p1Wins,
+      p2Wins: game[gameId].p2Wins,
+      rounds: game[gameId].rounds,
+      roomId: game[gameId].roomId,
     });
-
+    
     // Xóa dữ liệu phòng khi game kết thúc (nếu cần)
-    delete game[roomUniqueId];
+    delete game[gameId];
   }
 
   function makeid(length) {
