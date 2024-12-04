@@ -390,10 +390,12 @@ socket.on("continueJoinSuccess", (data) => {
   const modalEndRoundElement = document.getElementById("modal-end-round");
   const modal = new bootstrap.Modal(modalEndRoundElement);
   setTimeout(() => {
-    socket.emit("combindNextRound", {
+    const dataEmit = {
       ...data,
+      roomId: data.roomId,
       userId: user.userId,
-    });
+    };
+    socket.emit("combindNextRound", dataEmit);
     modal.hide();
   }, 5000);
 });

@@ -50,7 +50,7 @@ const listRooms = [
       roomUsePassword: false,
       roomBet: 1000,
       owner: 1234,
-      roomRound: 5,
+      roomRound: 3,
     },
     roomMember: [],
     currentRoundMembers: [],
@@ -355,6 +355,33 @@ const setupSocketServer = (server) => {
             loseCount++;
           }
         }
+
+        if (winCount === loseCount) {
+          // handle draw round
+          group.result.push({
+            turn: group.result.length + 1,
+            player1Choice: "",
+            player2Choice: "",
+            winner: null,
+          });
+          socket.emit("startTurn", {
+            currentRoom,
+            yourInfo: getUserInfo(userId),
+            rivalInfo: getUserInfo(group.player1 === userId ? group.player2 : group.player1),
+            roomInfo: currentRoom.roomInfo,
+            currentTurn: currentRound.currentTurn,
+          });
+          setTimeout(() => {
+            socket.emit("submitTurnNow", {
+              roomId,
+              roundGame,
+              roundId,
+              currentTurn: currentRound.currentTurn,
+            });
+          }, 5000);
+          return;
+        }
+
         if (currentRound.listPlayer.length <= 2 && winCount > loseCount) {
           const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
           io.to(roomId).emit("endOfGame", {
@@ -408,6 +435,7 @@ const setupSocketServer = (server) => {
       const { roomId, userId, roundGame } = data;
       const currentRoom = getCurrentRoom(roomId);
       const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
+      console.log(userId);
       if (!currentRound) {
         currentRoom.roundGames.push({
           roundId: makeid(6),
@@ -419,6 +447,7 @@ const setupSocketServer = (server) => {
       }
       const currentRoundNew = currentRoom.roundGames.find((round) => round.round === roundGame);
       currentRoundNew.listPlayer.push(userId);
+      socket.join(currentRoundNew.roundId);
 
       socket.emit("continueJoinSuccess", {
         roomId,
@@ -430,9 +459,10 @@ const setupSocketServer = (server) => {
     socket.on("combindNextRound", (data) => {
       const { roomId, userId, roundGame, roundId } = data;
       const currentRoom = getCurrentRoom(roomId);
-      const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
-
-      if (currentRound.listPlayer.length < 2) {
+      const currentRound = currentRoom.roundGames?.find(
+        (round) => round.round === roundGame || round.round === data.currentRound
+      );
+      if (currentRound.listPlayer?.length < 2) {
         io.to(roomId).emit("endOfGame", {
           roundGame,
           roundId,
@@ -444,36 +474,46 @@ const setupSocketServer = (server) => {
         currentRoom.isPlaying = false;
         return;
       }
-
-      for (let i = 0; i < currentRound.listPlayer?.length / 2; i++) {
-        const turnCount = currentRoom.roomInfo.roomRound;
-        const turnResult = [];
-        for (let j = 0; j < turnCount; j++) {
-          turnResult.push({
-            turn: j + 1,
-            player1Choice: "",
-            player2Choice: "",
-            winner: null,
+      if (currentRound.listPlayer.length === currentRoom.roomInfo.roomMaxUser / 2 ** (currentRound.round - 1)) {
+        for (let i = 0; i < currentRound.listPlayer?.length / 2; i++) {
+          const turnCount = currentRoom.roomInfo.roomRound;
+          const turnResult = [];
+          const player1 = currentRound.listPlayer[i];
+          const player2 = currentRound.listPlayer[currentRound.listPlayer.length - i - 1];
+          for (let j = 0; j < turnCount; j++) {
+            turnResult.push({
+              turn: j + 1,
+              player1Choice: "",
+              player2Choice: "",
+              winner: null,
+            });
+          }
+          currentRound.group.push({
+            groupId: makeid(6),
+            player1,
+            player2,
+            result: turnResult,
+          });
+          console.log("currentROund", currentRound);
+          // socket.to(getSocketIdOfUser(player1)).emit("continueJoinSuccess", {
+          //   currentRound: currentRound.round,
+          //   roundId: currentRound.roundId,
+          //   currentRoundMembers: currentRoom.currentRoundMembers,
+          //   roomInfo: currentRoom.roomInfo,
+          //   roomId,
+          // });
+          io.to(currentRound.roundId).emit("startGameSuccess", {
+            currentRound: currentRound.round,
+            roundId: currentRound.roundId,
+            currentRoundMembers: currentRoom.currentRoundMembers,
+            roomInfo: currentRoom.roomInfo,
+            roomId,
           });
         }
-        currentRound.group.push({
-          groupId: makeid(6),
-          player1: currentRound.listPlayer[i],
-          player2: currentRound.listPlayer[currentRound.listPlayer.length - i - 1],
-          result: turnResult,
-        });
       }
-
-      socket.emit("startGameSuccess", {
-        currentRound: roundGame,
-        roundId: currentRound.roundId,
-        currentRoundMembers: currentRoom.currentRoundMembers,
-        roomInfo: currentRoom.roomInfo,
-      });
     });
     socket.on("submitTurn", (data) => {
       const { roomId, userId, roundGame, currentTurn, choosedOption } = data;
-      console.log(currentTurn);
       const currentRoom = getCurrentRoom(roomId);
       const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
       const currentRoundGroup = currentRound.group;
@@ -511,10 +551,10 @@ const setupSocketServer = (server) => {
         roundId,
         currentTurn,
         yourChoice:
-          group.player1 === userId ? group.result[currentTurn - 1].player1Choice : group.result[currentTurn - 1].player2Choice,
+          group.player1 === userId ? group.result[currentTurn - 1]?.player1Choice : group.result[currentTurn - 1]?.player2Choice,
         rivalChoice:
-          group.player1 === userId ? group.result[currentTurn - 1].player2Choice : group.result[currentTurn - 1].player1Choice,
-        result: `Bạn ${checkResult === userId ? "thắng" : "thua"}`,
+          group.player1 === userId ? group.result[currentTurn - 1]?.player2Choice : group.result[currentTurn - 1]?.player1Choice,
+        result: `${checkResult === null ? "Lượt đấu hoà" : checkResult === userId ? "Bạn thắng" : "Bạn thua"}`,
       });
     });
 
