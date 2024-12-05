@@ -15,10 +15,11 @@ export const createTournamentRooms = (players) => {
         p2Choice: null,
         roomId,
         players: [player1, player2],
-        rounds: 0,
-        maxRounds: 3,
+        rounds: 1,
+        maxRounds: 1,
         p1Wins: 0,
-        p2Wins: 0
+        p2Wins: 0,
+        ready: false
       });
     }
   
@@ -35,10 +36,11 @@ export const createTournamentRooms = (players) => {
         p2Choice: null,
         roomId,
         players: [],
-        rounds: 0,
-        maxRounds: 3,
+        rounds: 1,
+        maxRounds: 1,
         p1Wins: 0,
-        p2Wins: 0
+        p2Wins: 0,
+        ready: false
       });
     }
   
@@ -52,10 +54,11 @@ export const createTournamentRooms = (players) => {
         p2Choice: null,
         roomId: finalRoomId,
         players: [],
-        rounds: 0,
-        maxRounds: 3,
+        rounds: 1,
+        maxRounds: 1,
         p1Wins: 0,
-        p2Wins: 0
+        p2Wins: 0,
+        ready: false
       });
     }
   

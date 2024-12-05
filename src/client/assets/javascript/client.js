@@ -312,7 +312,9 @@ socket.on("result", (data) => {
   console.log(data, 'data');
   
   if (data.rounds == data.maxRounds || data.p1Wins > requiredStreak || data.p2Wins > requiredStreak) {
-    socket.on("gameOver", handleGameOver);
+    console.log(data, 'data');
+
+    // socket.on("gameOver", handleGameOver);
   } else if (data.rounds < data.maxRounds) {
     setTimeout(() => {
       socket.emit("nextRound", { roomUniqueId: gameId, rounds: data.rounds, roomId: data.gameData.roomId, gameData: data.gameData });
@@ -325,17 +327,13 @@ const checkUser = (data) =>{
 }
 
 socket.on("playGame", (data) => {
-  console.log(data.roomId !== childRoomId, 'data.gameId !== childRoomId');
-  
-  if (data.roomId !== childRoomId) return;
-
+  if (data?.roomId !== childRoomId) return;
   const round = document.querySelector(".round");
-  round.innerHTML = `ROUND ${data.round + 1}`;
+  round.innerHTML = `ROUND ${data?.round}`;
   player1Choice.src = './assets/images/rock-paper-scissors.png';
   player2Choice.src = './assets/images/rock-paper-scissors.png';
   choices = {};
   winnerArea.innerHTML = '';
-  round.innerHTML = `ROUND ${data.round + 1}`;
   startCountdown();
 });
 

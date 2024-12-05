@@ -153,7 +153,34 @@ export const handleGameLogic = (socket, io) => {
         return listMemberOfRoom;
     };
 
+    socket.on("playerReady", (data) => {
+        const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
+        if (room) {
+            const match = room.room.find((match) => match.roomId === data.childRoomId);
+            if (match) {
+                match.ready = true;
+                checkReadyStatus(room, match, io);
+            }
+        }
+    });
 
+    const checkReadyStatus = (room, match, io) => {
+        const readyPlayers = room.room.filter((match) => match.ready);
+        if (readyPlayers.length === 2) {
+            const finalRoom = room.room.find((r) => r.players.length === 0);
+            if (finalRoom) {
+                finalRoom.player1 = readyPlayers[0].player1;
+                finalRoom.player2 = readyPlayers[1].player2;
+                finalRoom.players = [finalRoom.player1, finalRoom.player2];
+                finalRoom.ready = false;
+
+                io.to(room.roomInfo.roomId).emit("startFinalMatch", {
+                    roomId: finalRoom.roomId,
+                    players: finalRoom.players
+                });
+            }
+        }
+    };
     function getCurrentRoomOfUser(socketId) {
         return listRooms.find(room => room.roomMember.some(userId => {
             const user = connectedUsers.find(user => user.userId === userId);
@@ -163,17 +190,20 @@ export const handleGameLogic = (socket, io) => {
 
     // Handle next round
     socket.on("nextRound", (data) => {
-        const room = listRooms.find((room) => room.roomInfo.roomId === data.roomUniqueId);
+        const roomActive = listRooms.find((room) => room.roomInfo.roomId === data.roomUniqueId);
+        const room = roomActive?.room?.find((r) => r.roomId === data.gameData.roomId);
+        
         if (room) {
-            room.currentRound++;
+            room.rounds++;
+            console.log(room,'rooom');
             
             io.to(filterSocketId(data.gameData.player1)).emit("playGame", {
-                round: room.currentRound,
+                round: room.rounds,
                 gameId: data.roomUniqueId,
                 roomId: data.gameData.roomId,
             });
             io.to(filterSocketId(data.gameData.player2)).emit("playGame", {
-                round: room.currentRound,
+                round: room.rounds,
                 gameId: data.roomUniqueId,
                 roomId: data.gameData.roomId,
             });
@@ -188,7 +218,6 @@ export const handleGameLogic = (socket, io) => {
     socket.on("player", (data) => {
         const roomActive = listRooms.find((room) => room.roomInfo.roomId === data.roomUniqueId);
         const room = roomActive?.room?.find((r) => r.roomId === data.childRoomId);
-        console.log(room, 'room');
 
         if (room) {
           if (room.player1 === data.player) {
@@ -196,8 +225,8 @@ export const handleGameLogic = (socket, io) => {
           } else if (room.player2 === data.player) {
             room.p2Choice = data.rpsValue;
           }
-          
-          if (room.p1Choice && room.p2Choice) {
+
+          if (room.p1Choice !== null && room.p2Choice !== null ) {
             determineWinner(room, data.roomUniqueId);
           }
         }
@@ -235,7 +264,7 @@ export const handleGameLogic = (socket, io) => {
             if (remainingMembers.length === 1) {
                 const remainingUser = remainingMembers[0];
 
-                io.to(remainingUser.socketId).emit("opponentDisconnected", "Your opponent left. You win!");
+                io.to(remainingUser?.socketId).emit("opponentDisconnected", "Your opponent left. You win!");
             }
             socket
                 .to(roomOfUserWithSocketId.roomInfo.roomId)
@@ -246,7 +275,6 @@ export const handleGameLogic = (socket, io) => {
 
     function determineWinner(game, roomUniqueId) {
         const gameData = game;
-    console.log(gameData , 'gameData');
     
         const p1Choice = gameData.p1Choice;
         const p2Choice = gameData.p2Choice;
@@ -268,22 +296,24 @@ export const handleGameLogic = (socket, io) => {
                    (p1Choice === "paper" && p2Choice === "rock")) {
             winner = "p1";
             name = gameData.player1;
-        } else if (p1Choice === null) {
+        } else if (p1Choice === '') {
             winner = "p2";
-        } else if (p2Choice === null) {
+            name = gameData.player2;
+        } else if (p2Choice === '') {
             winner = "p1";
-        }  else {
+            name = gameData.player1;
+        } else if (p1Choice === '' && p2Choice === '') {
+            winner = "d";
+        } else {
             winner = "p2";
             name = gameData.player2;
         }
-    
+        
         if (winner === "p1") {
             gameData.p1Wins++;
         } else if (winner === "p2") {
             gameData.p2Wins++;
         }
-    
-        gameData.rounds++;
     
         io.sockets.to(roomUniqueId).emit("result", {
             winner: winner,
@@ -317,11 +347,14 @@ export const handleGameLogic = (socket, io) => {
             endGame(roomUniqueId, finalWinner, name, gameData);
             return;
         }
-    
+
         gameData.p1Choice = null;
         gameData.p2Choice = null;
     }
     function endGame(roomUniqueId, finalWinner, name, gameData) {
+    const roomActive = listRooms.find((room) => room.roomInfo.roomId === roomUniqueId);
+    console.log(roomActive, 'roomActive');
+        
       io.sockets.to(roomUniqueId).emit("gameOver", {
         winner: finalWinner,
         nameWinner: name,
@@ -334,6 +367,6 @@ export const handleGameLogic = (socket, io) => {
       gameData.p2Choice = null;
       gameData.p1Wins = 0;
       gameData.p2Wins = 0;
-      gameData.rounds = 0;
+      gameData.rounds = 1;
     }
 };
