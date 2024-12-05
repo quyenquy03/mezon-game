@@ -9,11 +9,13 @@
   padding: 10px;
   position: relative;
 }
+
 .user-section {
   width: 300px;
   background: #313338;
   box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
 }
+
 .user-section-header {
   padding: 10px;
   background: #202124;
@@ -33,12 +35,14 @@
   padding: 10px;
   cursor: pointer;
 }
-.user-list .user-item .user-info {
-}
+
+.user-list .user-item .user-info {}
+
 .user-list .user-item .user-info .user-name {
   font-size: 16px;
   color: #fff;
 }
+
 .user-list .user-item .user-avatar,
 .user-list .user-item .user-avatar img {
   width: 40px;
@@ -82,15 +86,18 @@
   cursor: pointer;
   font-size: 20px;
 }
+
 .room-section-header .header-left .create-room-btn:hover {
   background-color: #f1f1f1;
 }
+
 .room-section-header .header-right {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 20px;
 }
+
 .room-section-header .coin-box {
   display: flex;
   align-items: center;
@@ -102,11 +109,13 @@
   border-radius: 100px;
   padding: 5px 10px;
 }
-.room-section-header .coin-box {
-}
+
+.room-section-header .coin-box {}
+
 .room-section-header .coin-box .coin-icon {
   width: 20px;
 }
+
 .room-section-header .account-box {
   display: flex;
   align-items: center;
@@ -119,6 +128,7 @@
   padding: 5px 10px;
   border-radius: 100px;
 }
+
 .room-section-header .account-box .avatar,
 .room-section-header .account-box .avatar img {
   width: 30px;
@@ -131,9 +141,11 @@
   overflow-y: scroll;
   height: calc(100vh - 150px);
 }
+
 .room-section .room-list::-webkit-scrollbar {
   display: none;
 }
+
 .room-list .room-item {
   width: 100%;
   aspect-ratio: 5/3;
@@ -142,6 +154,7 @@
   position: relative;
   margin-bottom: 10px;
 }
+
 .room-list .room-item .room-name {
   position: absolute;
   left: 50%;
@@ -155,14 +168,17 @@
   justify-content: center;
   align-items: center;
 }
+
 .room-list .room-item .room-name .room-name-img {
   width: 120px;
 }
+
 .room-list .room-item .room-name .room-name-text {
   font-size: 20px;
   font-weight: 500;
   color: #fff;
 }
+
 .room-item .room-bet {
   position: absolute;
   bottom: 0;
@@ -170,10 +186,12 @@
   width: 100px;
   height: 50px;
 }
+
 .room-item .room-bet .room-bet-coin {
   width: 30px;
   height: 30px;
 }
+
 .room-item .room-bet .room-bet-bg {
   width: 50px;
   height: 130px;
@@ -182,6 +200,7 @@
   bottom: -25px;
   right: 50px;
 }
+
 .room-item .room-bet .room-bet-info {
   display: flex;
   justify-content: space-between;
@@ -192,6 +211,7 @@
   z-index: 1;
   width: 100px;
 }
+
 .room-item .room-bet .room-bet-text {
   font-size: 20px;
   color: #fff;
@@ -214,6 +234,7 @@
   gap: 5px;
   font-size: 13px;
 }
+
 .room-item .room-owner .room-owner-icon {
   width: 20px;
   height: 20px;
@@ -229,6 +250,7 @@
   justify-content: center;
   align-items: center;
 }
+
 .room-item .room-join .room-join-btn {
   width: 100px;
   height: 40px;
@@ -236,13 +258,11 @@
   border: none;
   display: flex;
   background: rgb(34, 1, 6);
-  background: radial-gradient(
-    circle,
-    rgba(34, 1, 6, 0.9136904761904762) 0%,
-    rgba(34, 1, 6, 0.9108893557422969) 31%,
-    rgba(34, 1, 6, 0.8688725490196079) 86%,
-    rgba(34, 1, 6, 0.8072478991596639) 100%
-  );
+  background: radial-gradient(circle,
+      rgba(34, 1, 6, 0.9136904761904762) 0%,
+      rgba(34, 1, 6, 0.9108893557422969) 31%,
+      rgba(34, 1, 6, 0.8688725490196079) 86%,
+      rgba(34, 1, 6, 0.8072478991596639) 100%);
   border-radius: 100px;
   justify-content: center;
   align-items: center;
@@ -255,6 +275,7 @@
 .room-join-btn:hover {
   box-shadow: 0 0 10px rgba(123, 113, 113, 0.5);
 }
+
 .room-join-btn:active {
   transform: scale(0.95);
 }
@@ -271,17 +292,20 @@
   font-size: 13px;
   color: #fff;
 }
+
 .form-create-room .form-item .form-input {
   height: 40px;
   padding: 10px;
   font-size: 15px;
 }
+
 .form-create-room .form-item .form-select {
   height: 40px;
   padding: 10px;
   font-size: 15px;
   width: 100%;
 }
+
 .form-create-room .btn-create-room {
   width: 140px;
   height: 40px;
@@ -294,6 +318,7 @@
   overflow-y: scroll;
   height: calc(100vh - 150px);
 }
+
 .game-section::-webkit-scrollbar {
   display: none;
 }
@@ -328,6 +353,7 @@
   align-items: center;
   margin-top: 40px;
 }
+
 .start-game .btn-start-game {
   width: 70px;
   height: 70px;
@@ -340,6 +366,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.start-game .btn-start-game:disabled {
+  opacity: 0.5;
 }
 
 .header-game {
@@ -355,6 +385,13 @@
   gap: 10px;
   color: white;
 }
+
+.game-user-score .state-result {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
 
 .game-user .game-user-avatar {
   width: 60px;
@@ -379,6 +416,7 @@
   gap: 10px;
   margin-top: 50px;
 }
+
 .player-choice {
   width: 150px;
   height: 150px;
@@ -398,6 +436,7 @@
   gap: 10px;
   margin-top: 50px;
 }
+
 .rock {
   background-image: url(../images/rock.png);
 }
@@ -409,6 +448,7 @@
 .scissors {
   background-image: url(../images/scissors.png);
 }
+
 .list-choice .btn-choice {
   width: 80px;
   height: 80px;
@@ -429,11 +469,19 @@
 .list-choice .btn-choice:hover {
   box-shadow: 0 0 10px rgba(123, 113, 113, 0.5);
 }
+
 .list-choice .btn-choice:active {
   transform: scale(0.98);
 }
+
 .list-choice .btn-choice.active {
   border: 2px solid #fff;
+}
+
+.header-game-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .body-game-center {
@@ -443,15 +491,18 @@
   gap: 10px;
   height: 100%;
 }
+
 .body-game-center {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
+
 .body-game-center .countdown {
   position: relative;
 }
+
 .body-game-center .countdown-bg {
   width: 250px;
   height: 250px;
@@ -463,6 +514,7 @@
   align-items: center;
   animation: spin 30s linear infinite;
 }
+
 .body-game-center .countdown-time {
   font-size: 50px;
   font-weight: 500;
@@ -472,6 +524,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
 .body-game-center .turn-result {
   font-size: 20px;
   font-weight: 600;
@@ -485,6 +538,7 @@
   color: #fff;
   text-align: center;
 }
+
 .end-round-desc {
   font-size: 20px;
   color: #fff;
@@ -495,9 +549,12 @@
 
 @keyframes spin {
   from {
-    transform: rotate(0deg); /* Bắt đầu từ 0 độ */
+    transform: rotate(0deg);
+    /* Bắt đầu từ 0 độ */
   }
+
   to {
-    transform: rotate(360deg); /* Kết thúc ở 360 độ */
+    transform: rotate(360deg);
+    /* Kết thúc ở 360 độ */
   }
 }

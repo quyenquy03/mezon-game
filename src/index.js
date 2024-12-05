@@ -25,73 +25,73 @@ const server = app.listen(3000, function () {
 });
 
 const connectedUsers = [
-  {
-    id: "1234",
-    userId: 1234,
-    name: "User 1234",
-    avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
-    socketId: "socket-1234",
-  },
-  {
-    id: "5678",
-    userId: 5678,
-    name: "User 5678",
-    avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
-    socketId: "socket-5678",
-  },
+  // {
+  //   id: "1234",
+  //   userId: 1234,
+  //   name: "User 1234",
+  //   avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
+  //   socketId: "socket-1234",
+  // },
+  // {
+  //   id: "5678",
+  //   userId: 5678,
+  //   name: "User 5678",
+  //   avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
+  //   socketId: "socket-5678",
+  // },
 ];
 const listRooms = [
-  {
-    roomInfo: {
-      roomId: "123456",
-      roomName: "Phòng 1",
-      roomMaxUser: 4,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 1000,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    currentRoundGroup: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
-  {
-    roomInfo: {
-      roomId: "234567",
-      roomName: "Phòng 2",
-      roomMaxUser: 8,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 1000,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    roundGames: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
-  {
-    roomInfo: {
-      roomId: "345678",
-      roomName: "Phòng 2",
-      roomMaxUser: 2,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 1000,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    currentRoundGroup: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
+  // {
+  //   roomInfo: {
+  //     roomId: "123456",
+  //     roomName: "Phòng 1",
+  //     roomMaxUser: 4,
+  //     roomPassword: null,
+  //     roomUsePassword: false,
+  //     roomBet: 1000,
+  //     owner: 1234,
+  //     roomRound: 3,
+  //   },
+  //   roomMember: [],
+  //   currentRoundMembers: [],
+  //   currentRoundGroup: [],
+  //   currentRound: 1,
+  //   isPlaying: false,
+  // },
+  // {
+  //   roomInfo: {
+  //     roomId: "234567",
+  //     roomName: "Phòng 2",
+  //     roomMaxUser: 8,
+  //     roomPassword: null,
+  //     roomUsePassword: false,
+  //     roomBet: 1000,
+  //     owner: 1234,
+  //     roomRound: 3,
+  //   },
+  //   roomMember: [],
+  //   currentRoundMembers: [],
+  //   roundGames: [],
+  //   currentRound: 1,
+  //   isPlaying: false,
+  // },
+  // {
+  //   roomInfo: {
+  //     roomId: "345678",
+  //     roomName: "Phòng 2",
+  //     roomMaxUser: 2,
+  //     roomPassword: null,
+  //     roomUsePassword: false,
+  //     roomBet: 1000,
+  //     owner: 1234,
+  //     roomRound: 3,
+  //   },
+  //   roomMember: [],
+  //   currentRoundMembers: [],
+  //   currentRoundGroup: [],
+  //   currentRound: 1,
+  //   isPlaying: false,
+  // },
 ];
 
 const getSocketIdOfUser = (userId) => {
@@ -546,6 +546,7 @@ const setupSocketServer = (server) => {
         group.result[currentTurn - 1].winner = group.player2;
       }
       socket.emit("getTurnResult", {
+        winnerTurnId: checkResult,
         roomId,
         roundGame,
         roundId,

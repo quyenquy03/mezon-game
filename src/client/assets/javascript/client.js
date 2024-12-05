@@ -36,7 +36,7 @@ const fetchUser = () => {
   }, 1000);
 };
 fetchUser();
-
+let prize;
 const createNewRoom = () => {
   const roomName = document.getElementById("room-name")?.value;
   const roomMaxUser = document.getElementById("room-max-user")?.value;
@@ -132,7 +132,9 @@ const renderCurrentRoomInfo = (roomInfo) => {
   const roomMemberElement = document.querySelector(".game-members");
   roomMemberElement.innerHTML = "";
   const maxMember = roomInfo.roomInfo.roomMaxUser;
-
+  let owner = roomInfo.roomInfo.owner;
+  const coinText = document.querySelector('.coin-text');
+  coinText.innerHTML = roomInfo.roomInfo.roomBet;
   Array.from({ length: maxMember }).forEach((_, index) => {
     const memberElement = document.createElement("div");
     memberElement.classList.add("game-member-item");
@@ -142,11 +144,16 @@ const renderCurrentRoomInfo = (roomInfo) => {
     `;
     roomMemberElement.appendChild(memberElement);
   });
+  const startGameButtonElement = document.querySelector(".btn-start-game")
+  if (owner == user.userId) {
+    startGameButtonElement.addEventListener("click", () => {
+      startGame(user.userId, roomInfo.roomInfo.roomId);
+    });
+  } else {
+    startGameButtonElement.innerHTML = 'Waiting';
+    startGameButtonElement.disabled = true;
+  }
 
-  const startGameButtonElement = document.querySelector(".btn-start-game");
-  startGameButtonElement.addEventListener("click", () => {
-    startGame(user.userId, roomInfo.roomInfo.roomId);
-  });
 };
 socket.on("currentRoom", (roomInfo) => {
   renderCurrentRoomInfo(roomInfo);
@@ -301,6 +308,8 @@ socket.on("startGameSuccess", (data) => {
 
 socket.on("startTurn", (data) => {
   console.log("Start turn", data);
+  const displayTurn = document.querySelector('.turn');
+  displayTurn.innerHTML = `Turn ${data.currentTurn}`;
   renderCurrentRoundInfo(data);
   refreshTurnResult();
   startCountdown(5);
@@ -332,6 +341,7 @@ socket.on("submitTurnNow", (data) => {
 });
 
 const renderTurnResult = (data) => {
+  console.log('result turn:', data);
   const myChoiceElement = document.querySelector(".my-choice");
   const rivalChoiceElement = document.querySelector(".rival-choice");
 
@@ -341,6 +351,7 @@ const renderTurnResult = (data) => {
   const resultElement = document.querySelector(".turn-result");
   resultElement.innerHTML = data.result;
 };
+
 const refreshTurnResult = () => {
   const myChoiceElement = document.querySelector(".my-choice");
   const rivalChoiceElement = document.querySelector(".rival-choice");
@@ -351,9 +362,25 @@ const refreshTurnResult = () => {
   const resultElement = document.querySelector(".turn-result");
   resultElement.innerHTML = "";
 };
+let stateResult = [];
+const renderStateResult = (data) => {
+  const score = document.querySelector(".game-user-score");
+  if (data.winnerTurnId === user.userId) {
+    stateResult.push("win");
+  } else if (data.winnerTurnId === null) {
+    stateResult.push("draw");
+  } else {
+    stateResult.push("lose");
+  }
+
+  score.innerHTML = stateResult.map((e) => `<img src="./assets/images/${e}.png" class="state-result"/>`)
+  .join("");
+};
+
 socket.on("getTurnResult", (data) => {
   startCountdown(4);
   renderTurnResult(data);
+  renderStateResult(data);
   setTimeout(() => {
     socket.emit("startRound", {
       userId: user.userId,
@@ -400,8 +427,11 @@ socket.on("continueJoinSuccess", (data) => {
   }, 5000);
 });
 socket.on("endOfGame", (data) => {
+  console.log('endOfGame:', data);
   const endRoundElement = document.querySelector(".turn-result");
   if (data.winner === user.userId) {
+    console.log('winner:', user);
+    
     endRoundElement.innerHTML = `
       <h5 class='end-round-result'>Kết thúc trận đấu</h5>
       <div class='end-round-desc'>Chúc mừng! Bạn đã thắng trận 😍😍</div>
