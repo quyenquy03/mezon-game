@@ -41,57 +41,57 @@ const connectedUsers = [
   // },
 ];
 const listRooms = [
-  {
-    roomInfo: {
-      roomId: "123456",
-      roomName: "Phòng 1",
-      roomMaxUser: 4,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 10,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    currentRoundGroup: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
-  {
-    roomInfo: {
-      roomId: "234567",
-      roomName: "Phòng 2",
-      roomMaxUser: 8,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 10,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    roundGames: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
-  {
-    roomInfo: {
-      roomId: "345678",
-      roomName: "Phòng 2",
-      roomMaxUser: 2,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 10,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    currentRoundGroup: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
+  // {
+  //   roomInfo: {
+  //     roomId: "123456",
+  //     roomName: "Phòng 1",
+  //     roomMaxUser: 4,
+  //     roomPassword: null,
+  //     roomUsePassword: false,
+  //     roomBet: 10,
+  //     owner: 1234,
+  //     roomRound: 3,
+  //   },
+  //   roomMember: [],
+  //   currentRoundMembers: [],
+  //   currentRoundGroup: [],
+  //   currentRound: 1,
+  //   isPlaying: false,
+  // },
+  // {
+  //   roomInfo: {
+  //     roomId: "234567",
+  //     roomName: "Phòng 2",
+  //     roomMaxUser: 8,
+  //     roomPassword: null,
+  //     roomUsePassword: false,
+  //     roomBet: 10,
+  //     owner: 1234,
+  //     roomRound: 3,
+  //   },
+  //   roomMember: [],
+  //   currentRoundMembers: [],
+  //   roundGames: [],
+  //   currentRound: 1,
+  //   isPlaying: false,
+  // },
+  // {
+  //   roomInfo: {
+  //     roomId: "345678",
+  //     roomName: "Phòng 2",
+  //     roomMaxUser: 2,
+  //     roomPassword: null,
+  //     roomUsePassword: false,
+  //     roomBet: 10,
+  //     owner: 1234,
+  //     roomRound: 3,
+  //   },
+  //   roomMember: [],
+  //   currentRoundMembers: [],
+  //   currentRoundGroup: [],
+  //   currentRound: 1,
+  //   isPlaying: false,
+  // },
 ];
 
 const getSocketIdOfUser = (userId) => {
@@ -409,6 +409,9 @@ const setupSocketServer = (server) => {
             isWinner: winCount > loseCount,
             winner: userId,
           });
+          // console.log("endOfGame", room);
+          // console.log("endOfGame", room.totalBet);
+          // console.log("endOfGame " + Date.now(), userId);
           endBet(roomId, userId);
           socket.emit("endBet", room.totalBet);
           room.isPlaying = false;
@@ -463,7 +466,6 @@ const setupSocketServer = (server) => {
       const currentRoundNew = currentRoom.roundGames.find((round) => round.round === roundGame);
       currentRoundNew.listPlayer.push(userId);
       socket.join(currentRoundNew.roundId);
-      // console.log("continueJoin", data);
       socket.emit("continueJoinSuccess", {
         roomId,
         roundGame,
@@ -471,6 +473,7 @@ const setupSocketServer = (server) => {
         currentTurn: currentRoundNew.currentTurn,
       });
     });
+
     socket.on("combindNextRound", (data) => {
       const { roomId, userId, roundGame, roundId } = data;
       const currentRoom = getCurrentRoom(roomId);
@@ -497,13 +500,13 @@ const setupSocketServer = (server) => {
             player2,
             result: turnResult,
           });
-          // console.log("combindNextRound", player1, player2);
           io.to(currentRound.roundId).emit("startGameSuccess", {
             currentRound: currentRound.round,
             roundId: currentRound.roundId,
             currentRoundMembers: currentRoom.currentRoundMembers,
             roomInfo: currentRoom.roomInfo,
             roomId,
+            roundinfo: currentRound,
           });
         }
       }

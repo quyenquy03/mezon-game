@@ -208,7 +208,6 @@ socket.on("listUsers", (users) => {
 });
 
 const renderUserInfo = (userInfo) => {
-  console.log(userInfo);
   const userInfoElement = document.querySelector(".account-box");
   const coinText = document.querySelector(".coin-text");
 
@@ -249,6 +248,7 @@ socket.on("startBet", (data) => {
 });
 
 socket.on("endBet", (data) => {
+  console.log("endBet", data);
   user.userCoin = user.userCoin + data;
   renderUserInfo(user);
 });
@@ -312,8 +312,37 @@ const chooseOption = (option) => {
   choosedOption = option;
 };
 
+// socket.on("startGameSuccess", (data) => {
+//   const modalElement = document.getElementById("modal-start-round");
+//   if (!modalElement.classList.contains("show")) {
+//     const modal = new bootstrap.Modal(modalElement);
+//     modal.show();
+//   }
+//   socket.emit("startRound", {
+//     userId: user.userId,
+//     roomId: data.roomInfo.roomId,
+//     roundGame: data.currentRound,
+//     roundId: data.roundId,
+//     currentTurn: 1,
+//   });
+// });
+
+let lastEventTime = 0; // Thời gian của lần xử lý event cuối cùng
+
 socket.on("startGameSuccess", (data) => {
+  const now = Date.now();
+
+  // Kiểm tra nếu khoảng cách giữa 2 lần xử lý sự kiện nhỏ hơn 5 giây
+  if (now - lastEventTime < 5000) {
+    console.warn("Bỏ qua event startGameSuccess vì chưa đủ thời gian chờ.");
+    return; // Nếu chưa đủ 5 giây, bỏ qua sự kiện
+  }
+
+  lastEventTime = now; // Cập nhật thời gian lần xử lý sự kiện mới
+
   const modalElement = document.getElementById("modal-start-round");
+
+  // Kiểm tra xem modal đã được hiển thị chưa
   if (!modalElement.classList.contains("show")) {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
@@ -447,6 +476,7 @@ socket.on("continueJoinSuccess", (data) => {
   }, 5000);
 });
 socket.on("endOfGame", (data) => {
+  stateResult = [];
   const endRoundElement = document.querySelector(".turn-result");
   if (data.winner === user.userId) {
     endRoundElement.innerHTML = `
