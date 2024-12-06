@@ -27,6 +27,7 @@ const generateUser = () => {
     userId: userId,
     name: "User " + userId,
     avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
+    userCoin: 1000,
   };
 };
 const user = generateUser();
@@ -125,56 +126,62 @@ socket.on("joinRoomError", (message) => {
 socket.emit("listRooms");
 socket.on("listRooms", (rooms) => {
   renderListRoom(rooms);
-  console.log("List rooms:", rooms);
 });
 
 const renderCurrentRoomInfo = (roomInfo) => {
   const roomMemberElement = document.querySelector(".game-members");
   roomMemberElement.innerHTML = "";
   const maxMember = roomInfo.roomInfo.roomMaxUser;
-  let owner = roomInfo.roomInfo.owner;
-  const coinText = document.querySelector('.coin-text');
-  coinText.innerHTML = roomInfo.roomInfo.roomBet;
+  const owner = roomInfo.roomInfo.owner;
+  // const coinText = document.querySelector(".coin-text");
+  // coinText.innerHTML = roomInfo.roomInfo.roomBet;
+  const roomMembers = roomInfo.roomMember;
+
   Array.from({ length: maxMember }).forEach((_, index) => {
     const memberElement = document.createElement("div");
     memberElement.classList.add("game-member-item");
+    const member = roomMembers?.[index];
     memberElement.innerHTML = `
       <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-      <span class='member-name'>Waiting...</span>
+      <span class='member-name'>${member?.name ?? "Waiting..."}</span>
     `;
     roomMemberElement.appendChild(memberElement);
   });
-  const startGameButtonElement = document.querySelector(".btn-start-game")
-  if (owner == user.userId) {
-    startGameButtonElement.addEventListener("click", () => {
-      startGame(user.userId, roomInfo.roomInfo.roomId);
-    });
-  } else {
-    startGameButtonElement.innerHTML = 'Waiting';
-    startGameButtonElement.disabled = true;
-  }
 
+  const startGameButtonElement = document.querySelector(".btn-start-game");
+  const handleStartGame = () => {
+    startGame(user.userId, roomInfo.roomInfo.roomId);
+  };
+
+  startGameButtonElement.replaceWith(startGameButtonElement.cloneNode(true));
+  const newStartGameButton = document.querySelector(".btn-start-game");
+
+  if (user.userId === owner) {
+    newStartGameButton.addEventListener("click", handleStartGame);
+    newStartGameButton.innerHTML = "START";
+    newStartGameButton.disabled = false;
+  } else {
+    newStartGameButton.innerHTML = "Waiting";
+    newStartGameButton.disabled = true;
+  }
 };
+
 socket.on("currentRoom", (roomInfo) => {
   renderCurrentRoomInfo(roomInfo);
 });
 
 const renderRoomMembers = (members) => {
   const gameMemberItems = document.querySelectorAll(".game-member-item");
-  members.forEach((member, index) => {
-    const memberElement = gameMemberItems[index];
-    if (!memberElement) {
-      return;
-    }
-    memberElement.innerHTML = `
+  gameMemberItems.forEach((gameMemberItem, index) => {
+    const member = members[index];
+    gameMemberItem.innerHTML = `
       <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-      <span class='member-name'>${member?.name}</span>
+      <span class='member-name'>${member?.name ?? "Waiting"}</span>
     `;
   });
 };
 socket.on("roomMembers", (members) => {
   renderRoomMembers(members);
-  console.log("Room members:", members);
 });
 
 const renderListUser = (listUsers) => {
@@ -198,16 +205,18 @@ const renderListUser = (listUsers) => {
 socket.emit("listUsers");
 socket.on("listUsers", (users) => {
   renderListUser(users);
-  console.log("List users:", users);
 });
 
 const renderUserInfo = (userInfo) => {
+  console.log(userInfo);
   const userInfoElement = document.querySelector(".account-box");
+  const coinText = document.querySelector(".coin-text");
 
   if (!userInfoElement) {
     console.error("Element with class 'account-box' not found.");
     return;
   }
+  coinText.innerHTML = userInfo?.userCoin;
 
   userInfoElement.innerHTML = `
     <div class="avatar">
@@ -218,8 +227,11 @@ const renderUserInfo = (userInfo) => {
     </div>
   `;
 };
-renderUserInfo(user);
 
+socket.on("userInfo", (userInfo) => {
+  console.log(userInfo);
+  renderUserInfo(userInfo);
+});
 // start game
 const startGame = (userId, roomId) => {
   socket.emit("startGame", {
@@ -229,6 +241,16 @@ const startGame = (userId, roomId) => {
 };
 socket.on("startGameError", (message) => {
   alert(message);
+});
+
+socket.on("startBet", (data) => {
+  user.userCoin = user.userCoin - data;
+  renderUserInfo(user);
+});
+
+socket.on("endBet", (data) => {
+  user.userCoin = user.userCoin + data;
+  renderUserInfo(user);
 });
 
 const renderCurrentRoundInfo = (roundInfo) => {
@@ -273,7 +295,6 @@ function startCountdown(countdown = 9) {
     countdown--;
 
     if (countdown < 0) {
-      console.log("Stopping interval");
       clearInterval(countdownInterval);
       countdownArea.innerHTML = `00`;
     }
@@ -307,8 +328,7 @@ socket.on("startGameSuccess", (data) => {
 });
 
 socket.on("startTurn", (data) => {
-  console.log("Start turn", data);
-  const displayTurn = document.querySelector('.turn');
+  const displayTurn = document.querySelector(".turn");
   displayTurn.innerHTML = `Turn ${data.currentTurn}`;
   renderCurrentRoundInfo(data);
   refreshTurnResult();
@@ -341,7 +361,6 @@ socket.on("submitTurnNow", (data) => {
 });
 
 const renderTurnResult = (data) => {
-  console.log('result turn:', data);
   const myChoiceElement = document.querySelector(".my-choice");
   const rivalChoiceElement = document.querySelector(".rival-choice");
 
@@ -364,6 +383,7 @@ const refreshTurnResult = () => {
 };
 let stateResult = [];
 const renderStateResult = (data) => {
+  console.log(data);
   const score = document.querySelector(".game-user-score");
   if (data.winnerTurnId === user.userId) {
     stateResult.push("win");
@@ -373,8 +393,7 @@ const renderStateResult = (data) => {
     stateResult.push("lose");
   }
 
-  score.innerHTML = stateResult.map((e) => `<img src="./assets/images/${e}.png" class="state-result"/>`)
-  .join("");
+  score.innerHTML = stateResult.map((e) => `<img src="./assets/images/${e}.png" class="state-result"/>`).join("");
 };
 
 socket.on("getTurnResult", (data) => {
@@ -394,6 +413,7 @@ socket.on("getTurnResult", (data) => {
 
 socket.on("endOfRound", (data) => {
   const endRoundElement = document.querySelector(".turn-result");
+  stateResult = [];
   if (data.isWinner) {
     endRoundElement.innerHTML = `
       <h5 class='end-round-result'>Bạn thắng</h5>
@@ -427,11 +447,8 @@ socket.on("continueJoinSuccess", (data) => {
   }, 5000);
 });
 socket.on("endOfGame", (data) => {
-  console.log('endOfGame:', data);
   const endRoundElement = document.querySelector(".turn-result");
   if (data.winner === user.userId) {
-    console.log('winner:', user);
-    
     endRoundElement.innerHTML = `
       <h5 class='end-round-result'>Kết thúc trận đấu</h5>
       <div class='end-round-desc'>Chúc mừng! Bạn đã thắng trận 😍😍</div>
