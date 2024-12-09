@@ -36,7 +36,8 @@
   cursor: pointer;
 }
 
-.user-list .user-item .user-info {}
+.user-list .user-item .user-info {
+}
 
 .user-list .user-item .user-info .user-name {
   font-size: 16px;
@@ -75,7 +76,7 @@
   cursor: pointer;
 }
 
-.room-section-header .header-left .create-room-btn {
+.room-section-header .header-left .header-button {
   background-color: #fff;
   width: 40px;
   height: 40px;
@@ -87,7 +88,7 @@
   font-size: 20px;
 }
 
-.room-section-header .header-left .create-room-btn:hover {
+.room-section-header .header-left .header-button:hover {
   background-color: #f1f1f1;
 }
 
@@ -110,7 +111,8 @@
   padding: 5px 10px;
 }
 
-.room-section-header .coin-box {}
+.room-section-header .coin-box {
+}
 
 .room-section-header .coin-box .coin-icon {
   width: 20px;
@@ -258,11 +260,13 @@
   border: none;
   display: flex;
   background: rgb(34, 1, 6);
-  background: radial-gradient(circle,
-      rgba(34, 1, 6, 0.9136904761904762) 0%,
-      rgba(34, 1, 6, 0.9108893557422969) 31%,
-      rgba(34, 1, 6, 0.8688725490196079) 86%,
-      rgba(34, 1, 6, 0.8072478991596639) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(34, 1, 6, 0.9136904761904762) 0%,
+    rgba(34, 1, 6, 0.9108893557422969) 31%,
+    rgba(34, 1, 6, 0.8688725490196079) 86%,
+    rgba(34, 1, 6, 0.8072478991596639) 100%
+  );
   border-radius: 100px;
   justify-content: center;
   align-items: center;
@@ -339,6 +343,36 @@
   color: #fff;
 }
 
+.game-section .footer-game {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+
+.game-section .footer-game .room-info-box {
+  max-width: 550px;
+  width: 100%;
+  background-color: #313338;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
+  color: #fff;
+}
+
+.game-section .room-info-box .room-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  padding-bottom: 8px;
+  padding-top: 8px;
+}
+
+.game-section .room-info-box .room-info-item + .room-info-item {
+  border-top: 1px solid #fff;
+}
+
 .game-members .game-member-item .member-avatar {
   width: 50px;
   height: 50px;
@@ -391,7 +425,6 @@
   height: 20px;
   margin-right: 10px;
 }
-
 
 .game-user .game-user-avatar {
   width: 60px;
@@ -464,6 +497,7 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  border: 5px solid transparent;
 }
 
 .list-choice .btn-choice:hover {
@@ -475,7 +509,7 @@
 }
 
 .list-choice .btn-choice.active {
-  border: 2px solid #fff;
+  border: 5px solid #f53d00;
 }
 
 .header-game-center {

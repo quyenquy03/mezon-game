@@ -36,3 +36,13 @@ html {
 .content.active {
   display: block;
 }
+
+.show-flex {
+  display: flex !important;
+}
+.hide {
+  display: none !important;
+}
+.opacity-50 {
+  opacity: 0.5;
+}

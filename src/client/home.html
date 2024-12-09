@@ -18,14 +18,17 @@
       <div class="room-section">
         <div class="room-section-header">
           <div class="header-left">
-            <span class="create-room-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
-              <img class="room-header-icon" src="./assets/images/menu.png" alt="" />
-            </span>
-            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-room">
+            <span class="header-button create-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-room">
               <img class="room-header-icon" src="./assets/images/plus.png" alt="" />
             </span>
-            <span class="create-room-btn" type="button" data-bs-toggle="modal" data-bs-target="#modal-search-room">
+            <span class="header-button search-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-search-room">
               <img class="room-header-icon" src="./assets/images/magnifier.png" alt="" />
+            </span>
+            <span class="header-button online-button hide" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+              <img class="room-header-icon" src="./assets/images/menu.png" alt="" />
+            </span>
+            <span class="header-button leave-button hide" onclick='leaveRoom()' type="button" >
+              <img class="room-header-icon" src="./assets/images/turn-off.png" alt="" />
             </span>
           </div>
           <div class="header-right">
@@ -46,6 +49,11 @@
             <div class='game-members'> </div>
             <div class='start-game'>
               <button class='btn-start-game'>START</button>
+            </div>
+            <div class='footer-game'>
+              <div class="room-info-box">
+                
+              </div>
             </div>
           </div>
         </div>
@@ -158,16 +166,7 @@
                       <img class='game-user-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
                       <div class='game-user-info'>
                         <div class='game-user-name'>Player 1</div>
-                        <div class='game-user-score'>
-                          <!-- <span>&#9733;</span>
-                          <span>&#9733;</span>
-                          <span>&#9733;</span>
-                          <span>&#9733;</span>
-                          <span>&#9733;</span> -->
-                          <img class="result-turn"/>
-                          <img class="result-turn"/>
-                          <img class="result-turn"/>
-                        </div>
+                        <div class='game-user-score-of-player-2'></div>
                       </div>
                     </div>
                   </div>
@@ -182,16 +181,7 @@
                       <img class='game-user-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
                       <div class='game-user-info'>
                         <div class='game-user-name'>Player 1</div>
-                        <div class='game-user-score'>
-                          <img class="result-turn"/>
-                          <img class="result-turn"/>
-                          <img class="result-turn"/>
-                          <!-- <span>&#9733;</span>
-                          <span>&#9733;</span>
-                          <span>&#9733;</span>
-                          <span>&#9733;</span>
-                          <span>&#9733;</span> -->
-                        </div>
+                        <div class='game-user-score-of-player-1'></div>
                       </div>
                     </div>
                   </div> 

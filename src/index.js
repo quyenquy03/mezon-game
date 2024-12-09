@@ -24,86 +24,57 @@ const server = app.listen(3000, function () {
   console.log("Example app listening on port 3000 with domain http://localhost:3000");
 });
 
-const connectedUsers = [
-  // {
-  //   id: "1234",
-  //   userId: 1234,
-  //   name: "User 1234",
-  //   avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
-  //   socketId: "socket-1234",
-  // },
-  // {
-  //   id: "5678",
-  //   userId: 5678,
-  //   name: "User 5678",
-  //   avatar: "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg",
-  //   socketId: "socket-5678",
-  // },
-];
+const connectedUsers = [];
 const listRooms = [
-  // {
-  //   roomInfo: {
-  //     roomId: "123456",
-  //     roomName: "Phòng 1",
-  //     roomMaxUser: 4,
-  //     roomPassword: null,
-  //     roomUsePassword: false,
-  //     roomBet: 10,
-  //     owner: 1234,
-  //     roomRound: 3,
-  //   },
-  //   roomMember: [],
-  //   currentRoundMembers: [],
-  //   currentRoundGroup: [],
-  //   currentRound: 1,
-  //   isPlaying: false,
-  // },
-  // {
-  //   roomInfo: {
-  //     roomId: "234567",
-  //     roomName: "Phòng 2",
-  //     roomMaxUser: 8,
-  //     roomPassword: null,
-  //     roomUsePassword: false,
-  //     roomBet: 10,
-  //     owner: 1234,
-  //     roomRound: 3,
-  //   },
-  //   roomMember: [],
-  //   currentRoundMembers: [],
-  //   roundGames: [],
-  //   currentRound: 1,
-  //   isPlaying: false,
-  // },
-  // {
-  //   roomInfo: {
-  //     roomId: "345678",
-  //     roomName: "Phòng 2",
-  //     roomMaxUser: 2,
-  //     roomPassword: null,
-  //     roomUsePassword: false,
-  //     roomBet: 10,
-  //     owner: 1234,
-  //     roomRound: 3,
-  //   },
-  //   roomMember: [],
-  //   currentRoundMembers: [],
-  //   currentRoundGroup: [],
-  //   currentRound: 1,
-  //   isPlaying: false,
-  // },
+  {
+    roomInfo: {
+      roomId: "123456",
+      roomName: "Phòng 1",
+      roomMaxUser: 4,
+      roomPassword: null,
+      roomUsePassword: false,
+      roomBet: 10,
+      owner: 1234,
+      roomRound: 3,
+    },
+    roomMember: [],
+    currentRoundMembers: [],
+    currentRoundGroup: [],
+    currentRound: 1,
+    isPlaying: false,
+  },
+  {
+    roomInfo: {
+      roomId: "345678",
+      roomName: "Phòng 2",
+      roomMaxUser: 2,
+      roomPassword: null,
+      roomUsePassword: false,
+      roomBet: 10,
+      owner: 1234,
+      roomRound: 3,
+    },
+    roomMember: [],
+    currentRoundMembers: [],
+    currentRoundGroup: [],
+    currentRound: 1,
+    isPlaying: false,
+  },
 ];
 
+// get socket id of user to send socket message to an user
 const getSocketIdOfUser = (userId) => {
   const user = connectedUsers.find((user) => user.userId === userId);
   return user?.id;
 };
 
+// get user info by userId
 const getUserInfo = (userId) => {
   const user = connectedUsers.find((user) => user.userId === userId);
   return user;
 };
 
+// disconnect user, remove user from connectedUsers array and remove user from room
 const disconnectUser = (socket) => {
   const index = connectedUsers.findIndex((user) => user.id === socket.id);
   const user = connectedUsers[index];
@@ -113,6 +84,7 @@ const disconnectUser = (socket) => {
   leaveRoom(user?.userId);
 };
 
+// create new room and push new room info to listRooms
 const createdRoom = (roomInfo) => {
   listRooms.push({
     roomInfo,
@@ -125,6 +97,7 @@ const createdRoom = (roomInfo) => {
   });
 };
 
+// check room before join room, return error message if room is not valid
 const checkBeforeJoinRoom = (data) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
   if (!room) {
@@ -143,6 +116,7 @@ const checkBeforeJoinRoom = (data) => {
   return null;
 };
 
+// join room and push user to roomMember array of room
 const joinRoom = (data) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
   const checkIsMember = room?.roomMember?.find((member) => member.userId === data.userId);
@@ -151,6 +125,7 @@ const joinRoom = (data) => {
   }
 };
 
+// leave room and remove user from roomMember array of room
 const leaveRoom = (userId) => {
   const room = listRooms.find((room) => room.roomMember.includes(userId));
   if (room) {
@@ -158,26 +133,37 @@ const leaveRoom = (userId) => {
   }
 };
 
+// get current room by roomId, return room info
 const getCurrentRoom = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
   return room;
 };
 
-const getRoomMembers = (roomId) => {
-  const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
-  const listMemberOfRoom = room?.roomMember?.map((member) => {
-    return connectedUsers.find((user) => user.userId === member);
-  });
-  listMemberOfRoom.filter((member) => member !== null);
-  return listMemberOfRoom;
-};
-const getCurrentRoomOfUser = (socketId) => {
-  const userBySocketId = connectedUsers.find((user) => user.id === socketId);
-  if (!userBySocketId) return null;
-  const room = listRooms.find((room) => room.roomMember.includes(userBySocketId?.userId));
+// get room info of user by userId
+const getRoomOfUser = (userId) => {
+  const room = listRooms.find((room) => room.roomMember.includes(userId));
   return room;
 };
 
+// get room members by roomId, return list of members
+const getRoomMembers = (roomId) => {
+  const room = listRooms?.find((room) => room.roomInfo.roomId === roomId);
+  const listMemberOfRoom = room?.roomMember?.map((member) => {
+    return connectedUsers?.find((user) => user.userId === member);
+  });
+  listMemberOfRoom?.filter((member) => member !== null);
+  return listMemberOfRoom;
+};
+
+// get current room of user by socketId, return room info
+const getCurrentRoomOfUser = (socketId) => {
+  const userBySocketId = connectedUsers?.find((user) => user.id === socketId);
+  if (!userBySocketId) return null;
+  const room = listRooms.find((room) => room.roomMember?.includes(userBySocketId?.userId));
+  return room;
+};
+
+// check member before start game, return true if member is enough to start game
 const checkMemberBeforeStartGame = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
   if (room?.roomMember?.length < 2) {
@@ -189,18 +175,22 @@ const checkMemberBeforeStartGame = (roomId) => {
   return true;
 };
 
+// start bet, decrease money of user by room bet, increase total bet of room
 const startBet = (roomId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
 
+  // decrease money of all user in room when start game
   connectedUsers.forEach((user) => {
     if (room.roomMember.includes(user.userId)) {
       user.money -= room.roomInfo.roomBet;
     }
   });
 
+  // total bet of room will be given to winner after game
   room.totalBet = room.roomInfo.roomBet * room.roomInfo.roomMaxUser;
 };
 
+// end bet, increase money of winner by total bet of room
 const endBet = (roomId, winnerId) => {
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
   const user = connectedUsers.find((user) => user.userId === winnerId);
@@ -208,12 +198,15 @@ const endBet = (roomId, winnerId) => {
 };
 
 const startNewGame = (roomId) => {
+  // find room and reset room info before start new game
   const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
   room.currentRoundMembers = room.roomMember;
   room.currentRound = 1;
   room.isPlaying = true;
   room.roundGames = [];
   const listGroup = [];
+
+  // loop to create group of players for each round, each group has 2 players and each player will play with each other
   for (let i = 0; i < room.currentRoundMembers.length / 2; i++) {
     const turnCount = room.roomInfo.roomRound;
     const turnResult = [];
@@ -239,9 +232,12 @@ const startNewGame = (roomId) => {
     group: listGroup,
     currentTurn: 1,
   };
+
+  // push new round to room info to keep track of game
   room.roundGames.push(newRound);
 };
 
+// check result of one game, return winner of game
 const checkResultOfOneGame = (player1, player2, player1Choice, player2Choice) => {
   if (player1Choice === player2Choice) {
     return null;
@@ -291,7 +287,7 @@ const setupSocketServer = (server) => {
   });
 
   io.on("connection", (socket) => {
-    // Nhận thông tin từ client
+    // when user connect to server
     socket.on("userInfo", (userInfo) => {
       connectedUsers.push({ id: socket.id, ...userInfo });
       socket.emit("userInfo", userInfo);
@@ -328,6 +324,19 @@ const setupSocketServer = (server) => {
       socket.emit("joinRoomSuccess", currentRoom);
       io.to(data.roomId).emit("currentRoom", currentRoom);
       io.to(data.roomId).emit("roomMembers", getRoomMembers(data.roomId));
+    });
+
+    socket.on("leaveRoom", (data) => {
+      const currentRoom = getRoomOfUser(data.userId);
+      if (currentRoom) {
+        currentRoom.roomInfo.owner = currentRoom.roomMember[0];
+      }
+      leaveRoom(data.userId);
+      const roomAfterLeave = getCurrentRoom(currentRoom?.roomInfo?.roomId);
+      console.log("roomAfterLeave", roomAfterLeave);
+      socket.emit("leaveRoomSuccess", roomAfterLeave);
+      io.to(roomAfterLeave?.roomInfo.roomId).emit("currentRoom", roomAfterLeave);
+      io.to(roomAfterLeave?.roomInfo.roomId).emit("roomMembers", getRoomMembers(roomAfterLeave?.roomInfo.roomId));
     });
 
     socket.on("getRoomMembers", (roomId) => {
@@ -409,9 +418,6 @@ const setupSocketServer = (server) => {
             isWinner: winCount > loseCount,
             winner: userId,
           });
-          // console.log("endOfGame", room);
-          // console.log("endOfGame", room.totalBet);
-          // console.log("endOfGame " + Date.now(), userId);
           endBet(roomId, userId);
           socket.emit("endBet", room.totalBet);
           room.isPlaying = false;
@@ -429,7 +435,6 @@ const setupSocketServer = (server) => {
       for (let i = 0; i < currentRoundGroup.length; i++) {
         const group = currentRoundGroup[i];
         if (group.player1 === userId || group.player2 === userId) {
-          // console.log("start Turn", group);
           socket.emit("startTurn", {
             currentRoom,
             yourInfo: getUserInfo(userId),
