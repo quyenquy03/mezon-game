@@ -25,42 +25,7 @@ const server = app.listen(3000, function () {
 });
 
 const connectedUsers = [];
-const listRooms = [
-  {
-    roomInfo: {
-      roomId: "123456",
-      roomName: "Phòng 1",
-      roomMaxUser: 4,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 10,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    currentRoundGroup: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
-  {
-    roomInfo: {
-      roomId: "345678",
-      roomName: "Phòng 2",
-      roomMaxUser: 2,
-      roomPassword: null,
-      roomUsePassword: false,
-      roomBet: 10,
-      owner: 1234,
-      roomRound: 3,
-    },
-    roomMember: [],
-    currentRoundMembers: [],
-    currentRoundGroup: [],
-    currentRound: 1,
-    isPlaying: false,
-  },
-];
+const listRooms = [];
 
 // get socket id of user to send socket message to an user
 const getSocketIdOfUser = (userId) => {
@@ -130,6 +95,10 @@ const leaveRoom = (userId) => {
   const room = listRooms.find((room) => room.roomMember.includes(userId));
   if (room) {
     room.roomMember = room.roomMember.filter((member) => member !== userId);
+  }
+  if (room?.roomMember.length === 0) {
+    const index = listRooms.findIndex((room) => room.roomMember.length === 0);
+    listRooms.splice(index, 1);
   }
 };
 
@@ -335,6 +304,7 @@ const setupSocketServer = (server) => {
       const roomAfterLeave = getCurrentRoom(currentRoom?.roomInfo?.roomId);
       console.log("roomAfterLeave", roomAfterLeave);
       socket.emit("leaveRoomSuccess", roomAfterLeave);
+      io.emit("listRooms", listRooms);
       io.to(roomAfterLeave?.roomInfo.roomId).emit("currentRoom", roomAfterLeave);
       io.to(roomAfterLeave?.roomInfo.roomId).emit("roomMembers", getRoomMembers(roomAfterLeave?.roomInfo.roomId));
     });

@@ -11,7 +11,9 @@ function navigateTo(pageId) {
 //   event.returnValue = "Bạn có chắc chắn muốn rời khỏi trang này?";
 // });
 let choosedOption = null;
-const socket = io();
+const socket = io({
+  transports: ["polling"], // Chỉ sử dụng long polling
+});
 
 socket.on("disconnect", () => {
   console.log("Disconnected from server");
@@ -553,4 +555,9 @@ socket.on("endOfGame", (data) => {
     navigateTo("room-content");
   }, 10000);
   startCountdown(9);
+});
+
+window.Mezon.WebView.postEvent("PING", { message: "Hello Mezon!" });
+window.Mezon.WebView.onEvent("PONG", () => {
+  console.log("Hello Mezon Again!");
 });
