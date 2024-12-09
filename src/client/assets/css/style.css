@@ -1,0 +1,48 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Roboto", sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+  color: #333;
+}
+html {
+  font-size: 62.5%;
+}
+
+.font-weight-600 {
+  font-weight: 600;
+}
+.custom-modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  pointer-events: auto;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.3rem;
+  outline: 0;
+  background: #4d4e54;
+  box-shadow: 0 0 10px rgba(90, 80, 80, 0.5);
+}
+.content {
+  display: none;
+}
+.content.active {
+  display: block;
+}
+
+.show-flex {
+  display: flex !important;
+}
+.hide {
+  display: none !important;
+}
+.opacity-50 {
+  opacity: 0.5;
+}
