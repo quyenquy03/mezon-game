@@ -21,7 +21,7 @@
             <span class="header-button create-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-room">
               <img class="room-header-icon" src="./assets/images/plus.png" alt="" />
             </span>
-            <span class="header-button search-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-search-room">
+            <span class="header-button search-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-start-round">
               <img class="room-header-icon" src="./assets/images/magnifier.png" alt="" />
             </span>
             <span class="header-button online-button hide" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
@@ -186,7 +186,7 @@
                     </div>
                   </div> 
                 </div>
-                <div class='row mt-4'>
+                <!-- <div class='row mt-4'>
                   <div class="col col-4">
                     <div class='body-game-left'>
                       <div class='text-center'>
@@ -206,7 +206,6 @@
                         <div class='countdown-time' id='countdown-time'>00</div>
                       </div>
                       <div class='turn-result text-white'></div>
-                      <!-- <div class='display-champion'></div> -->
                     </div>
                   </div>
                   <div class="col col-4">
@@ -216,6 +215,24 @@
                       </div>
                     </div> 
                   </div>
+                </div> -->
+                <div class="game-main">
+                  <div id="dragon" class="dragon"></div>
+                  <div id="countdown-time" class="countdown-time"></div>
+                  <div class='player-choice-box my-choice-box'>
+                    <img class='player-choice my-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
+                  </div>
+                  <div class='player-choice-box rival-choice-box'>
+                    <img class='player-choice rival-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
+                  </div>
+                  <span class='choice-text my-choice-text'>Bạn chọn</span>
+                  <span class='choice-text rival-choice-text'>Đối thủ chọn</span>
+                  <div class='turn-result text-white'>Bạn thắng</div>
+                </div>
+                <div class='list-choice'>
+                  <button data-choice="rock" onclick='chooseOption("rock")' class='btn-choice rock '></button>
+                  <button data-choice="paper" onclick='chooseOption("paper")' class='btn-choice paper'></button>
+                  <button data-choice="scissors" onclick='chooseOption("scissors")' class='btn-choice scissors'></button>
                 </div>
               </div>
             </div>
