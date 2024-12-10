@@ -661,6 +661,74 @@
   color: #fff;
   text-transform: uppercase;
 }
+.dice {
+  position: absolute;
+}
+.dice1 {
+  background: url("../images/dice.png") no-repeat -507px -2px;
+  width: 98px;
+  height: 96px;
+  transform: scale(0.8) rotate(-20deg);
+  left: 340px;
+  top: 200px;
+  opacity: 0;
+}
+.dice2 {
+  background: url("../images/dice.png") no-repeat -404px -3px;
+  width: 98px;
+  height: 96px;
+  transform: scale(0.8) rotate(20deg);
+  left: 300px;
+  top: 270px;
+  opacity: 0;
+}
+.dice3 {
+  background: url("../images/dice.png") no-repeat 0 -2px;
+  width: 98px;
+  height: 96px;
+  transform: scale(0.8) rotate(10deg);
+  left: 380px;
+  top: 270px;
+  opacity: 0;
+}
+
+.result-dice {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  /* display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; */
+}
+.result-dice-item {
+  width: 30px;
+  height: 30px;
+  background-image: unset;
+  background-size: cover;
+  background-position: center;
+}
+.result-dice-item-1 {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+.result-dice-item-2 {
+  position: absolute;
+  bottom: 27px;
+  right: 19px;
+  transform: rotate(-20deg);
+}
+.result-dice-item-3 {
+  position: absolute;
+  bottom: 26px;
+  left: 18px;
+  transform: rotate(-70deg);
+}
+
 @keyframes spin {
   0% {
     transform: rotate(360deg);

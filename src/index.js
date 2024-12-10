@@ -360,8 +360,76 @@ const setupSocketServer = (server) => {
           }
         }
 
+        // handle draw round
         if (winCount === loseCount) {
-          // handle draw round
+          // start dice game if draw and current turn is less than room round + 3
+          if (currentRound.currentTurn > +currentRoom.roomInfo?.roomRound + 1) {
+            if (!group?.diceTurn) {
+              group.diceTurn = {
+                player1: {
+                  dice1: 0,
+                  dice2: 0,
+                  dice3: 0,
+                  total: 0,
+                  userId: group.player1,
+                },
+                player2: {
+                  dice1: 0,
+                  dice2: 0,
+                  dice3: 0,
+                  total: 0,
+                  userId: group.player2,
+                },
+              };
+            }
+            if (userId === group.player1) {
+              const dice1 = Math.floor(1 + Math.random() * 6);
+              const dice2 = Math.floor(1 + Math.random() * 6);
+              const dice3 = Math.floor(1 + Math.random() * 6);
+              group.diceTurn.player1 = {
+                dice1,
+                dice2,
+                dice3,
+                total: dice1 + dice2 + dice3,
+                userId: group.player1,
+              };
+            } else {
+              const dice1 = Math.floor(1 + Math.random() * 6);
+              const dice2 = Math.floor(1 + Math.random() * 6);
+              const dice3 = Math.floor(1 + Math.random() * 6);
+              group.diceTurn.player2 = {
+                dice1,
+                dice2,
+                dice3,
+                total: dice1 + dice2 + dice3,
+                userId: group.player2,
+              };
+            }
+            socket.emit("startDiceGame");
+            setTimeout(() => {
+              socket.emit("endDiceGame", {
+                roomId,
+                roundGame,
+                roundId,
+                currentTurn: currentRound.currentTurn,
+                myDice: userId === group.player1 ? group.diceTurn.player1 : group.diceTurn.player2,
+                rivalDice: userId === group.player1 ? group.diceTurn.player2 : group.diceTurn.player1,
+              });
+            }, 2000);
+            setTimeout(() => {
+              const winner = group.diceTurn.player1.total > group.diceTurn.player2.total ? group.player1 : group.player2;
+              socket.emit("endOfRound", {
+                roundGame,
+                roundId,
+                roomId,
+                currentTurn: currentRound.currentTurn,
+                isWinner: winner === userId,
+              });
+            }, 10000);
+            return;
+          }
+
+          // create new turn if draw and current turn is less than room round + 3
           group.result.push({
             turn: group.result.length + 1,
             player1Choice: "",
@@ -382,7 +450,7 @@ const setupSocketServer = (server) => {
               roundId,
               currentTurn: currentRound.currentTurn,
             });
-          }, 5000);
+          }, 10000);
           return;
         }
 
@@ -431,9 +499,10 @@ const setupSocketServer = (server) => {
           roundId,
           currentTurn: currentRound.currentTurn,
         });
-      }, 5000);
+      }, 10000);
     });
     socket.on("continueJoin", (data) => {
+      console.log(data);
       const { roomId, userId, roundGame } = data;
       const currentRoom = getCurrentRoom(roomId);
       const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
@@ -463,7 +532,23 @@ const setupSocketServer = (server) => {
       const currentRound = currentRoom.roundGames?.find(
         (round) => round.round === roundGame || round.round === data.currentRound
       );
+      console.log("combindNextRound", currentRound);
+      console.log("data", data);
       if (currentRound.listPlayer.length === currentRoom.roomInfo?.roomMaxUser / 2 ** (currentRound.round - 1)) {
+        if (currentRound.listPlayer.length === 1) {
+          const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
+          io.to(roomId).emit("endOfGame", {
+            roundGame,
+            roundId,
+            roomId,
+            currentTurn: currentRound.currentTurn,
+            winner: userId,
+          });
+          endBet(roomId, userId);
+          socket.emit("endBet", room.totalBet);
+          room.isPlaying = false;
+          return;
+        }
         for (let i = 0; i < currentRound.listPlayer?.length / 2; i++) {
           const turnCount = currentRoom.roomInfo?.roomRound;
           const turnResult = [];
@@ -483,6 +568,7 @@ const setupSocketServer = (server) => {
             player2,
             result: turnResult,
           });
+          console.log("currentRound.group", currentRound.group);
           io.to(currentRound.roundId).emit("startGameSuccess", {
             currentRound: currentRound.round,
             roundId: currentRound.roundId,
