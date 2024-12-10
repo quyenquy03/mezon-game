@@ -10,6 +10,23 @@ function navigateTo(pageId) {
 //   // Trả về một chuỗi (hoặc để trống, nếu không muốn hiển thị thông báo riêng)
 //   event.returnValue = "Bạn có chắc chắn muốn rời khỏi trang này?";
 // });
+
+d1 = document.getElementById("dice1");
+d2 = document.getElementById("dice2");
+d3 = document.getElementById("dice3");
+const player1DiceElement = document.querySelector(".player1-dice");
+const player2DiceElement = document.querySelector(".player2-dice");
+const roll = document.getElementById("roll");
+const time = document.getElementById("countdown-time");
+
+const p1dice1 = document.getElementById("p1-dice1");
+const p1dice2 = document.getElementById("p1-dice2");
+const p1dice3 = document.getElementById("p1-dice3");
+
+const p2dice1 = document.getElementById("p2-dice1");
+const p2dice2 = document.getElementById("p2-dice2");
+const p2dice3 = document.getElementById("p2-dice3");
+
 let choosedOption = null;
 const socket = io({
   transports: ["polling"],
@@ -94,7 +111,7 @@ const renderListRoom = (listRooms) => {
                 </div>
               </div>
               <div class="room-owner">
-                <img class="room-owner-icon" src="./assets/images/user?.png" alt="" />
+                <img class="room-owner-icon" src="./assets/images/user.png" alt="" />
                 <span class="room-owner-name">username</span>
               </div>
             </div>
@@ -434,7 +451,7 @@ socket.on("startTurn", (data) => {
   displayTurn.innerHTML = `Turn ${data?.currentTurn}`;
   renderCurrentRoundInfo(data);
   refreshTurnResult();
-  startCountdown(5);
+  startCountdown(9);
   // const modalElement = document.getElementById("modal-start-round");
   // const modal = new bootstrap.Modal(modalElement);
   // modal.show();
@@ -485,7 +502,7 @@ const refreshTurnResult = () => {
 };
 
 socket.on("getTurnResult", (data) => {
-  startCountdown(4);
+  startCountdown(5);
   renderTurnResult(data);
   stateResult.push(data?.winnerTurnId);
   renderStateResult();
@@ -501,12 +518,21 @@ socket.on("getTurnResult", (data) => {
 });
 
 socket.on("endOfRound", (data) => {
+  console.log("endOfRound", data);
   const endRoundElement = document.querySelector(".turn-result");
   stateResult = [];
+
+  player1DiceElement.style.opacity = 0;
+  player2DiceElement.style.opacity = 0;
+  roll.style.opacity = 0;
+  d1.style.opacity = 0;
+  d2.style.opacity = 0;
+  d3.style.opacity = 0;
+  time.style.opacity = 1;
+
   if (data?.isWinner) {
     endRoundElement.innerHTML = `
-      <h5 class='end-round-result'>Bạn thắng</h5>
-      <span class='end-round-desc'>Vui lòng chờ để chuyển qua vòng đấu tiếp theo</span>
+      Bạn thắng! Chuẩn bị cho vòng tiếp theo nhé!
     `;
     socket.emit("continueJoin", {
       userId: user?.userId,
@@ -515,8 +541,7 @@ socket.on("endOfRound", (data) => {
     });
   } else {
     endRoundElement.innerHTML = `
-      <h5 class='end-round-result'>Bạn thua rồi</h5>
-      <span class='end-round-desc'>Ngồi chờ mọi người chơi xong để bắt đầu trận mới nhé!</span>
+      Bạn thua! Ngồi chờ trận đấu kết thúc nhé!
     `;
   }
   // modal.show();
@@ -525,6 +550,14 @@ socket.on("endOfRound", (data) => {
 socket.on("continueJoinSuccess", (data) => {
   const modalEndRoundElement = document.getElementById("modal-end-round");
   const modal = new bootstrap.Modal(modalEndRoundElement);
+  player1DiceElement.style.opacity = 0;
+  player2DiceElement.style.opacity = 0;
+  roll.style.opacity = 0;
+  d1.style.opacity = 0;
+  d2.style.opacity = 0;
+  d3.style.opacity = 0;
+  time.style.opacity = 1;
+
   setTimeout(() => {
     const dataEmit = {
       ...data,
@@ -536,19 +569,23 @@ socket.on("continueJoinSuccess", (data) => {
   }, 5000);
 });
 socket.on("endOfGame", (data) => {
+  time.style.opacity = 1;
+  roll.style.opacity = 0;
+  d1.style.opacity = 0;
+  d2.style.opacity = 0;
+  d3.style.opacity = 0;
+  player1DiceElement.style.opacity = 0;
+  player2DiceElement.style.opacity = 0;
+
   stateResult = [];
   const endRoundElement = document.querySelector(".turn-result");
   if (data?.winner === user?.userId) {
     endRoundElement.innerHTML = `
-      <h5 class='end-round-result'>Kết thúc trận đấu</h5>
-      <div class='end-round-desc'>Chúc mừng! Bạn đã thắng trận 😍😍</div>
-      <div class='end-round-desc'>Trở về phòng sau 10s</div>
+      Trận đấu kết thúc! Bạn thắng rồi! 🎉
     `;
   } else {
     endRoundElement.innerHTML = `
-      <h5 class='end-round-result'>Kết thúc trận đấu</h5>
-      <div class='end-round-desc'>Oh noo! Bạn thua rồi 😥</div>
-      <div class='end-round-desc'>Trở về phòng sau 10s</div>
+      Trận đấu kết thúc! Bạn thua rồi! 😭
     `;
   }
   setTimeout(() => {
@@ -558,6 +595,61 @@ socket.on("endOfGame", (data) => {
     navigateTo("room-content");
   }, 10000);
   startCountdown(9);
+});
+
+showDice = function (dice1, dice2, dice3) {
+  const dice = {
+    1: "0 -2px",
+    2: "-103px -3px",
+    3: "-204px -3px",
+    4: "-305px -3px",
+    5: "-404px -3px",
+    6: "-507px -2px",
+  };
+  d1.style.background = "url('./assets/images/dice.png') no-repeat " + dice[dice1];
+  d2.style.background = "url('./assets/images/dice.png') no-repeat " + dice[dice2];
+  d3.style.background = "url('./assets/images/dice.png') no-repeat " + dice[dice3];
+  d1.style.opacity = 1;
+  d2.style.opacity = 1;
+  d3.style.opacity = 1;
+};
+const showResultDice = (player1Dice, player2Dice) => {
+  p1dice1.style.background = `url('./assets/images/dice${player1Dice.dice1}.png')`;
+  p1dice2.style.background = `url('./assets/images/dice${player1Dice.dice2}.png')`;
+  p1dice3.style.background = `url('./assets/images/dice${player1Dice.dice3}.png')`;
+
+  p2dice1.style.background = `url('./assets/images/dice${player2Dice.dice1}.png')`;
+  p2dice2.style.background = `url('./assets/images/dice${player2Dice.dice2}.png')`;
+  p2dice3.style.background = `url('./assets/images/dice${player2Dice.dice3}.png')`;
+
+  player1DiceElement.style.opacity = 1;
+  player2DiceElement.style.opacity = 1;
+};
+
+socket.on("startDiceGame", () => {
+  const time = document.getElementById("countdown-time");
+  time.style.opacity = 0;
+  roll.src = "";
+  roll.src = "./assets/images/roll1.gif";
+  roll.style.opacity = 1;
+});
+
+socket.on("endDiceGame", (data) => {
+  console.log("endDiceGame", data);
+  const roll = document.getElementById("roll");
+  roll.style.opacity = 0;
+  showDice(data.myDice.dice1, data.myDice.dice2, data.myDice.dice3);
+  showResultDice(data.myDice, data.rivalDice);
+  const endRoundElement = document.querySelector(".turn-result");
+  if (data?.myDice.total >= data?.rivalDice.total) {
+    endRoundElement.innerHTML = `
+      Bạn thắng! Chuẩn bị cho vòng tiếp theo nhé!
+    `;
+  } else {
+    endRoundElement.innerHTML = `
+      Bạn thua! Ngồi chờ trận đấu kết thúc nhé!
+    `;
+  }
 });
 
 window.Mezon.WebView.postEvent("PING", { message: "Hello Mezon!" });
