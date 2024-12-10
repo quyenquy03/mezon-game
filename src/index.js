@@ -64,12 +64,12 @@ const createdRoom = (roomInfo) => {
 
 // check room before join room, return error message if room is not valid
 const checkBeforeJoinRoom = (data) => {
-  const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === data.roomId);
   if (!room) {
     return "Phòng không tồn tại!";
   }
-  const checkUser = room.roomMember.filter((member) => member !== null);
-  if (checkUser.length === room.roomInfo.roomMaxUser) {
+  const checkUser = room.roomMember?.filter((member) => member !== null);
+  if (checkUser.length === room.roomInfo?.roomMaxUser) {
     return "Phòng đã đầy!";
   }
   if (room.isPlaying) {
@@ -83,7 +83,7 @@ const checkBeforeJoinRoom = (data) => {
 
 // join room and push user to roomMember array of room
 const joinRoom = (data) => {
-  const room = listRooms.find((room) => room.roomInfo.roomId === data.roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === data.roomId);
   const checkIsMember = room?.roomMember?.find((member) => member.userId === data.userId);
   if (room && !checkIsMember && data.userId) {
     room.roomMember.push(data.userId);
@@ -92,31 +92,31 @@ const joinRoom = (data) => {
 
 // leave room and remove user from roomMember array of room
 const leaveRoom = (userId) => {
-  const room = listRooms.find((room) => room.roomMember.includes(userId));
+  const room = listRooms?.find((room) => room.roomMember.includes(userId));
   if (room) {
-    room.roomMember = room.roomMember.filter((member) => member !== userId);
+    room.roomMember = room.roomMember?.filter((member) => member !== userId);
   }
   if (room?.roomMember.length === 0) {
-    const index = listRooms.findIndex((room) => room.roomMember.length === 0);
+    const index = listRooms?.findIndex((room) => room.roomMember.length === 0);
     listRooms.splice(index, 1);
   }
 };
 
 // get current room by roomId, return room info
 const getCurrentRoom = (roomId) => {
-  const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
   return room;
 };
 
 // get room info of user by userId
 const getRoomOfUser = (userId) => {
-  const room = listRooms.find((room) => room.roomMember.includes(userId));
+  const room = listRooms?.find((room) => room.roomMember.includes(userId));
   return room;
 };
 
 // get room members by roomId, return list of members
 const getRoomMembers = (roomId) => {
-  const room = listRooms?.find((room) => room.roomInfo.roomId === roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
   const listMemberOfRoom = room?.roomMember?.map((member) => {
     return connectedUsers?.find((user) => user.userId === member);
   });
@@ -128,17 +128,17 @@ const getRoomMembers = (roomId) => {
 const getCurrentRoomOfUser = (socketId) => {
   const userBySocketId = connectedUsers?.find((user) => user.id === socketId);
   if (!userBySocketId) return null;
-  const room = listRooms.find((room) => room.roomMember?.includes(userBySocketId?.userId));
+  const room = listRooms?.find((room) => room.roomMember?.includes(userBySocketId?.userId));
   return room;
 };
 
 // check member before start game, return true if member is enough to start game
 const checkMemberBeforeStartGame = (roomId) => {
-  const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
   if (room?.roomMember?.length < 2) {
     return false;
   }
-  if (room?.roomMember?.length !== room?.roomInfo.roomMaxUser) {
+  if (room?.roomMember?.length !== room?.roomInfo?.roomMaxUser) {
     return false;
   }
   return true;
@@ -146,29 +146,29 @@ const checkMemberBeforeStartGame = (roomId) => {
 
 // start bet, decrease money of user by room bet, increase total bet of room
 const startBet = (roomId) => {
-  const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
 
   // decrease money of all user in room when start game
   connectedUsers.forEach((user) => {
-    if (room.roomMember.includes(user.userId)) {
-      user.money -= room.roomInfo.roomBet;
+    if (room.roomMember?.includes(user.userId)) {
+      user.money -= room.roomInfo?.roomBet;
     }
   });
 
   // total bet of room will be given to winner after game
-  room.totalBet = room.roomInfo.roomBet * room.roomInfo.roomMaxUser;
+  room.totalBet = room.roomInfo?.roomBet * room.roomInfo?.roomMaxUser;
 };
 
 // end bet, increase money of winner by total bet of room
 const endBet = (roomId, winnerId) => {
-  const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
   const user = connectedUsers.find((user) => user.userId === winnerId);
   user.userCoin += room.totalBet;
 };
 
 const startNewGame = (roomId) => {
   // find room and reset room info before start new game
-  const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
   room.currentRoundMembers = room.roomMember;
   room.currentRound = 1;
   room.isPlaying = true;
@@ -177,7 +177,7 @@ const startNewGame = (roomId) => {
 
   // loop to create group of players for each round, each group has 2 players and each player will play with each other
   for (let i = 0; i < room.currentRoundMembers.length / 2; i++) {
-    const turnCount = room.roomInfo.roomRound;
+    const turnCount = room.roomInfo?.roomRound;
     const turnResult = [];
     for (let j = 0; j < turnCount; j++) {
       turnResult.push({
@@ -289,10 +289,14 @@ const setupSocketServer = (server) => {
       if (currentRoom) {
         currentRoom.roomInfo.owner = currentRoom.roomMember[0];
       }
+      const roomMembers = getRoomMembers(data.roomId);
       socket.join(data.roomId);
       socket.emit("joinRoomSuccess", currentRoom);
-      io.to(data.roomId).emit("currentRoom", currentRoom);
-      io.to(data.roomId).emit("roomMembers", getRoomMembers(data.roomId));
+      io.to(data.roomId).emit("currentRoom", {
+        currentRoom,
+        roomMembers: roomMembers,
+      });
+      io.to(data.roomId).emit("roomMembers", roomMembers);
     });
 
     socket.on("leaveRoom", (data) => {
@@ -302,11 +306,15 @@ const setupSocketServer = (server) => {
       }
       leaveRoom(data.userId);
       const roomAfterLeave = getCurrentRoom(currentRoom?.roomInfo?.roomId);
-      console.log("roomAfterLeave", roomAfterLeave);
+      const roomMembers = getRoomMembers(currentRoom?.roomInfo?.roomId);
+      socket.leave(currentRoom?.roomInfo?.roomId);
       socket.emit("leaveRoomSuccess", roomAfterLeave);
       io.emit("listRooms", listRooms);
-      io.to(roomAfterLeave?.roomInfo.roomId).emit("currentRoom", roomAfterLeave);
-      io.to(roomAfterLeave?.roomInfo.roomId).emit("roomMembers", getRoomMembers(roomAfterLeave?.roomInfo.roomId));
+      io.to(roomAfterLeave?.roomInfo?.roomId).emit("currentRoom", {
+        currentRoom: roomAfterLeave,
+        roomMembers: roomMembers,
+      });
+      io.to(roomAfterLeave?.roomInfo?.roomId).emit("roomMembers", roomMembers);
     });
 
     socket.on("getRoomMembers", (roomId) => {
@@ -331,7 +339,7 @@ const setupSocketServer = (server) => {
         roomInfo: currentRoom.roomInfo,
       });
       startBet(data.roomId);
-      io.to(data.roomId).emit("startBet", currentRoom.roomInfo.roomBet);
+      io.to(data.roomId).emit("startBet", currentRoom.roomInfo?.roomBet);
     });
     socket.on("startRound", (data) => {
       const { roomId, userId, roundGame, roundId, currentTurn } = data;
@@ -339,7 +347,7 @@ const setupSocketServer = (server) => {
       const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
       const currentRoundGroup = currentRound.group;
       currentRound.currentTurn = currentTurn;
-      if (currentRound.currentTurn > currentRoom.roomInfo.roomRound) {
+      if (currentRound.currentTurn > currentRoom.roomInfo?.roomRound) {
         const group = currentRoundGroup.find((group) => group.player1 === userId || group.player2 === userId);
         let winCount = 0;
         let loseCount = 0;
@@ -379,7 +387,7 @@ const setupSocketServer = (server) => {
         }
 
         if (currentRound.listPlayer.length <= 2 && winCount > loseCount) {
-          const room = listRooms.find((room) => room.roomInfo.roomId === roomId);
+          const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
           io.to(roomId).emit("endOfGame", {
             roundGame,
             roundId,
@@ -455,9 +463,9 @@ const setupSocketServer = (server) => {
       const currentRound = currentRoom.roundGames?.find(
         (round) => round.round === roundGame || round.round === data.currentRound
       );
-      if (currentRound.listPlayer.length === currentRoom.roomInfo.roomMaxUser / 2 ** (currentRound.round - 1)) {
+      if (currentRound.listPlayer.length === currentRoom.roomInfo?.roomMaxUser / 2 ** (currentRound.round - 1)) {
         for (let i = 0; i < currentRound.listPlayer?.length / 2; i++) {
-          const turnCount = currentRoom.roomInfo.roomRound;
+          const turnCount = currentRoom.roomInfo?.roomRound;
           const turnResult = [];
           const player1 = currentRound.listPlayer[i];
           const player2 = currentRound.listPlayer[currentRound.listPlayer.length - i - 1];
@@ -539,10 +547,12 @@ const setupSocketServer = (server) => {
       disconnectUser(socket);
       if (roomOfUserWithSocketId) {
         roomOfUserWithSocketId.roomInfo.owner = roomOfUserWithSocketId.roomMember[0];
-        socket.to(roomOfUserWithSocketId.roomInfo.roomId).emit("currentRoom", roomOfUserWithSocketId);
-        socket
-          .to(roomOfUserWithSocketId.roomInfo.roomId)
-          .emit("roomMembers", getRoomMembers(roomOfUserWithSocketId.roomInfo.roomId));
+        const roomMembers = getRoomMembers(roomOfUserWithSocketId.roomInfo?.roomId);
+        socket.to(roomOfUserWithSocketId.roomInfo?.roomId).emit("currentRoom", {
+          currentRoom: roomOfUserWithSocketId,
+          roomMembers: roomMembers,
+        });
+        socket.to(roomOfUserWithSocketId.roomInfo?.roomId).emit("roomMembers", roomMembers);
       }
       io.emit("listUsers", connectedUsers);
     });

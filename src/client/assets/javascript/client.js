@@ -12,7 +12,7 @@ function navigateTo(pageId) {
 // });
 let choosedOption = null;
 const socket = io({
-  transports: ["polling"], // Chỉ sử dụng long polling
+  transports: ["polling"],
 });
 
 socket.on("disconnect", () => {
@@ -34,9 +34,10 @@ const generateUser = () => {
 };
 const user = generateUser();
 const fetchUser = () => {
+  // Fake fetch user info
   setTimeout(() => {
     socket.emit("userInfo", user);
-  }, 1000);
+  }, 1);
 };
 fetchUser();
 let prize;
@@ -55,7 +56,7 @@ const createNewRoom = () => {
     roomPassword,
     roomUsePassword,
     roomBet,
-    owner: user.userId,
+    owner: user?.userId,
     roomRound,
   });
 };
@@ -63,8 +64,8 @@ const createNewRoom = () => {
 socket.on("roomCreated", (roomInfo) => {
   navigateTo("room-content");
   socket.emit("joinRoom", {
-    roomId: roomInfo.roomId,
-    userId: user.userId,
+    roomId: roomInfo?.roomId,
+    userId: user?.userId,
   });
   const modalCreateRoom = document.getElementById("modal-create-room");
   const modal = bootstrap.Modal.getInstance(modalCreateRoom);
@@ -93,7 +94,7 @@ const renderListRoom = (listRooms) => {
                 </div>
               </div>
               <div class="room-owner">
-                <img class="room-owner-icon" src="./assets/images/user.png" alt="" />
+                <img class="room-owner-icon" src="./assets/images/user?.png" alt="" />
                 <span class="room-owner-name">username</span>
               </div>
             </div>
@@ -110,7 +111,7 @@ const joinRoomWithSearch = () => {
 const joinRoom = (roomId) => {
   socket.emit("joinRoom", {
     roomId,
-    userId: user.userId,
+    userId: user?.userId,
   });
 };
 
@@ -119,31 +120,31 @@ const renderRoomInfo = (roomInfo) => {
   roomInfoBoxElement.innerHTML = `
     <div class='room-info-item'>
       <span class='room-info-label'>Mã phòng:</span>
-      <span class='room-info-value'>${roomInfo.roomId}</span>
+      <span class='room-info-value'>${roomInfo?.roomId}</span>
     </div>
     <div class='room-info-item'>
       <span class='room-info-label'>Tên phòng:</span>
-    <span class='room-info-value'>${roomInfo.roomName}</span>
+    <span class='room-info-value'>${roomInfo?.roomName}</span>
     </div>
     <div class='room-info-item'>
       <span class='room-info-label'>Số người chơi:</span>
-      <span class='room-info-value room-member-info'>${roomInfo.roomMaxUser}</span>
+      <span class='room-info-value room-member-info'>${roomInfo?.roomMaxUser}</span>
     </div>
     <div class='room-info-item'>
       <span class='room-info-label'>Mật khẩu phòng:</span>
       <span class='room-info-value'>${
-        roomInfo.roomPassword === null || roomInfo.roomUsePassword ? "Không dùng mật khẩu" : roomInfo.roomPassword
+        roomInfo?.roomPassword === null || roomInfo?.roomUsePassword ? "Không dùng mật khẩu" : roomInfo?.roomPassword
       }</span>
     </div>
     <div class='room-info-item'>
       <span class='room-info-label'>Mức cược:</span>
-      <span class='room-info-value'>${roomInfo.roomBet}</span>
+      <span class='room-info-value'>${roomInfo?.roomBet}</span>
     </div>
   `;
 };
 socket.on("joinRoomSuccess", (roomData) => {
   navigateTo("room-content");
-  renderRoomInfo(roomData.roomInfo);
+  renderRoomInfo(roomData?.roomInfo);
   const modalJoinRoom = document.getElementById("modal-search-room");
   const modal = bootstrap.Modal.getInstance(modalJoinRoom);
   if (modal) {
@@ -165,7 +166,7 @@ socket.on("joinRoomError", (message) => {
 
 const leaveRoom = () => {
   socket.emit("leaveRoom", {
-    userId: user.userId,
+    userId: user?.userId,
   });
 };
 
@@ -187,21 +188,23 @@ socket.on("listRooms", (rooms) => {
   renderListRoom(rooms);
 });
 
-const renderCurrentRoomInfo = (roomInfo) => {
+const renderCurrentRoomInfo = (roomInfo, roomMembers) => {
   const roomMemberElement = document.querySelector(".game-members");
   const roomMemberInfoElement = document.querySelector(".room-info-item .room-member-info");
   roomMemberElement.innerHTML = "";
-  const maxMember = roomInfo.roomInfo.roomMaxUser;
-  const owner = roomInfo.roomInfo.owner;
-  const roomMembers = roomInfo.roomMember;
+  const maxMember = roomInfo?.roomInfo?.roomMaxUser;
+  const owner = roomInfo?.roomInfo?.owner;
   if (roomMemberInfoElement) {
-    roomMemberInfoElement.innerHTML = `${roomMembers.length}/${maxMember}`;
+    roomMemberInfoElement.innerHTML = `${roomMembers?.length}/${maxMember}`;
   }
 
   Array.from({ length: maxMember }).forEach((_, index) => {
     const memberElement = document.createElement("div");
     const member = roomMembers?.[index];
-    memberElement.classList.add("game-member-item", "opacity-50");
+    memberElement.classList.add("game-member-item");
+    if (!member) {
+      memberElement.classList.add("opacity-50");
+    }
     memberElement.innerHTML = `
       <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
       <span class='member-name'>${member?.name ?? "Waiting..."}</span>
@@ -211,13 +214,13 @@ const renderCurrentRoomInfo = (roomInfo) => {
 
   const startGameButtonElement = document.querySelector(".btn-start-game");
   const handleStartGame = () => {
-    startGame(user.userId, roomInfo.roomInfo.roomId);
+    startGame(user?.userId, roomInfo?.roomInfo?.roomId);
   };
 
   startGameButtonElement.replaceWith(startGameButtonElement.cloneNode(true));
   const newStartGameButton = document.querySelector(".btn-start-game");
 
-  if (user.userId === owner) {
+  if (user?.userId === owner) {
     newStartGameButton.addEventListener("click", handleStartGame);
     newStartGameButton.innerHTML = "START";
     newStartGameButton.disabled = false;
@@ -227,11 +230,12 @@ const renderCurrentRoomInfo = (roomInfo) => {
   }
 };
 
-socket.on("currentRoom", (roomInfo) => {
-  renderCurrentRoomInfo(roomInfo);
+socket.on("currentRoom", (data) => {
+  renderCurrentRoomInfo(data?.currentRoom, data?.roomMembers);
 });
 
 const renderRoomMembers = (members) => {
+  console.log("renderRoomMembers", members);
   const gameMemberItems = document.querySelectorAll(".game-member-item");
   gameMemberItems.forEach((gameMemberItem, index) => {
     const member = members[index];
@@ -240,7 +244,7 @@ const renderRoomMembers = (members) => {
     }
     gameMemberItem.innerHTML = `
       <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-      <span class='member-name'>${member?.name ?? "Waiting"}</span>
+      <span class='member-name'>${member?.name ?? "Waiting..."}</span>
     `;
   });
 };
@@ -256,10 +260,10 @@ const renderListUser = (listUsers) => {
     userElement.classList.add("user-item");
     userElement.innerHTML = `
       <div class="user-avatar">
-        <img src="${user.avatar}" alt="${user.name}" />
+        <img src="${user?.avatar}" alt="${user?.name}" />
       </div>
       <div class="user-info">
-        <span class="user-name">${user.name}</span>
+        <span class="user-name">${user?.name}</span>
       </div>
     `;
     listUserElement.appendChild(userElement);
@@ -283,16 +287,15 @@ const renderUserInfo = (userInfo) => {
 
   userInfoElement.innerHTML = `
     <div class="avatar">
-      <img src="${userInfo.avatar}" alt="${userInfo.name}" />
+      <img src="${userInfo?.avatar}" alt="${userInfo?.name}" />
     </div>
     <div class="name">
-      <span class="user-name">${userInfo.name}</span>
+      <span class="user-name">${userInfo?.name}</span>
     </div>
   `;
 };
 
 socket.on("userInfo", (userInfo) => {
-  console.log(userInfo);
   renderUserInfo(userInfo);
 });
 // start game
@@ -307,13 +310,13 @@ socket.on("startGameError", (message) => {
 });
 
 socket.on("startBet", (data) => {
-  user.userCoin = user.userCoin - data;
+  user.userCoin = user?.userCoin - data;
   renderUserInfo(user);
 });
 
 socket.on("endBet", (data) => {
   console.log("endBet", data);
-  user.userCoin = user.userCoin + data;
+  user.userCoin = user?.userCoin + data;
   renderUserInfo(user);
 });
 
@@ -323,7 +326,7 @@ const renderStateResult = () => {
   const player2Score = document.querySelector(".game-user-score.player-2");
   player1Score.innerHTML = stateResult
     ?.map((e) => {
-      if (e === user.userId) {
+      if (e === user?.userId) {
         return `<img src="./assets/images/win.png" class="state-result"/>`;
       } else if (e === null) {
         return `<img src="./assets/images/draw.png" class="state-result"/>`;
@@ -334,7 +337,7 @@ const renderStateResult = () => {
     .join("");
   player2Score.innerHTML = stateResult
     ?.map((e) => {
-      if (e === user.userId) {
+      if (e === user?.userId) {
         return `<img src="./assets/images/lose.png" class="state-result"/>`;
       } else if (e === null) {
         return `<img src="./assets/images/draw.png" class="state-result"/>`;
@@ -418,17 +421,17 @@ socket.on("startGameSuccess", (data) => {
     modal.show();
   }
   socket.emit("startRound", {
-    userId: user.userId,
-    roomId: data.roomInfo.roomId,
-    roundGame: data.currentRound,
-    roundId: data.roundId,
+    userId: user?.userId,
+    roomId: data?.roomInfo?.roomId,
+    roundGame: data?.currentRound,
+    roundId: data?.roundId,
     currentTurn: 1,
   });
 });
 
 socket.on("startTurn", (data) => {
   const displayTurn = document.querySelector(".turn");
-  displayTurn.innerHTML = `Turn ${data.currentTurn}`;
+  displayTurn.innerHTML = `Turn ${data?.currentTurn}`;
   renderCurrentRoundInfo(data);
   refreshTurnResult();
   startCountdown(5);
@@ -443,18 +446,18 @@ socket.on("submitTurnNow", (data) => {
     choice = choosedOptionElement.dataset.choice;
   }
   socket.emit("submitTurn", {
-    userId: user.userId,
-    roomId: data.roomId,
-    roundGame: data.roundGame,
-    currentTurn: data.currentTurn,
+    userId: user?.userId,
+    roomId: data?.roomId,
+    roundGame: data?.roundGame,
+    currentTurn: data?.currentTurn,
     choosedOption: choice,
   });
   setTimeout(() => {
     socket.emit("getTurnResult", {
-      userId: user.userId,
-      roomId: data.roomId,
-      roundGame: data.roundGame,
-      currentTurn: data.currentTurn,
+      userId: user?.userId,
+      roomId: data?.roomId,
+      roundGame: data?.roundGame,
+      currentTurn: data?.currentTurn,
     });
   }, 1000);
 });
@@ -463,11 +466,11 @@ const renderTurnResult = (data) => {
   const myChoiceElement = document.querySelector(".my-choice");
   const rivalChoiceElement = document.querySelector(".rival-choice");
 
-  myChoiceElement.setAttribute("src", `./assets/images/${data.yourChoice ?? "rock-paper-scissors"}.png`);
-  rivalChoiceElement.setAttribute("src", `./assets/images/${data.rivalChoice ?? "rock-paper-scissors"}.png`);
+  myChoiceElement.setAttribute("src", `./assets/images/${data?.yourChoice ?? "rock-paper-scissors"}.png`);
+  rivalChoiceElement.setAttribute("src", `./assets/images/${data?.rivalChoice ?? "rock-paper-scissors"}.png`);
 
   const resultElement = document.querySelector(".turn-result");
-  resultElement.innerHTML = data.result;
+  resultElement.innerHTML = data?.result;
 };
 
 const refreshTurnResult = () => {
@@ -484,15 +487,15 @@ const refreshTurnResult = () => {
 socket.on("getTurnResult", (data) => {
   startCountdown(4);
   renderTurnResult(data);
-  stateResult.push(data.winnerTurnId);
+  stateResult.push(data?.winnerTurnId);
   renderStateResult();
   setTimeout(() => {
     socket.emit("startRound", {
-      userId: user.userId,
-      roomId: data.roomId,
-      roundGame: data.roundGame,
-      roundId: data.roundId,
-      currentTurn: data.currentTurn + 1,
+      userId: user?.userId,
+      roomId: data?.roomId,
+      roundGame: data?.roundGame,
+      roundId: data?.roundId,
+      currentTurn: data?.currentTurn + 1,
     });
   }, 5000);
 });
@@ -500,15 +503,15 @@ socket.on("getTurnResult", (data) => {
 socket.on("endOfRound", (data) => {
   const endRoundElement = document.querySelector(".turn-result");
   stateResult = [];
-  if (data.isWinner) {
+  if (data?.isWinner) {
     endRoundElement.innerHTML = `
       <h5 class='end-round-result'>Bạn thắng</h5>
       <span class='end-round-desc'>Vui lòng chờ để chuyển qua vòng đấu tiếp theo</span>
     `;
     socket.emit("continueJoin", {
-      userId: user.userId,
-      roomId: data.roomId,
-      roundGame: data.roundGame + 1,
+      userId: user?.userId,
+      roomId: data?.roomId,
+      roundGame: data?.roundGame + 1,
     });
   } else {
     endRoundElement.innerHTML = `
@@ -525,8 +528,8 @@ socket.on("continueJoinSuccess", (data) => {
   setTimeout(() => {
     const dataEmit = {
       ...data,
-      roomId: data.roomId,
-      userId: user.userId,
+      roomId: data?.roomId,
+      userId: user?.userId,
     };
     socket.emit("combindNextRound", dataEmit);
     modal.hide();
@@ -535,7 +538,7 @@ socket.on("continueJoinSuccess", (data) => {
 socket.on("endOfGame", (data) => {
   stateResult = [];
   const endRoundElement = document.querySelector(".turn-result");
-  if (data.winner === user.userId) {
+  if (data?.winner === user?.userId) {
     endRoundElement.innerHTML = `
       <h5 class='end-round-result'>Kết thúc trận đấu</h5>
       <div class='end-round-desc'>Chúc mừng! Bạn đã thắng trận 😍😍</div>
