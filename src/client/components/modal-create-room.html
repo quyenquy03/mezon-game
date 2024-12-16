@@ -1,0 +1,89 @@
+<div class="modal fade" id="modal-create-room" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center w-100" id="exampleModalLabel">
+          <span class="font-weight-600 text-white">Tạo phòng</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="form-create-room">
+        <div class="row">
+          <div class="col col-sm-6">
+            <div class="form-item">
+              <label for="room-name" class="label">Tên phòng</label>
+              <input
+                autocomplete="false"
+                type="text"
+                id="room-name"
+                class="form-control form-input"
+                placeholder="Tên phòng của bạn..."
+              />
+            </div>
+          </div>
+          <div class="col col-sm-6">
+            <div class="form-item">
+              <label for="room-round" class="label">Số lượt mỗi vòng</label>
+              <select id="room-round" class="form-select form-select-lg" aria-label="Default select example">
+                <option value="1">1</option>
+                <option value="3" selected>3</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col col-sm-6">
+            <div class="form-item">
+              <label for="room-user" class="label">Số người chơi</label>
+              <select id="room-max-user" class="form-select form-select-lg" aria-label="Default select example">
+                <option value="2" selected>2</option>
+                <option value="4">4</option>
+                <option value="8">8</option>
+                <option value="16">16</option>
+              </select>
+            </div>
+          </div>
+          <div class="col col-sm-6">
+            <div class="form-item">
+              <label for="room-bet" class="label">Mức cược</label>
+              <input
+                value="1"
+                autocomplete="false"
+                type="text"
+                id="room-bet"
+                class="form-control form-input"
+                placeholder="Mức cược của bạn..."
+              />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col col-sm-6 d-flex align-items-center">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="room-use-password" />
+              <label class="form-check-label text-white" for="room-use-password">Sử dụng mật khẩu</label>
+            </div>
+          </div>
+          <div class="col col-sm-6">
+            <div class="form-item">
+              <label for="room-password" class="label">Mật khẩu phòng</label>
+              <input
+                autocomplete="false"
+                type="password"
+                id="room-password"
+                class="form-control form-input"
+                placeholder="Mật khẩu phòng..."
+              />
+            </div>
+          </div>
+        </div>
+        <div class="text-center mt-3">
+          <button class="btn btn-primary btn-create-room btn-danger" data-bs-dismiss="modal" aria-label="Close">Huỷ bỏ</button>
+          <button onclick="createNewRoom()" class="btn btn-primary btn-create-room">Tạo phòng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

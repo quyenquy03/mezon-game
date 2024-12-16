@@ -1,0 +1,26 @@
+<div class="modal fade" id="modal-search-room" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center w-100" id="exampleModalLabel">
+          <span class="font-weight-600 text-white">Tìm kiếm phòng</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="form-create-room">
+        <div class="form-item">
+          <input
+            autocomplete="false"
+            type="text"
+            id="room-id-search"
+            class="form-control form-input"
+            placeholder="Nhập ID phòng để tham gia"
+          />
+        </div>
+        <div class="text-center mt-3">
+          <button onclick="joinRoomWithSearch()" class="btn btn-primary btn-create-room">Tham gia</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

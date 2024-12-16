@@ -52,13 +52,16 @@ const disconnectUser = (socket) => {
 // create new room and push new room info to listRooms
 const createdRoom = (roomInfo) => {
   listRooms.push({
-    roomInfo,
-    roomMember: [],
-    currentRoundMembers: [],
-    currentRoundGroup: [],
-    currentRound: 1,
-    isPlaying: false,
-    roundGames: [],
+    roomInfo, // use to store room info
+    roomMember: [], // use to store list id of user in room
+    currentRoundMembers: [], // use to store info of user in current round
+    // currentRoundGroup: [],
+    currentRound: 1, // use to store current round of room
+    isPlaying: false, // use to check room is playing or not
+    roundGames: [], // use to store list of round game
+    totalBet: 0, // use to store total bet of room
+    userWatchers: [], // use to store list of user watching game { userId, targetId }
+    memberStatus: [], // use to store status of member in room { userId, status: "pending" | "playing" | "lose"}
   });
 };
 
@@ -69,13 +72,13 @@ const checkBeforeJoinRoom = (data) => {
     return "Phòng không tồn tại!";
   }
   const checkUser = room.roomMember?.filter((member) => member !== null);
-  if (checkUser.length === room.roomInfo?.roomMaxUser) {
+  if (checkUser?.length === room.roomInfo?.roomMaxUser) {
     return "Phòng đã đầy!";
   }
   if (room.isPlaying) {
     return "Phòng này đang trong trạng thái chơi!";
   }
-  if (room.roomMember.includes(data.userId)) {
+  if (room.roomMember?.includes(data.userId)) {
     return "Bạn đã ở trong phòng!";
   }
   return null;
@@ -92,7 +95,7 @@ const joinRoom = (data) => {
 
 // leave room and remove user from roomMember array of room
 const leaveRoom = (userId) => {
-  const room = listRooms?.find((room) => room.roomMember.includes(userId));
+  const room = listRooms?.find((room) => room.roomMember?.includes(userId));
   if (room) {
     room.roomMember = room.roomMember?.filter((member) => member !== userId);
   }
@@ -110,8 +113,14 @@ const getCurrentRoom = (roomId) => {
 
 // get room info of user by userId
 const getRoomOfUser = (userId) => {
-  const room = listRooms?.find((room) => room.roomMember.includes(userId));
+  const room = listRooms?.find((room) => room.roomMember?.includes(userId));
   return room;
+};
+
+// get user info by socketId
+const getUserBySocketId = (socketId) => {
+  const user = connectedUsers.find((user) => user.id === socketId);
+  return user;
 };
 
 // get room members by roomId, return list of members
@@ -169,11 +178,13 @@ const endBet = (roomId, winnerId) => {
 const startNewGame = (roomId) => {
   // find room and reset room info before start new game
   const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
-  room.currentRoundMembers = room.roomMember;
+  room.currentRoundMembers = room?.roomMember;
   room.currentRound = 1;
   room.isPlaying = true;
   room.roundGames = [];
   const listGroup = [];
+  room.userWatchers = [];
+  room.memberStatus = room?.roomMember.map((member) => ({ userId: member, status: "pending" }));
 
   // loop to create group of players for each round, each group has 2 players and each player will play with each other
   for (let i = 0; i < room.currentRoundMembers.length / 2; i++) {
@@ -206,6 +217,14 @@ const startNewGame = (roomId) => {
   room.roundGames.push(newRound);
 };
 
+const changeStatusOfMember = (roomId, userId, status) => {
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
+  const member = room?.memberStatus?.find((member) => member.userId === userId);
+  if (member) {
+    member.status = status;
+  }
+};
+
 // check result of one game, return winner of game
 const checkResultOfOneGame = (player1, player2, player1Choice, player2Choice) => {
   if (player1Choice === player2Choice) {
@@ -235,6 +254,17 @@ const checkResultOfOneGame = (player1, player2, player1Choice, player2Choice) =>
   if (player1Choice === "scissors" && player2Choice === "paper") {
     return player1;
   }
+};
+
+const getGameMemberStatus = (roomId) => {
+  const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
+  const memberStatus = room?.memberStatus?.map((member) => {
+    return {
+      userInfo: getUserInfo(member.userId),
+      status: member.status,
+    };
+  });
+  return memberStatus;
 };
 
 function makeid(length) {
@@ -326,7 +356,7 @@ const setupSocketServer = (server) => {
         socket.emit("startGameError", "Số lượng người chơi chưa đủ để bắt đầu!");
         return;
       }
-      if (getCurrentRoom(data.roomId).isPlaying) {
+      if (getCurrentRoom(data.roomId)?.isPlaying) {
         return;
       }
       startNewGame(data.roomId);
@@ -344,6 +374,11 @@ const setupSocketServer = (server) => {
     socket.on("startRound", (data) => {
       const { roomId, userId, roundGame, roundId, currentTurn } = data;
       const currentRoom = getCurrentRoom(roomId);
+      changeStatusOfMember(roomId, userId, "playing");
+      currentRoom?.userWatchers?.forEach((watcher) => {
+        const gameData = getGameMemberStatus(currentRoom?.roomInfo?.roomId);
+        io.to(getSocketIdOfUser(watcher.userId)).emit("watchGame", gameData);
+      });
       const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
       const currentRoundGroup = currentRound.group;
       currentRound.currentTurn = currentTurn;
@@ -425,6 +460,12 @@ const setupSocketServer = (server) => {
                 currentTurn: currentRound.currentTurn,
                 isWinner: winner === userId,
               });
+              changeStatusOfMember(roomId, userId, winner === userId ? "pending" : "lose");
+
+              currentRoom?.userWatchers?.forEach((watcher) => {
+                const gameData = getGameMemberStatus(currentRoom?.roomInfo?.roomId);
+                io.to(getSocketIdOfUser(watcher.userId)).emit("watchGame", gameData);
+              });
             }, 10000);
             return;
           }
@@ -475,6 +516,11 @@ const setupSocketServer = (server) => {
           roomId,
           currentTurn: currentRound.currentTurn,
           isWinner: winCount > loseCount,
+        });
+        changeStatusOfMember(roomId, userId, winCount > loseCount ? "pending" : "lose");
+        currentRoom?.userWatchers?.forEach((watcher) => {
+          const gameData = getGameMemberStatus(currentRoom?.roomInfo?.roomId);
+          io.to(getSocketIdOfUser(watcher.userId)).emit("watchGame", gameData);
         });
         return;
       }
@@ -532,8 +578,6 @@ const setupSocketServer = (server) => {
       const currentRound = currentRoom.roundGames?.find(
         (round) => round.round === roundGame || round.round === data.currentRound
       );
-      console.log("combindNextRound", currentRound);
-      console.log("data", data);
       if (currentRound.listPlayer.length === currentRoom.roomInfo?.roomMaxUser / 2 ** (currentRound.round - 1)) {
         if (currentRound.listPlayer.length === 1) {
           const room = listRooms?.find((room) => room.roomInfo?.roomId === roomId);
@@ -568,7 +612,6 @@ const setupSocketServer = (server) => {
             player2,
             result: turnResult,
           });
-          console.log("currentRound.group", currentRound.group);
           io.to(currentRound.roundId).emit("startGameSuccess", {
             currentRound: currentRound.round,
             roundId: currentRound.roundId,
@@ -625,6 +668,23 @@ const setupSocketServer = (server) => {
           group.player1 === userId ? group.result[currentTurn - 1]?.player2Choice : group.result[currentTurn - 1]?.player1Choice,
         result: `${checkResult === null ? "Lượt đấu hoà" : checkResult === userId ? "Bạn thắng" : "Bạn thua"}`,
       });
+    });
+
+    socket.on("getWatchGame", (data) => {
+      const userBySocketId = getUserBySocketId(socket.id);
+      console.log("userBySocketId", userBySocketId);
+      const currentRoom = getCurrentRoomOfUser(socket.id);
+      console.log("currentRoom", currentRoom);
+      const checkUserInListWatchers = currentRoom?.userWatchers?.find((watcher) => watcher.userId === userBySocketId?.userId);
+      console.log("checkUserInListWatchers", checkUserInListWatchers);
+      if (!checkUserInListWatchers) {
+        currentRoom?.userWatchers.push({
+          userId: userBySocketId?.userId,
+          targetId: currentRoom.roomMember[0],
+        });
+      }
+      const gameData = getGameMemberStatus(currentRoom?.roomInfo?.roomId);
+      socket.emit("watchGame", gameData);
     });
 
     // Khi client ngắt kết nối

@@ -729,6 +729,114 @@
   transform: rotate(-70deg);
 }
 
+.modal-show-game {
+  display: flex;
+  gap: 20px;
+}
+.modal-show-game .show-game-left-box {
+  width: 350px;
+  height: calc(100vh - 20px);
+  margin: 10px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border-radius: 10px;
+  background: #313338;
+  box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
+}
+.show-game-left-box .list-members {
+  width: 100%;
+  border-radius: 10px;
+}
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.show-game-left-box .list-members .member-item {
+  display: flex;
+  padding: 10px;
+  cursor: pointer;
+  color: #fff;
+  position: relative;
+  width: 100%;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.show-game-left-box .list-members .member-item:hover {
+  background-color: #202124;
+  box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
+}
+
+.show-game-left-box .member-item + .member-item {
+  border-top: 1px solid #fff;
+}
+
+.show-game-left-box .member-item .member-info {
+  flex: 1;
+}
+.show-game-left-box .member-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  border: 2px solid #fff;
+  padding: 2px;
+}
+.show-game-left-box .eye-icon {
+  width: 24px;
+  border-radius: 50%;
+  padding: absolute;
+  top: 0;
+  right: 0;
+  transition: all 0.2s;
+}
+.show-game-left-box .eye-icon:active {
+  transform: scale(0.9);
+}
+
+.show-game-right-box {
+  flex: 1;
+  margin: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.show-game-right-box .round-player-box {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-direction: column;
+}
+
+.round-player-box .player-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  border: 2px solid #fff;
+}
+.result-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.round-result-item {
+  padding: 10px;
+  background-color: #313338;
+  border-radius: 10px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(360deg);

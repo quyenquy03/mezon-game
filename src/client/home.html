@@ -21,7 +21,7 @@
             <span class="header-button create-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-create-room">
               <img class="room-header-icon" src="./assets/images/plus.png" alt="" />
             </span>
-            <span class="header-button search-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-start-round">
+            <span class="header-button search-button" type="button" data-bs-toggle="modal" data-bs-target="#modal-show-game">
               <img class="room-header-icon" src="./assets/images/magnifier.png" alt="" />
             </span>
             <span class="header-button online-button hide" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
@@ -64,185 +64,24 @@
           <div class="user-list"></div>
         </div>
       </div>
-      <div class='modal-section'>
-        <div class="modal fade" id="modal-create-room" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title text-center w-100" id="exampleModalLabel">
-                 <span class="font-weight-600 text-white">Tạo phòng</span> 
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-                <div class='form-create-room'>
-                  <div class='row'>
-                    <div class='col col-sm-6'>
-                      <div class='form-item'>
-                        <label for='room-name' class='label'>Tên phòng</label>
-                        <input autocomplete='false' type='text' id='room-name' class='form-control form-input' placeholder='Tên phòng của bạn...' />
-                      </div>
-                    </div>
-                    <div class='col col-sm-6'>
-                      <div class='form-item'>
-                        <label for='room-round' class='label'>Số lượt mỗi vòng</label>
-                        <select id='room-round' class="form-select form-select-lg" aria-label="Default select example">
-                          <option value="1" >1</option>
-                          <option value="3" selected>3</option>
-                          <option value="5">5</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class='row'>
-                    <div class='col col-sm-6'>
-                      <div class='form-item'>
-                        <label for='room-user' class='label'>Số người chơi</label>
-                        <select id='room-max-user' class="form-select form-select-lg" aria-label="Default select example">
-                          <option value="2" selected>2</option>
-                          <option value="4">4</option>
-                          <option value="8">8</option>
-                          <option value="16">16</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class='col col-sm-6'>
-                      <div class='form-item'>
-                        <label for='room-bet' class='label'>Mức cược</label>
-                        <input value='1' autocomplete='false' type='text' id='room-bet' class='form-control form-input' placeholder='Mức cược của bạn...' />
-                      </div>
-                    </div>
-                  </div>
-                  <div class='row'>
-                    <div class='col col-sm-6 d-flex align-items-center'>
-                      <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="room-use-password">
-                        <label class="form-check-label text-white" for="room-use-password">Sử dụng mật khẩu</label>
-                      </div>
-                    </div>
-                    <div class='col col-sm-6'>
-                      <div class='form-item'>
-                        <label for='room-password' class='label'>Mật khẩu phòng</label>
-                        <input autocomplete='false' type='password' id='room-password' class='form-control form-input' placeholder='Mật khẩu phòng...' />
-                      </div>
-                    </div>
-                  </div>
-                  <div class='text-center mt-3'>
-                    <button class='btn btn-primary btn-create-room btn-danger' data-bs-dismiss="modal" aria-label="Close">Huỷ bỏ</button>
-                    <button onclick='createNewRoom()' class='btn btn-primary btn-create-room'>Tạo phòng</button>
-                  </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal fade" id="modal-search-room" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title text-center w-100" id="exampleModalLabel">
-                <span class="font-weight-600 text-white">Tìm kiếm phòng</span> 
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class='form-create-room'>
-                <div class='form-item'>
-                  <input autocomplete='false' type='text' id='room-id-search' class='form-control form-input' placeholder='Nhập ID phòng để tham gia' />
-                </div>
-                <div class='text-center mt-3'>
-                  <button onclick='joinRoomWithSearch()' class='btn btn-primary btn-create-room'>Tham gia</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="modal fade" id="modal-start-round" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-fullscreen">
-            <div class="modal-content custom-modal-content">
-              <div class='form-create-room'>
-                <div class='header-game'>
-                  <div class='header-game-left'>
-                    <div class='game-user game-user-left'>
-                      <img class='game-user-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-                      <div class='game-user-info'>
-                        <div class='game-user-name'>Player 1</div>
-                        <div class='game-user-score-of-player-2'></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class='header-game-center'>
-                    <span class='text-white'>
-                      ROUND 1
-                    </span>
-                    <span class="turn text-white"></span>
-                  </div>
-                  <div class='header-game-right'>
-                    <div class='game-user game-user-right'>
-                      <img class='game-user-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-                      <div class='game-user-info'>
-                        <div class='game-user-name'>Player 1</div>
-                        <div class='game-user-score-of-player-1'></div>
-                      </div>
-                    </div>
-                  </div> 
-                </div>
-                <div class="game-main">
-                  <div id="dragon" class="dragon"></div>
-                  <div id="countdown-time" class="countdown-time"></div>
-                  <div class='player-choice-box my-choice-box'>
-                    <img class='player-choice my-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
-                    <div class='player1-dice result-dice'>
-                      <div id='p1-dice1' class='result-dice-item result-dice-item-1'></div>
-                      <div id='p1-dice2' class='result-dice-item result-dice-item-2'></div>
-                      <div id='p1-dice3' class='result-dice-item result-dice-item-3'></div>
-                    </div>
-                  </div>
-                  <div class='player-choice-box rival-choice-box'>
-                    <img class='player-choice rival-choice' src="./assets/images/rock-paper-scissors.png" alt="" />
-                    <div class='player2-dice result-dice'>
-                      <div id='p2-dice1' class='result-dice-item result-dice-item-1'></div>
-                      <div id='p2-dice2' class='result-dice-item result-dice-item-2'></div>
-                      <div id='p2-dice3' class='result-dice-item result-dice-item-3'></div>
-                    </div>
-                  </div>
-                  <span class='choice-text my-choice-text'>Bạn chọn</span>
-                  <span class='choice-text rival-choice-text'>Đối thủ chọn</span>
-                  <div class='turn-result text-white'>Bạn thắng</div>
-                  <div id="dice1" class="dice dice1"></div>
-                  <div id="dice2" class="dice dice2"></div>
-                  <div id="dice3" class="dice dice3"></div>
-                  <img src="" id="roll" style="position: absolute; left: 300px; top: 190px; transition: 0.5s; opacity: 0; width: 180px" />
-                </div>
-                <div class='list-choice'>
-                  <button data-choice="rock" onclick='chooseOption("rock")' class='btn-choice rock '></button>
-                  <button data-choice="paper" onclick='chooseOption("paper")' class='btn-choice paper'></button>
-                  <button data-choice="scissors" onclick='chooseOption("scissors")' class='btn-choice scissors'></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal fade" id="modal-end-round" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal-content">
-              <div class='form-create-room'>
-                <div class='end-round'></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-notification show">
-          
-        </div>
+      <div class='modal-section'>        
+        <div id="modal-create-room-root"></div>
+        <div id="modal-search-room-root"></div>
+        <div id="modal-start-round-root"></div>
+        <div id="modal-show-game-root"></div>
       </div>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
       crossorigin="anonymous"
     ></script>
+    <script src='./assets/javascript/load-component.js'></script>
     <script src="./assets/javascript/mezon-web-sdk.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./assets/javascript/client.js"></script>
+    <script src="./assets/javascript/user-logic.js"></script>
+    <script src="./assets/javascript/room-logic.js"></script>
+    <script src="./assets/javascript/stream-logic.js"></script>
+    <script src="./assets/javascript/game-logic.js"></script>
   </body>
 </html>

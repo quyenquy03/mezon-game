@@ -1,0 +1,76 @@
+<div class="modal fade" id="modal-start-round" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+    <div class="modal-content custom-modal-content">
+      <div class="form-create-room">
+        <div class="header-game">
+          <div class="header-game-left">
+            <div class="game-user game-user-left">
+              <img
+                class="game-user-avatar"
+                src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg"
+                alt=""
+              />
+              <div class="game-user-info">
+                <div class="game-user-name">Player 1</div>
+                <div class="game-user-score-of-player-2"></div>
+              </div>
+            </div>
+          </div>
+          <div class="header-game-center">
+            <span class="text-white"> ROUND 1 </span>
+            <span class="turn text-white"></span>
+          </div>
+          <div class="header-game-right">
+            <div class="game-user game-user-right">
+              <img
+                class="game-user-avatar"
+                src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg"
+                alt=""
+              />
+              <div class="game-user-info">
+                <div class="game-user-name">Player 1</div>
+                <div class="game-user-score-of-player-1"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="game-main">
+          <div id="dragon" class="dragon"></div>
+          <div id="countdown-time" class="countdown-time"></div>
+          <div class="player-choice-box my-choice-box">
+            <img class="player-choice my-choice" src="./assets/images/rock-paper-scissors.png" alt="" />
+            <div class="player1-dice result-dice">
+              <div id="p1-dice1" class="result-dice-item result-dice-item-1"></div>
+              <div id="p1-dice2" class="result-dice-item result-dice-item-2"></div>
+              <div id="p1-dice3" class="result-dice-item result-dice-item-3"></div>
+            </div>
+          </div>
+          <div class="player-choice-box rival-choice-box">
+            <img class="player-choice rival-choice" src="./assets/images/rock-paper-scissors.png" alt="" />
+            <div class="player2-dice result-dice">
+              <div id="p2-dice1" class="result-dice-item result-dice-item-1"></div>
+              <div id="p2-dice2" class="result-dice-item result-dice-item-2"></div>
+              <div id="p2-dice3" class="result-dice-item result-dice-item-3"></div>
+            </div>
+          </div>
+          <span class="choice-text my-choice-text">Bạn chọn</span>
+          <span class="choice-text rival-choice-text">Đối thủ chọn</span>
+          <div class="turn-result text-white">Bạn thắng</div>
+          <div id="dice1" class="dice dice1"></div>
+          <div id="dice2" class="dice dice2"></div>
+          <div id="dice3" class="dice dice3"></div>
+          <img src="" id="roll" style="position: absolute; left: 300px; top: 190px; transition: 0.5s; opacity: 0; width: 180px" />
+        </div>
+        <div class="list-choice" id="list-choice">
+          <button data-choice="rock" onclick='chooseOption("rock")' class="btn-choice rock"></button>
+          <button data-choice="paper" onclick='chooseOption("paper")' class="btn-choice paper"></button>
+          <button data-choice="scissors" onclick='chooseOption("scissors")' class="btn-choice scissors"></button>
+        </div>
+        <div class="end-game-action text-center hide" id="end-game-action">
+          <button onclick="handleLeaveGame()" class="btn btn-primary btn-create-room btn-danger">Thoát trận</button>
+          <button onclick="handleShowGame(user.id)" class="btn btn-primary btn-create-room">Xem đấu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
