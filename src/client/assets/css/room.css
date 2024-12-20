@@ -522,7 +522,8 @@
 }
 
 .list-choice .btn-choice.active {
-  border: 5px solid #f53d00;
+  /* border: 5px solid #f53d00; */
+  border: 5px solid #1dd882;
 }
 
 .header-game-center {

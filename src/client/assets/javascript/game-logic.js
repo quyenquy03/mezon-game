@@ -21,7 +21,7 @@ socket.on("startBet", (data) => {
 });
 
 socket.on("endBet", (data) => {
-  console.log("endBet", data);
+  // console.log("endBet", data);
   user.userCoin = user?.userCoin + data;
   renderUserInfo(user);
 });
@@ -34,7 +34,7 @@ const renderStateResult = () => {
     ?.map((e) => {
       if (e === user?.userId) {
         return `<img src="./assets/images/win.png" class="state-result"/>`;
-      } else if (e === null) {
+      } else if (e === 'draw') {
         return `<img src="./assets/images/draw.png" class="state-result"/>`;
       } else {
         return `<img src="./assets/images/lose.png" class="state-result"/>`;
@@ -45,7 +45,7 @@ const renderStateResult = () => {
     ?.map((e) => {
       if (e === user?.userId) {
         return `<img src="./assets/images/lose.png" class="state-result"/>`;
-      } else if (e === null) {
+      } else if (e === 'draw') {
         return `<img src="./assets/images/draw.png" class="state-result"/>`;
       } else {
         return `<img src="./assets/images/win.png" class="state-result"/>`;
@@ -348,7 +348,7 @@ socket.on("startDiceGame", () => {
 });
 
 socket.on("endDiceGame", (data) => {
-  console.log("endDiceGame", data);
+  // console.log("endDiceGame", data);
   const roll = document.getElementById("roll");
   roll.style.opacity = 0;
   showDice(data.myDice.dice1, data.myDice.dice2, data.myDice.dice3);

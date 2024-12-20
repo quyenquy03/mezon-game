@@ -212,7 +212,6 @@ const startNewGame = (roomId) => {
     group: listGroup,
     currentTurn: 1,
   };
-
   // push new round to room info to keep track of game
   room.roundGames.push(newRound);
 };
@@ -227,8 +226,8 @@ const changeStatusOfMember = (roomId, userId, status) => {
 
 // check result of one game, return winner of game
 const checkResultOfOneGame = (player1, player2, player1Choice, player2Choice) => {
-  if (player1Choice === player2Choice) {
-    return null;
+  if (player1Choice == player2Choice) {
+    return 'draw';
   }
   if (!player1Choice) {
     return player2;
@@ -368,6 +367,8 @@ const setupSocketServer = (server) => {
         currentRoundMembers: currentRoom.currentRoundMembers,
         roomInfo: currentRoom.roomInfo,
       });
+      // console.log('list group:', currentRoom.roundGames[0].group);
+
       startBet(data.roomId);
       io.to(data.roomId).emit("startBet", currentRoom.roomInfo?.roomBet);
     });
@@ -381,6 +382,14 @@ const setupSocketServer = (server) => {
       });
       const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
       const currentRoundGroup = currentRound.group;
+      const players = currentRoundGroup.map(group => ({
+        // groupId: group.groupId,
+        player1: group.player1,
+        player2: group.player2
+      })
+      );
+      io.to(roomId).emit("displayMatches", players);
+
       currentRound.currentTurn = currentTurn;
       if (currentRound.currentTurn > currentRoom.roomInfo?.roomRound) {
         const group = currentRoundGroup.find((group) => group.player1 === userId || group.player2 === userId);
@@ -548,7 +557,7 @@ const setupSocketServer = (server) => {
       }, 10000);
     });
     socket.on("continueJoin", (data) => {
-      console.log(data);
+      // console.log(data);
       const { roomId, userId, roundGame } = data;
       const currentRoom = getCurrentRoom(roomId);
       const currentRound = currentRoom.roundGames.find((round) => round.round === roundGame);
@@ -656,6 +665,10 @@ const setupSocketServer = (server) => {
       if (checkResult === group.player2) {
         group.result[currentTurn - 1].winner = group.player2;
       }
+
+      if (checkResult === "draw") {
+        group.result[currentTurn -1].winner = "draw";
+      }
       socket.emit("getTurnResult", {
         winnerTurnId: checkResult,
         roomId,
@@ -666,17 +679,41 @@ const setupSocketServer = (server) => {
           group.player1 === userId ? group.result[currentTurn - 1]?.player1Choice : group.result[currentTurn - 1]?.player2Choice,
         rivalChoice:
           group.player1 === userId ? group.result[currentTurn - 1]?.player2Choice : group.result[currentTurn - 1]?.player1Choice,
-        result: `${checkResult === null ? "Lượt đấu hoà" : checkResult === userId ? "Bạn thắng" : "Bạn thua"}`,
+        result: `${checkResult == 'draw' ? "Lượt đấu hoà" : checkResult === userId ? "Bạn thắng" : "Bạn thua"}`,
       });
+      const listMatch = [];
+      currentRoundGroup.forEach(group => {
+        group.result.forEach(turn => {
+          if (turn.winner !== null) {
+            listMatch.push({
+              // groupId: group.groupId,
+              player1: group.player1,
+              player2: group.player2,
+              turn: turn.turn,
+              player1Choice: group.result[currentTurn - 1]?.player1Choice,
+              player2Choice: group.result[currentTurn - 1]?.player2Choice,
+              winner: turn.winner,
+            }); 
+          }
+        });
+      });
+      updateMatchesForTurn(currentTurn, listMatch, roomId);
     });
 
+    function updateMatchesForTurn(turn, listMatch, roomId) {
+      let currentTurn = turn; // Cập nhật lượt hiện tại
+      let filteredMatches = listMatch.filter(match => match.turn === currentTurn);
+      io.to(roomId).emit("listMatch", filteredMatches);
+    }
+    
     socket.on("getWatchGame", (data) => {
+      // console.log('watch game:', data);
       const userBySocketId = getUserBySocketId(socket.id);
-      console.log("userBySocketId", userBySocketId);
+      // console.log("userBySocketId", userBySocketId);
       const currentRoom = getCurrentRoomOfUser(socket.id);
-      console.log("currentRoom", currentRoom);
+      // console.log("currentRoom", currentRoom.roundGames[0].group);
       const checkUserInListWatchers = currentRoom?.userWatchers?.find((watcher) => watcher.userId === userBySocketId?.userId);
-      console.log("checkUserInListWatchers", checkUserInListWatchers);
+      // console.log("checkUserInListWatchers", checkUserInListWatchers);
       if (!checkUserInListWatchers) {
         currentRoom?.userWatchers.push({
           userId: userBySocketId?.userId,

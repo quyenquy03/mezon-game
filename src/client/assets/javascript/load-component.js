@@ -14,6 +14,7 @@ let d1,
   endGameAction,
   listChoice,
   modalShowGame,
+  modalShowMatches,
   modalStartRound,
   listMemberStream;
 
@@ -50,6 +51,17 @@ fetch("./components/modal-show-game.html")
   })
   .catch((error) => console.error("Lỗi:", error));
 
+// Load modal-show-matches.html
+fetch("./components/modal-show-matches.html")
+  .then((response) => {
+    if (!response.ok) throw new Error("Không thể tải file");
+    return response.text();
+  })
+  .then((data) => {
+    document.getElementById("modal-show-matches-root").innerHTML = data;
+  })
+  .catch((error) => console.error("Lỗi:", error));
+
 // load modal-start-round.html
 fetch("./components/modal-start-round.html")
   .then((response) => {
@@ -77,6 +89,7 @@ fetch("./components/modal-start-round.html")
     endGameAction = document.getElementById("end-game-action");
     listChoice = document.getElementById("list-choice");
     modalShowGame = document.getElementById("modal-show-game");
+    modalShowMatches = document.getElementById("modal-show-matches");
     modalStartRound = document.getElementById("modal-start-round");
     listMemberStream = document.getElementById("list-member-stream");
   })
