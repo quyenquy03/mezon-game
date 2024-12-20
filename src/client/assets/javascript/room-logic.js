@@ -23,6 +23,7 @@ socket.on("roomCreated", (roomInfo) => {
   socket.emit("joinRoom", {
     roomId: roomInfo?.roomId,
     userId: user?.userId,
+    password: roomInfo?.roomPassword,
   });
   const modalCreateRoom = document.getElementById("modal-create-room");
   const modal = bootstrap.Modal.getInstance(modalCreateRoom);
@@ -121,6 +122,17 @@ socket.on("joinRoomError", (message) => {
   alert(message);
 });
 
+socket.on("joinRoomWithPassword", (data) => {
+  const password = prompt("Nhập mật khẩu phòng");
+  if (!password) {
+    return;
+  }
+  socket.emit("joinRoom", {
+    roomId: data?.roomId,
+    userId: user?.userId,
+    password,
+  });
+});
 const leaveRoom = () => {
   socket.emit("leaveRoom", {
     userId: user?.userId,

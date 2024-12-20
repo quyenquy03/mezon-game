@@ -110,6 +110,7 @@ let lastEventTime = 0; // Thời gian của lần xử lý event cuối cùng
 
 socket.on("startGameSuccess", (data) => {
   const now = Date.now();
+  console.log("startGameSuccess", data);
 
   // Kiểm tra nếu khoảng cách giữa 2 lần xử lý sự kiện nhỏ hơn 5 giây
   if (now - lastEventTime < 5000) {
@@ -126,6 +127,7 @@ socket.on("startGameSuccess", (data) => {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
   }
+  console.log("startRound 130", data);
   socket.emit("startRound", {
     userId: user?.userId,
     roomId: data?.roomInfo?.roomId,
@@ -207,6 +209,7 @@ socket.on("getTurnResult", (data) => {
 });
 
 socket.on("endOfRound", (data) => {
+  console.log("endOfRound", data);
   const endRoundElement = document.querySelector(".turn-result");
   stateResult = [];
 
