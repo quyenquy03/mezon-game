@@ -1,0 +1,88 @@
+<div class="modal fade" id="modal-show-game" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-show-game">
+        <div class="show-game-left-box hidden-scrollbar">
+          <div class="list-members" id="list-member-stream">
+            <div class="member-item">
+              <img class="member-avatar" src="assets/images/user.png" alt="" />
+              <div class="member-info">
+                <div class="member-name">Player 1</div>
+                <div class="member-score">1000</div>
+              </div>
+              <span>
+                <img class="eye-icon" src="./assets/images/eye.png" alt="" />
+              </span>
+            </div>
+            <div class="member-item active">
+              <img class="member-avatar" src="assets/images/user.png" alt="" />
+              <div class="member-info">
+                <div class="member-name">Player 1</div>
+                <div class="member-score">1000</div>
+              </div>
+              <span>
+                <img class="eye-icon" src="./assets/images/eye.png" alt="" />
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="show-game-right-box">
+          <div class="list-rounds-result">
+            <div class="header-game">
+              <div id="header-stream-left"></div>
+              <div class="header-game-center">
+                <!-- <span class="text-white"> ROUND 1 </span>
+                <span class="turn text-white"></span> -->
+              </div>
+              <div id="header-stream-right"></div>
+            </div>
+            <div class="game-main">
+              <div id="dragon" class="dragon"></div>
+              <div id="countdown-time" class="countdown-time"></div>
+              <div class="player-choice-box my-choice-box">
+                <img
+                  id="player-1-choice-stream"
+                  class="player-choice my-choice"
+                  src="./assets/images/rock-paper-scissors.png"
+                  alt="player-choice"
+                />
+                <div class="player1-dice result-dice">
+                  <div id="p1-dice1" class="result-dice-item result-dice-item-1"></div>
+                  <div id="p1-dice2" class="result-dice-item result-dice-item-2"></div>
+                  <div id="p1-dice3" class="result-dice-item result-dice-item-3"></div>
+                </div>
+              </div>
+              <div class="player-choice-box rival-choice-box">
+                <img
+                  id="player-2-choice-stream"
+                  class="player-choice rival-choice"
+                  src="./assets/images/rock-paper-scissors.png"
+                  alt="player-choice"
+                />
+                <div class="player2-dice result-dice">
+                  <div id="p2-dice1" class="result-dice-item result-dice-item-1"></div>
+                  <div id="p2-dice2" class="result-dice-item result-dice-item-2"></div>
+                  <div id="p2-dice3" class="result-dice-item result-dice-item-3"></div>
+                </div>
+              </div>
+              <span id="player-1-name-stream" class="stream-choice-text my-choice-text">hoang.nguyenviet</span>
+              <span id="player-2-name-stream" class="stream-choice-text rival-choice-text">hoang.nguyenviet</span>
+              <div id="player-stream-result" class="turn-result text-white">Bạn thắng</div>
+              <div id="dice1" class="dice dice1"></div>
+              <div id="dice2" class="dice dice2"></div>
+              <div id="dice3" class="dice dice3"></div>
+              <img
+                src=""
+                id="roll"
+                style="position: absolute; left: 300px; top: 190px; transition: 0.5s; opacity: 0; width: 180px"
+              />
+            </div>
+          </div>
+          <div class="end-game-action text-end" id="end-game-action">
+            <button onclick="handleLeaveGame()" class="btn btn-primary btn-create-room btn-lg">Thoát trận</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
