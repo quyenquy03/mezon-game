@@ -15,6 +15,13 @@ let d1,
   listChoice,
   modalShowGame,
   modalStartRound,
+  player1ChoiceStream,
+  player1NameStream,
+  player2ChoiceStream,
+  player2NameStream,
+  playerStreamResult,
+  headerStreamLeft,
+  headerStreamRight,
   listMemberStream;
 
 // load modal-create-room.html
@@ -47,6 +54,15 @@ fetch("./components/modal-show-game.html")
   })
   .then((data) => {
     document.getElementById("modal-show-game-root").innerHTML = data;
+    player1ChoiceStream = document.getElementById("player-1-choice-stream");
+    player1NameStream = document.getElementById("player-1-name-stream");
+    player2ChoiceStream = document.getElementById("player-2-choice-stream");
+    player2NameStream = document.getElementById("player-2-name-stream");
+    playerStreamResult = document.getElementById("player-stream-result");
+    headerStreamLeft = document.getElementById("header-stream-left");
+    headerStreamRight = document.getElementById("header-stream-right");
+    modalShowGame = document.getElementById("modal-show-game");
+    listMemberStream = document.getElementById("list-member-stream");
   })
   .catch((error) => console.error("Lỗi:", error));
 
@@ -76,8 +92,6 @@ fetch("./components/modal-start-round.html")
 
     endGameAction = document.getElementById("end-game-action");
     listChoice = document.getElementById("list-choice");
-    modalShowGame = document.getElementById("modal-show-game");
     modalStartRound = document.getElementById("modal-start-round");
-    listMemberStream = document.getElementById("list-member-stream");
   })
   .catch((error) => console.error("Lỗi:", error));

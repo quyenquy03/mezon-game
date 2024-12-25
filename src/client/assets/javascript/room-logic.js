@@ -1,3 +1,16 @@
+// start game
+const startGame = (userId, roomId) => {
+  if (listChoice) {
+    listChoice.classList.remove("hide");
+  }
+  if (endGameAction) {
+    endGameAction.classList.add("hide");
+  }
+  socket.emit("startGame", {
+    userId,
+    roomId,
+  });
+};
 const createNewRoom = () => {
   const roomName = document.getElementById("room-name")?.value;
   const roomMaxUser = document.getElementById("room-max-user")?.value;
@@ -19,7 +32,6 @@ const createNewRoom = () => {
 };
 
 socket.on("roomCreated", (roomInfo) => {
-  navigateTo("room-content");
   socket.emit("joinRoom", {
     roomId: roomInfo?.roomId,
     userId: user?.userId,
@@ -27,7 +39,9 @@ socket.on("roomCreated", (roomInfo) => {
   });
   const modalCreateRoom = document.getElementById("modal-create-room");
   const modal = bootstrap.Modal.getInstance(modalCreateRoom);
-  modal.hide();
+  if (modal) {
+    modal.hide();
+  }
 });
 
 const renderListRoom = (listRooms) => {
@@ -175,8 +189,10 @@ const renderCurrentRoomInfo = (roomInfo, roomMembers) => {
       memberElement.classList.add("opacity-50");
     }
     memberElement.innerHTML = `
-      <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-      <span class='member-name'>${member?.name ?? "Waiting..."}</span>
+      <img class='member-avatar' src=${
+        member?.avatar ?? "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg"
+      } alt="">
+      <span class='member-name'>${member?.username ?? "Waiting..."}</span>
     `;
     roomMemberElement.appendChild(memberElement);
   });
@@ -211,10 +227,18 @@ const renderRoomMembers = (members) => {
       gameMemberItem.classList.remove("opacity-50");
     }
     gameMemberItem.innerHTML = `
-      <img class='member-avatar' src="https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg" alt="">
-      <span class='member-name'>${member?.name ?? "Waiting..."}</span>
+      <img class='member-avatar' src=${
+        member?.avatar ?? "https://img.freepik.com/free-psd/3d-render-avatar-character_23-2150611765.jpg"
+      } alt="">
+      <span class='member-name'>${member?.username ?? "Waiting..."}</span>
     `;
   });
+  if (gameMemberItems?.length > 0) {
+    gameMemberItems[0].innerHTML = `
+      ${gameMemberItems[0].innerHTML}
+      <img class='member-owner' src='./assets/images/king.png' alt=''>
+    `;
+  }
 };
 socket.on("roomMembers", (members) => {
   renderRoomMembers(members);

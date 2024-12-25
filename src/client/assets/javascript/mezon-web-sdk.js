@@ -13,7 +13,7 @@
   (() => {
     "use strict";
     e.r(t), e.d(t, { WebView: () => s });
-    const n = "https://mezon.ai";
+    const n = "*";
     var r, a;
     function i(e) {
       try {
@@ -109,7 +109,13 @@
           if (((this.isIframe = null != window.parent && window != window.parent), !this.isIframe)) return;
           this.handleMessage(), (e.iFrameStyle = document.createElement("style")), document.head.appendChild(e.iFrameStyle);
           try {
-            window.parent.postMessage(JSON.stringify({ eventType: a.IframeReady, eventData: { reload_supported: !0 } }), "*");
+            window.parent.postMessage(
+              JSON.stringify({
+                eventType: a.IframeReady,
+                eventData: { reload_supported: !0 },
+              }),
+              "*"
+            );
           } catch (e) {}
         } catch (e) {}
       }

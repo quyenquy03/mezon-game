@@ -1,29 +1,35 @@
-// start game
-const startGame = (userId, roomId) => {
-  if (listChoice) {
-    listChoice.classList.remove("hide");
-  }
-  if (endGameAction) {
-    endGameAction.classList.add("hide");
-  }
-  socket.emit("startGame", {
-    userId,
-    roomId,
-  });
-};
 socket.on("startGameError", (message) => {
   alert(message);
 });
 
 socket.on("startBet", (data) => {
-  user.userCoin = user?.userCoin - data;
+  const { totalBet, receiverId } = data;
+  if (receiverId !== user?.userId) {
+    window.Mezon.WebView.postEvent("SEND_TOKEN", {
+      receiver_id: receiverId,
+      amount: totalBet,
+      note: `Đã đặt cược ${totalBet} token khi chơi game Rock Paper Scissors!`,
+    });
+  }
+  user.wallet = user?.wallet - totalBet;
   renderUserInfo(user);
 });
 
 socket.on("endBet", (data) => {
-  console.log("endBet", data);
-  user.userCoin = user?.userCoin + data;
+  const { totalBet } = data;
+  user.wallet = user?.wallet + totalBet;
   renderUserInfo(user);
+});
+
+socket.on("sendBet", (data) => {
+  const { totalBet, receiverId } = data;
+  if (receiverId !== user?.userId) {
+    window.Mezon.WebView.postEvent("SEND_TOKEN", {
+      receiver_id: receiverId,
+      amount: totalBet,
+      note: `Bạn đã thắng ${totalBet} token khi chơi game Rock Paper Scissors!`,
+    });
+  }
 });
 
 let stateResult = [];
@@ -174,8 +180,14 @@ const renderTurnResult = (data) => {
   const myChoiceElement = document.querySelector(".my-choice");
   const rivalChoiceElement = document.querySelector(".rival-choice");
 
-  myChoiceElement.setAttribute("src", `./assets/images/${data?.yourChoice ?? "rock-paper-scissors"}.png`);
-  rivalChoiceElement.setAttribute("src", `./assets/images/${data?.rivalChoice ?? "rock-paper-scissors"}.png`);
+  myChoiceElement.setAttribute(
+    "src",
+    `./assets/images/${data?.yourChoice && data?.yourChoice?.trim() !== "" ? data?.yourChoice : "rock-paper-scissors"}.png`
+  );
+  rivalChoiceElement.setAttribute(
+    "src",
+    `./assets/images/${data?.rivalChoice && data?.rivalChoice?.trim() !== "" ? data?.rivalChoice : "rock-paper-scissors"}.png`
+  );
 
   const resultElement = document.querySelector(".turn-result");
   resultElement.innerHTML = data?.result;

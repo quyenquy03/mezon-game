@@ -335,12 +335,14 @@
 }
 
 .game-section .game-members .game-member-item {
-  width: 100px;
+  width: 130px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   color: #fff;
+  padding: 10px;
+  position: relative;
 }
 
 .game-section .footer-game {
@@ -379,6 +381,13 @@
   border-radius: 10px;
   border: 2px solid #fff;
   margin-bottom: 5px;
+}
+.member-name {
+  overflow: hidden; /* Ẩn phần văn bản tràn */
+  text-overflow: ellipsis; /* Hiển thị dấu "..." khi văn bản bị cắt */
+  white-space: nowrap; /* Ngừng xuống dòng */
+  width: 120px; /* Độ rộng của phần tử */
+  text-align: center;
 }
 
 .start-game {
@@ -420,7 +429,7 @@
   color: white;
 }
 
-.game-user-score .state-result {
+.state-result {
   width: 20px;
   height: 20px;
   margin-right: 10px;
@@ -646,11 +655,23 @@
   font-size: 20px;
   text-transform: uppercase;
 }
+.stream-choice-text {
+  color: #fff;
+  position: absolute;
+  bottom: 153px;
+  font-size: 15px;
+  width: 195px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  bottom: 145px;
+}
 .my-choice-text {
-  left: 64px;
+  left: 50px;
 }
 .rival-choice-text {
-  right: 64px;
+  right: 50px;
 }
 .turn-result {
   position: absolute;
@@ -767,6 +788,15 @@
   box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
 }
 
+.show-game-left-box .list-members .member-item.active {
+  background-color: #202124;
+  box-shadow: 0 0 10px rgba(51, 50, 50, 0.5);
+}
+
+.show-game-left-box .list-members .member-item.member-lose {
+  opacity: 0.5;
+}
+
 .show-game-left-box .member-item + .member-item {
   border-top: 1px solid #fff;
 }
@@ -835,6 +865,14 @@
   border-radius: 10px;
   color: #fff;
   margin-bottom: 10px;
+}
+
+.member-owner {
+  width: 24px;
+  transform: rotate(45deg);
+  position: absolute;
+  top: 0px;
+  left: 76px;
 }
 
 @keyframes spin {
