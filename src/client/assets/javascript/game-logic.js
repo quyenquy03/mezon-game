@@ -109,14 +109,17 @@ const chooseOption = (option) => {
   const choosedOptionElementNew = document.querySelector(`.btn-choice.${option}`);
   choosedOptionElementNew.classList.add("active");
 
-  choosedOption = option;
+  myChoiceElement = document.querySelector(".my-choice");
+  myChoiceElement.setAttribute("src", `./assets/images/${option}.png`);
+
+  // choosedOption = option;
 };
 
 let lastEventTime = 0; // Thời gian của lần xử lý event cuối cùng
 
 socket.on("startGameSuccess", (data) => {
   const now = Date.now();
-  console.log("startGameSuccess", data);
+  // choosedOption = null;
 
   // Kiểm tra nếu khoảng cách giữa 2 lần xử lý sự kiện nhỏ hơn 5 giây
   if (now - lastEventTime < 5000) {
@@ -146,6 +149,10 @@ socket.on("startGameSuccess", (data) => {
 socket.on("startTurn", (data) => {
   const displayTurn = document.querySelector(".turn");
   displayTurn.innerHTML = `Turn ${data?.currentTurn}`;
+  const choosedOptionElement = document.querySelector(".btn-choice.active");
+  if (choosedOptionElement) {
+    choosedOptionElement.classList.remove("active");
+  }
   renderCurrentRoundInfo(data);
   refreshTurnResult();
   startCountdown(9);

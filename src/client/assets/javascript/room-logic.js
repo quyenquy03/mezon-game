@@ -105,7 +105,9 @@ const renderRoomInfo = (roomInfo) => {
     <div class='room-info-item'>
       <span class='room-info-label'>Mật khẩu phòng:</span>
       <span class='room-info-value'>${
-        roomInfo?.roomPassword === null || roomInfo?.roomUsePassword ? "Không dùng mật khẩu" : roomInfo?.roomPassword
+        roomInfo?.roomPassword === null || !roomInfo?.roomUsePassword || roomInfo?.roomPassword?.trim() === ""
+          ? "Không dùng mật khẩu"
+          : roomInfo?.roomPassword
       }</span>
     </div>
     <div class='room-info-item'>
