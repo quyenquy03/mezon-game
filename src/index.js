@@ -313,7 +313,12 @@ const setupSocketServer = (server) => {
   io.on("connection", (socket) => {
     // when user connect to server
     socket.on("userInfo", (userInfo) => {
-      connectedUsers.push({ id: socket.id, ...userInfo });
+      const user = connectedUsers.find((user) => user.userId === userInfo.userId);
+      if (user) {
+        user.id = socket.id;
+      } else {
+        connectedUsers.push({ id: socket.id, ...userInfo });
+      }
       socket.emit("userInfo", userInfo);
       io.emit("listUsers", connectedUsers);
     });
