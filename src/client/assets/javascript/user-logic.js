@@ -21,6 +21,11 @@ window.Mezon.WebView.onEvent("CURRENT_USER_INFO", (_, userData) => {
     wallet: JSON.parse(userData.wallet).value,
   };
   socket.emit("userInfo", user);
+
+  const loadingBox = document.querySelector(".loading-box");
+  if (loadingBox) {
+    loadingBox.classList.add("hide");
+  }
 });
 
 const renderListUser = (listUsers) => {

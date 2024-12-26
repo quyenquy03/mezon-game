@@ -81,9 +81,9 @@ const checkBeforeJoinRoom = (data) => {
   if (room.isPlaying) {
     return "Phòng này đang trong trạng thái chơi!";
   }
-  if (room.roomMember?.includes(data.userId)) {
-    return "Bạn đã ở trong phòng!";
-  }
+  // if (room.roomMember?.includes(data.userId)) {
+  //   return "Bạn đã ở trong phòng!";
+  // }
   return null;
 };
 
