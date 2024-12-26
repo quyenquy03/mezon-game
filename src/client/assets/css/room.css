@@ -602,6 +602,10 @@
   display: inline-block;
 }
 
+.stream-turn-result {
+  text-transform: unset;
+}
+
 .end-round-result {
   font-weight: 600;
   font-size: 30px;
