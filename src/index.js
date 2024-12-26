@@ -201,8 +201,8 @@ const startNewGame = (roomId) => {
     for (let j = 0; j < turnCount; j++) {
       turnResult.push({
         turn: j + 1,
-        player1Choice: "",
-        player2Choice: "",
+        player1Choice: null,
+        player2Choice: null,
         winner: null,
       });
     }
@@ -245,6 +245,9 @@ const changeStatusOfMember = (roomId, userId, status) => {
 // check result of one game, return winner of game
 const checkResultOfOneGame = (player1, player2, player1Choice, player2Choice) => {
   if (player1Choice === player2Choice) {
+    return null;
+  }
+  if ((player1Choice === null || player1Choice?.trim() === "") && (player2Choice === null || player2Choice?.trim() === "")) {
     return null;
   }
   if (!player1Choice) {
@@ -596,8 +599,8 @@ const setupSocketServer = (server) => {
             // create new turn if draw and current turn is less than room round + 3
             group.result.push({
               turn: group.result.length + 1,
-              player1Choice: "",
-              player2Choice: "",
+              player1Choice: null,
+              player2Choice: null,
               winner: null,
             });
 
@@ -777,8 +780,8 @@ const setupSocketServer = (server) => {
           for (let j = 0; j < turnCount; j++) {
             turnResult.push({
               turn: j + 1,
-              player1Choice: "",
-              player2Choice: "",
+              player1Choice: null,
+              player2Choice: null,
               winner: null,
             });
           }
