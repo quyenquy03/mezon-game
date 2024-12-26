@@ -91,7 +91,7 @@ const checkBeforeJoinRoom = (data) => {
 // join room and push user to roomMember array of room
 const joinRoom = (data) => {
   const room = listRooms?.find((room) => room.roomInfo?.roomId === data.roomId);
-  const checkIsMember = room?.roomMember?.find((member) => member.userId === data.userId);
+  const checkIsMember = room?.roomMember?.find((member) => member === data.userId);
   if (room && !checkIsMember && data.userId) {
     room.roomMember.push(data.userId);
   }
@@ -364,6 +364,7 @@ const setupSocketServer = (server) => {
 
       joinRoom(data);
       const currentRoom = getCurrentRoom(data.roomId);
+      console.log("currentRoom", currentRoom);
       if (currentRoom) {
         currentRoom.roomInfo.owner = currentRoom.roomMember[0];
       }
