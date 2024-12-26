@@ -74,7 +74,8 @@ const checkBeforeJoinRoom = (data) => {
   if (room.roomInfo?.roomBet > user?.wallet) {
     return "Số dư không đủ để tham gia phòng!";
   }
-  const checkUser = room.roomMember?.filter((member) => member !== null);
+  const checkUser = room.roomMember?.filter((member) => member !== null && member !== data.userId);
+
   if (checkUser?.length === room.roomInfo?.roomMaxUser) {
     return "Phòng đã đầy!";
   }
