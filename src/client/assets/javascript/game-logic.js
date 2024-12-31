@@ -13,6 +13,7 @@ socket.on("startBet", (data) => {
   // }
   if (user?.userId !== '1840663933552168960') {
     window.Mezon.WebView.postEvent("SEND_TOKEN", {
+      gameId: data?.gameId,
       sender_id: user?.userId,
       sender_name: user?.username,
       receiver_id: '1840663933552168960',
@@ -31,7 +32,7 @@ socket.on("endBet", (data) => {
 });
 
 socket.on("sendBet", (data) => {
-  const { totalBet, receiverId } = data;
+  const { totalBet, receiverId, gameId } = data;
   // if (receiverId !== user?.userId) {
   //   window.Mezon.WebView.postEvent("SEND_TOKEN", {
   //     sender_id: '1840655580834828288',
@@ -43,6 +44,7 @@ socket.on("sendBet", (data) => {
   // }
   if (user?.userId !== '1840663933552168960') {
     window.Mezon.WebView.postEvent("SEND_TOKEN", {
+      gameId: gameId,
       sender_id: '1840663933552168960',
       sender_name: 'BotMezonGame',
       receiver_id: receiverId,

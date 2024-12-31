@@ -446,6 +446,7 @@ const setupSocketServer = (server) => {
       });
       startBet(data.roomId);
       io.to(data.roomId).emit("startBet", {
+        gameId: data.roomId,
         totalBet: currentRoom.roomInfo?.roomBet,
         receiverId: currentRoom.roomMember[0],
       });
@@ -491,6 +492,7 @@ const setupSocketServer = (server) => {
               winner: userId,
             });
             io.to(getSocketIdOfUser(currentRoom?.roomMember[0])).emit("sendBet", {
+              gameId: roomId,
               totalBet: room.totalBet,
               receiverId: userId,
             });
