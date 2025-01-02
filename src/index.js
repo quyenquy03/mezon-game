@@ -306,13 +306,10 @@ function makeid(length) {
 }
 
 const getRewardFromBot = async (currentGameId, winner, amount) => {
-  const API_KEY = "93666ec9ceb82272dd968da427faa";
-  const APP_ID = "1897617078817241570";
   const userWinner = connectedUsers.find((user) => user.userId === winner);
-  const url = "http://10.10.20.15:3000/payoutApplication";
   const headers = {
-    apiKey: API_KEY,
-    appId: APP_ID,
+    apiKey: process.env.API_KEY,
+    appId: process.env.APP_ID,
     "Content-Type": "application/json",
   };
 
@@ -321,7 +318,7 @@ const getRewardFromBot = async (currentGameId, winner, amount) => {
     userRewardedList: [{ username: userWinner.username, amount }],
   };
   try {
-    const response = await fetch(url, {
+    const response = await fetch(process.env.URL_LAYOUT, {
       method: "POST",
       headers: headers,
       body: JSON.stringify(data),

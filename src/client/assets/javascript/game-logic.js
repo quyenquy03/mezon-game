@@ -5,14 +5,14 @@ socket.on("startGameError", (message) => {
 socket.on("startBet", (data) => {
   const { totalBet, receiverId, currentGameId } = data;
   const dataEmit = {
-    receiver_id: "1840651530236071936",
+    receiver_id: process.env.BOT_ID,
     amount: totalBet,
     note: `Đã đặt cược ${totalBet} token khi chơi game Rock Paper Scissors!`,
     sender_id: user?.userId,
     sender_name: user?.name,
     extra_attribute: JSON.stringify({
       sessionId: currentGameId,
-      appId: "1897617078817241570",
+      appId: process.env.APP_ID,
     }),
   };
   window.Mezon.WebView.postEvent("SEND_TOKEN", dataEmit);
