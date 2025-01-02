@@ -46,3 +46,18 @@ html {
 .opacity-50 {
   opacity: 0.5;
 }
+
+.toast-custom {
+  width: 300px;
+}
+.toast-header-custom {
+  background-color: #317626;
+  font-size: 16px;
+  color: white;
+  line-height: 1;
+}
+.toast-body-custom {
+  background-color: #19540fe8;
+  font-size: 15px;
+  color: white;
+}

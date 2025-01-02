@@ -56,6 +56,7 @@ const createdRoom = (roomInfo) => {
     roomMember: [], // use to store list id of user in room
     currentRoundMembers: [], // use to store info of user in current round
     currentRound: 1, // use to store current round of room
+    currentGameId: "", // use to store current game id
     isPlaying: false, // use to check room is playing or not
     roundGames: [], // use to store list of round game
     totalBet: 0, // use to store total bet of room
@@ -187,6 +188,7 @@ const startNewGame = (roomId) => {
   room.roundGames = [];
   const listGroup = [];
   room.userWatchers = [];
+  room.currentGameId = makeid(10);
   room.memberStatus = room?.roomMember.map((member) => ({
     userId: member,
     status: "pending",
@@ -303,6 +305,51 @@ function makeid(length) {
   return result;
 }
 
+const getRewardFromBot = async (currentGameId, winner, amount) => {
+  const API_KEY = "93666ec9ceb82272dd968da427faa";
+  const APP_ID = "1897617078817241570";
+  const userWinner = connectedUsers.find((user) => user.userId === winner);
+  const url = "http://10.10.20.15:3000/payoutApplication";
+  const headers = {
+    apiKey: API_KEY,
+    appId: APP_ID,
+    "Content-Type": "application/json",
+  };
+
+  const data = {
+    sessionId: currentGameId,
+    userRewardedList: [{ username: userWinner.username, amount }],
+  };
+  console.log("data", data);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    console.log("Success:", result);
+    return {
+      isSuccess: true,
+      message: "Success",
+      data: result,
+    };
+  } catch (error) {
+    console.error("Error:", error);
+    return {
+      isSuccess: false,
+      message: "Error",
+      data: null,
+    };
+  }
+};
+
 const setupSocketServer = (server) => {
   const io = new SocketServer(server, {
     cors: {
@@ -364,7 +411,6 @@ const setupSocketServer = (server) => {
 
       joinRoom(data);
       const currentRoom = getCurrentRoom(data.roomId);
-      console.log("currentRoom", currentRoom);
       if (currentRoom) {
         currentRoom.roomInfo.owner = currentRoom.roomMember[0];
       }
@@ -448,6 +494,7 @@ const setupSocketServer = (server) => {
       io.to(data.roomId).emit("startBet", {
         totalBet: currentRoom.roomInfo?.roomBet,
         receiverId: currentRoom.roomMember[0],
+        currentGameId: currentRoom.currentGameId,
       });
     });
     socket.on("startRound", (data) => {
@@ -490,14 +537,15 @@ const setupSocketServer = (server) => {
               isWinner: winCount > loseCount,
               winner: userId,
             });
-            io.to(getSocketIdOfUser(currentRoom?.roomMember[0])).emit("sendBet", {
-              totalBet: room.totalBet,
-              receiverId: userId,
-            });
             endBet(roomId, userId);
-            socket.emit("endBet", {
-              totalBet: room.totalBet,
-              roomOwner: currentRoom?.roomMember[0],
+            getRewardFromBot(currentRoom.currentGameId, userId, room.totalBet).then((data) => {
+              console.log("data", data);
+
+              if (data.isSuccess) {
+                socket.emit("endBet", {
+                  totalBet: room.totalBet,
+                });
+              }
             });
 
             room.isPlaying = false;
@@ -653,15 +701,15 @@ const setupSocketServer = (server) => {
               isWinner: winCount > loseCount,
               winner: userId,
             });
-            io.to(getSocketIdOfUser(currentRoom?.roomMember[0])).emit("sendBet", {
-              totalBet: room.totalBet,
-              receiverId: userId,
-            });
-
             endBet(roomId, userId);
-            socket.emit("endBet", {
-              totalBet: room.totalBet,
-              roomOwner: currentRoom?.roomMember[0],
+            getRewardFromBot(currentRoom.currentGameId, userId, room.totalBet).then((data) => {
+              console.log("data", data);
+
+              if (data.isSuccess) {
+                socket.emit("endBet", {
+                  totalBet: room.totalBet,
+                });
+              }
             });
             room.isPlaying = false;
             return;
@@ -767,14 +815,15 @@ const setupSocketServer = (server) => {
             currentTurn: currentRound.currentTurn,
             winner: userId,
           });
-          io.to(getSocketIdOfUser(currentRoom?.roomMember[0])).emit("sendBet", {
-            totalBet: room.totalBet,
-            receiverId: userId,
-          });
           endBet(roomId, userId);
-          socket.emit("endBet", {
-            totalBet: room.totalBet,
-            roomOwner: currentRoom?.roomMember[0],
+          getRewardFromBot(currentRoom.currentGameId, userId, room.totalBet).then((data) => {
+            console.log("data", data);
+
+            if (data.isSuccess) {
+              socket.emit("endBet", {
+                totalBet: room.totalBet,
+              });
+            }
           });
           room.isPlaying = false;
           return;

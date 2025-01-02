@@ -21,6 +21,16 @@ const randomNumber = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+const showToast = (toastHeader, toastMessage) => {
+  const toastElement = document.getElementById("myToast");
+  if (toastElement) {
+    const toast = new bootstrap.Toast(toastElement); // Disable auto-hide
+    document.getElementById("toastHeader").innerText = toastHeader;
+    document.getElementById("toastMessage").innerText = toastMessage;
+    toast.show();
+  }
+};
+
 // document.querySelector("#sendPaymentBtn").addEventListener("click", () => {
 //   const receiverId = document.querySelector("#receiverId").value;
 //   const amount = document.querySelector("#amount").value;

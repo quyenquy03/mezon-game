@@ -3,14 +3,20 @@ socket.on("startGameError", (message) => {
 });
 
 socket.on("startBet", (data) => {
-  const { totalBet, receiverId } = data;
-  if (receiverId !== user?.userId) {
-    window.Mezon.WebView.postEvent("SEND_TOKEN", {
-      receiver_id: receiverId,
-      amount: totalBet,
-      note: `Đã đặt cược ${totalBet} token khi chơi game Rock Paper Scissors!`,
-    });
-  }
+  const { totalBet, receiverId, currentGameId } = data;
+  const dataEmit = {
+    receiver_id: "1840651530236071936",
+    amount: totalBet,
+    note: `Đã đặt cược ${totalBet} token khi chơi game Rock Paper Scissors!`,
+    sender_id: user?.userId,
+    sender_name: user?.name,
+    extra_attribute: JSON.stringify({
+      sessionId: currentGameId,
+      appId: "1897617078817241570",
+    }),
+  };
+  console.log(dataEmit);
+  window.Mezon.WebView.postEvent("SEND_TOKEN", dataEmit);
   user.wallet = user?.wallet - totalBet;
   renderUserInfo(user);
 });
@@ -19,17 +25,7 @@ socket.on("endBet", (data) => {
   const { totalBet } = data;
   user.wallet = user?.wallet + totalBet;
   renderUserInfo(user);
-});
-
-socket.on("sendBet", (data) => {
-  const { totalBet, receiverId } = data;
-  if (receiverId !== user?.userId) {
-    window.Mezon.WebView.postEvent("SEND_TOKEN", {
-      receiver_id: receiverId,
-      amount: totalBet,
-      note: `Bạn đã thắng ${totalBet} token khi chơi game Rock Paper Scissors!`,
-    });
-  }
+  showToast("Bạn thắng", `Chúc mừng, bạn đã thắng trận và nhận được ${totalBet} token!`);
 });
 
 let stateResult = [];
@@ -156,9 +152,6 @@ socket.on("startTurn", (data) => {
   renderCurrentRoundInfo(data);
   refreshTurnResult();
   startCountdown(9);
-  // const modalElement = document.getElementById("modal-start-round");
-  // const modal = new bootstrap.Modal(modalElement);
-  // modal.show();
 });
 socket.on("submitTurnNow", (data) => {
   const choosedOptionElement = document.querySelector(".btn-choice.active");

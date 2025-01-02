@@ -139,6 +139,5 @@ const renderGameOfUser = (data) => {
       : `${rivalInfo.username} thắng lượt đấu ${currentTurn}`;
 };
 socket.on("watchGameOfUser", (data) => {
-  console.log("watchGameOfUser ========================= ", data);
   renderGameOfUser(data);
 });

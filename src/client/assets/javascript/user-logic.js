@@ -47,7 +47,6 @@ socket.on("listUsers", (users) => {
 });
 
 const renderUserInfo = (userInfo) => {
-  console.log("renderUserInfo", userInfo);
   const userInfoElement = document.querySelector(".account-box");
   const coinText = document.querySelector(".coin-text");
 
