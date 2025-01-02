@@ -3,7 +3,9 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Server as SocketServer } from "socket.io";
+import dotenv from "dotenv";
 
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -306,10 +308,10 @@ function makeid(length) {
 }
 
 const getRewardFromBot = async (currentGameId, winner, amount) => {
-  const API_KEY = "93666ec9ceb82272dd968da427faa";
-  const APP_ID = "1897617078817241570";
+  const API_KEY = process.env.API_KEY ?? "";
+  const APP_ID = process.env.APP_ID ?? "";
   const userWinner = connectedUsers.find((user) => user.userId === winner);
-  const url = "http://10.10.20.15:3000/payoutApplication";
+  const url = process.env.REWARD_URL ?? "";
   const headers = {
     apiKey: API_KEY,
     appId: APP_ID,
@@ -455,7 +457,7 @@ const setupSocketServer = (server) => {
       }
       const room = getCurrentRoom(data.roomId);
       let checkBetOfAllMember = [];
-      room.roomMember?.forEach((member) => {
+      room?.roomMember?.forEach((member) => {
         const user = connectedUsers.find((user) => user.userId === member);
         if (user.wallet < +room.roomInfo?.roomBet) {
           checkBetOfAllMember.push(member);
@@ -492,7 +494,8 @@ const setupSocketServer = (server) => {
       io.to(data.roomId).emit("startBet", {
         gameId: data.roomId,
         totalBet: currentRoom.roomInfo?.roomBet,
-        receiverId: currentRoom.roomMember[0],
+        receiverId: process.env.BOT_ID,
+        appId: process.env.APP_ID,
         currentGameId: currentRoom.currentGameId,
       });
     });
