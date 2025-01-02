@@ -51,7 +51,6 @@ const renderUserInfo = (userInfo) => {
   const coinText = document.querySelector(".coin-text");
 
   if (!userInfoElement) {
-    console.error("Element with class 'account-box' not found.");
     return;
   }
 

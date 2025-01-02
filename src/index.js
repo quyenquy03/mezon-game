@@ -320,7 +320,6 @@ const getRewardFromBot = async (currentGameId, winner, amount) => {
     sessionId: currentGameId,
     userRewardedList: [{ username: userWinner.username, amount }],
   };
-  console.log("data", data);
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -334,7 +333,6 @@ const getRewardFromBot = async (currentGameId, winner, amount) => {
 
     const result = await response.json();
 
-    console.log("Success:", result);
     return {
       isSuccess: true,
       message: "Success",
@@ -492,6 +490,7 @@ const setupSocketServer = (server) => {
       });
       startBet(data.roomId);
       io.to(data.roomId).emit("startBet", {
+        gameId: data.roomId,
         totalBet: currentRoom.roomInfo?.roomBet,
         receiverId: currentRoom.roomMember[0],
         currentGameId: currentRoom.currentGameId,
@@ -537,10 +536,13 @@ const setupSocketServer = (server) => {
               isWinner: winCount > loseCount,
               winner: userId,
             });
+            io.to(getSocketIdOfUser(currentRoom?.roomMember[0])).emit("sendBet", {
+              gameId: roomId,
+              totalBet: room.totalBet,
+              receiverId: userId,
+            });
             endBet(roomId, userId);
             getRewardFromBot(currentRoom.currentGameId, userId, room.totalBet).then((data) => {
-              console.log("data", data);
-
               if (data.isSuccess) {
                 socket.emit("endBet", {
                   totalBet: room.totalBet,
@@ -703,8 +705,6 @@ const setupSocketServer = (server) => {
             });
             endBet(roomId, userId);
             getRewardFromBot(currentRoom.currentGameId, userId, room.totalBet).then((data) => {
-              console.log("data", data);
-
               if (data.isSuccess) {
                 socket.emit("endBet", {
                   totalBet: room.totalBet,
@@ -817,8 +817,6 @@ const setupSocketServer = (server) => {
           });
           endBet(roomId, userId);
           getRewardFromBot(currentRoom.currentGameId, userId, room.totalBet).then((data) => {
-            console.log("data", data);
-
             if (data.isSuccess) {
               socket.emit("endBet", {
                 totalBet: room.totalBet,

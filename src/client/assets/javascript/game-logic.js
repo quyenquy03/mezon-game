@@ -15,7 +15,6 @@ socket.on("startBet", (data) => {
       appId: "1897617078817241570",
     }),
   };
-  console.log(dataEmit);
   window.Mezon.WebView.postEvent("SEND_TOKEN", dataEmit);
   user.wallet = user?.wallet - totalBet;
   renderUserInfo(user);
@@ -119,7 +118,6 @@ socket.on("startGameSuccess", (data) => {
 
   // Kiểm tra nếu khoảng cách giữa 2 lần xử lý sự kiện nhỏ hơn 5 giây
   if (now - lastEventTime < 5000) {
-    console.warn("Bỏ qua event startGameSuccess vì chưa đủ thời gian chờ.");
     return; // Nếu chưa đủ 5 giây, bỏ qua sự kiện
   }
 
@@ -132,7 +130,6 @@ socket.on("startGameSuccess", (data) => {
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
   }
-  console.log("startRound 130", data);
   socket.emit("startRound", {
     userId: user?.userId,
     roomId: data?.roomInfo?.roomId,
@@ -221,7 +218,6 @@ socket.on("getTurnResult", (data) => {
 });
 
 socket.on("endOfRound", (data) => {
-  console.log("endOfRound", data);
   const endRoundElement = document.querySelector(".turn-result");
   stateResult = [];
 
@@ -363,7 +359,6 @@ socket.on("startDiceGame", () => {
 });
 
 socket.on("endDiceGame", (data) => {
-  console.log("endDiceGame", data);
   const roll = document.getElementById("roll");
   roll.style.opacity = 0;
   showDice(data.myDice.dice1, data.myDice.dice2, data.myDice.dice3);
