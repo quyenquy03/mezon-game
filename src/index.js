@@ -22,8 +22,8 @@ app.get("/game", function (req, res) {
   res.sendFile(path.join(__dirname, "client", "game.html"));
 });
 
-const server = app.listen(3000, function () {
-  console.log("Example app listening on port 3000 with domain http://localhost:3000");
+const server = app.listen(3100, function () {
+  console.log("Example app listening on port 3000 with domain http://localhost:3100");
 });
 
 const connectedUsers = [];
