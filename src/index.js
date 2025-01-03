@@ -23,7 +23,7 @@ app.get("/game", function (req, res) {
 });
 
 const server = app.listen(3100, function () {
-  console.log("Example app listening on port 3000 with domain http://localhost:3100");
+  console.log("Example app listening on port 3100 with domain http://localhost:3100");
 });
 
 const connectedUsers = [];
