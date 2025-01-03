@@ -310,7 +310,7 @@ function makeid(length) {
 const getRewardFromBot = async (currentGameId, winner, amount) => {
   const API_KEY = process.env.API_KEY ?? "";
   const APP_ID = process.env.APP_ID ?? "";
-  const userWinner = connectedUsers.find((user) => user.userId === winner);
+  // const userWinner = connectedUsers.find((user) => user.userId === winner);
   const url = process.env.REWARD_URL ?? "";
   const headers = {
     apiKey: API_KEY,
@@ -320,7 +320,7 @@ const getRewardFromBot = async (currentGameId, winner, amount) => {
 
   const data = {
     sessionId: currentGameId,
-    userRewardedList: [{ username: userWinner.username, amount }],
+    userRewardedList: [{ userId: winner, amount }],
   };
   try {
     const response = await fetch(url, {
