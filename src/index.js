@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+const PORT = process.env.PORT || 3100;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -22,8 +22,8 @@ app.get("/game", function (req, res) {
   res.sendFile(path.join(__dirname, "client", "game.html"));
 });
 
-const server = app.listen(3000, function () {
-  console.log("Example app listening on port 3000 with domain http://localhost:3000");
+const server = app.listen(PORT, function () {
+  console.log(`Example app listening on port ${PORT} with domain http://localhost:${PORT}`);
 });
 
 const connectedUsers = [];
@@ -62,6 +62,7 @@ const createdRoom = (roomInfo) => {
     isPlaying: false, // use to check room is playing or not
     roundGames: [], // use to store list of round game
     totalBet: 0, // use to store total bet of room
+    isReady: [], // use to store list of user ready to play game
     userWatchers: [], // use to store list of user watching game { userId, targetId }
     memberStatus: [], // use to store status of member in room { userId, status: "pending" | "playing" | "lose"}
   });
@@ -97,6 +98,13 @@ const joinRoom = (data) => {
   const checkIsMember = room?.roomMember?.find((member) => member === data.userId);
   if (room && !checkIsMember && data.userId) {
     room.roomMember.push(data.userId);
+    const checkIsReady = room.isReady?.find((member) => member.userId === data.userId);
+    if (!checkIsReady) {
+      room.isReady.push({
+        userId: data.userId,
+        isReady: false,
+      });
+    }
   }
 };
 
@@ -105,6 +113,7 @@ const leaveRoom = (userId) => {
   const room = listRooms?.find((room) => room.roomMember?.includes(userId));
   if (room) {
     room.roomMember = room.roomMember?.filter((member) => member !== userId);
+    room.isReady = room.isReady?.filter((member) => member.userId !== userId);
   }
   if (room?.roomMember.length === 0) {
     const index = listRooms?.findIndex((room) => room.roomMember.length === 0);
@@ -310,7 +319,6 @@ function makeid(length) {
 const getRewardFromBot = async (currentGameId, winner, amount) => {
   const API_KEY = process.env.API_KEY ?? "";
   const APP_ID = process.env.APP_ID ?? "";
-  const userWinner = connectedUsers.find((user) => user.userId === winner);
   const url = process.env.REWARD_URL ?? "";
   const headers = {
     apiKey: API_KEY,
@@ -320,21 +328,22 @@ const getRewardFromBot = async (currentGameId, winner, amount) => {
 
   const data = {
     sessionId: currentGameId,
-    userRewardedList: [{ username: userWinner.username, amount }],
+    userRewardedList: [{ userId: winner, amount }],
   };
+  console.log("Data:", data);
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: headers,
       body: JSON.stringify(data),
     });
-
+    console.log("Response:", response);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const result = await response.json();
-
+    console.log("Result:", result);
     return {
       isSuccess: true,
       message: "Success",
@@ -446,7 +455,7 @@ const setupSocketServer = (server) => {
       io.emit("roomMembers", getRoomMembers(roomId));
     });
 
-    socket.on("startGame", (data) => {
+    socket.on("startCheckReady", (data) => {
       if (!checkMemberBeforeStartGame(data.roomId)) {
         socket.emit("startGameError", "Số lượng người chơi chưa đủ để bắt đầu!");
         return;
@@ -455,6 +464,49 @@ const setupSocketServer = (server) => {
         socket.emit("startGameError", "Phòng đang trong trạng thái chơi!");
         return;
       }
+      io.to(data.roomId).emit("startCheckReady", data);
+
+      setTimeout(() => {
+        const room = getCurrentRoom(data.roomId);
+        const checkIsReady = room?.isReady?.every((member) => member.isReady);
+        if (checkIsReady) {
+          socket.emit("startGameNow", data);
+        } else {
+          room?.isReady?.forEach((user) => {
+            const member = user.userId;
+            if (!user.isReady && user.userId !== room?.roomMember[0]) {
+              leaveRoom(member);
+              const roomAfterLeave = getCurrentRoom(room?.roomInfo?.roomId);
+              const roomMembers = getRoomMembers(room?.roomInfo?.roomId);
+              const targetSocket = io.sockets.sockets.get(getSocketIdOfUser(member));
+              targetSocket.leave(room?.roomInfo?.roomId);
+              targetSocket.emit("leaveRoomSuccess", roomAfterLeave);
+              io.emit("listRooms", listRooms);
+              io.to(roomAfterLeave?.roomInfo?.roomId).emit("currentRoom", {
+                currentRoom: roomAfterLeave,
+                roomMembers: roomMembers,
+              });
+              io.to(roomAfterLeave?.roomInfo?.roomId).emit("roomMembers", roomMembers);
+            }
+          });
+          io.to(data.roomId).emit("startGameError", "Có người chơi chưa sẵn sàng!");
+        }
+        room.isReady = room?.isReady?.map((member) => {
+          member.isReady = false;
+          return member;
+        });
+      }, 10000);
+    });
+
+    socket.on("readyGame", (data) => {
+      const room = getCurrentRoom(data.roomId);
+      const checkIsReady = room?.isReady?.find((member) => member.userId === data.userId);
+      if (checkIsReady) {
+        checkIsReady.isReady = true;
+      }
+    });
+
+    socket.on("startGame", (data) => {
       const room = getCurrentRoom(data.roomId);
       let checkBetOfAllMember = [];
       room?.roomMember?.forEach((member) => {

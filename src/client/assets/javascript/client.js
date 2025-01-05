@@ -21,10 +21,14 @@ const randomNumber = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-const showToast = (toastHeader, toastMessage) => {
+const showToast = (toastHeader, toastMessage, type = "success") => {
   const toastElement = document.getElementById("myToast");
   if (toastElement) {
-    const toast = new bootstrap.Toast(toastElement); // Disable auto-hide
+    const toast = new bootstrap.Toast(toastElement, {
+      // autohide: false,
+    }); // Disable auto-hide
+    toastElement.classList.remove(type);
+    toastElement.classList.add(type);
     document.getElementById("toastHeader").innerText = toastHeader;
     document.getElementById("toastMessage").innerText = toastMessage;
     toast.show();

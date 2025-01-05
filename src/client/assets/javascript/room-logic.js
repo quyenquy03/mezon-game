@@ -1,3 +1,47 @@
+// ready game
+const startCheckReadyGame = (userId, roomId, roomBet) => {
+  socket.emit("startCheckReady", {
+    userId,
+    roomId,
+    roomBet,
+  });
+};
+
+socket.on("startCheckReady", (data) => {
+  const modalElement = document.getElementById("modal-ready-game");
+
+  // Kiểm tra xem modal đã được hiển thị chưa
+  if (!modalElement.classList.contains("show")) {
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+    betCoinOfGame.innerHTML = data?.roomBet;
+    btnReadyGame.addEventListener("click", () => {
+      readyGame(user?.userId, data?.roomId, data?.roomBet);
+    });
+    btnReadyGame.disabled = false;
+    let time = 10;
+    const interval = setInterval(() => {
+      time--;
+      countdownReadyGame.innerHTML = time;
+      if (time === 0) {
+        clearInterval(interval);
+        modal.hide();
+        countdownReadyGame.innerHTML = 10;
+      }
+    }, 1000);
+  }
+});
+const readyGame = (userId, roomId) => {
+  socket.emit("readyGame", {
+    userId,
+    roomId,
+  });
+  btnReadyGame.disabled = true;
+};
+socket.on("startGameNow", (data) => {
+  startGame(data?.userId, data?.roomId);
+});
+
 // start game
 const startGame = (userId, roomId) => {
   if (listChoice) {
@@ -53,15 +97,24 @@ const renderListRoom = (listRooms) => {
     roomElement.innerHTML = `
       <div class="room-item">
               <div class="room-name">
-                <span class="room-name-text">${room?.roomInfo?.roomId}</span>
+                <span class="">${room?.roomInfo?.roomId}</span>
               </div>
               <div class="room-join">
-                <button onclick="joinRoom('${room?.roomInfo?.roomId}')" class="room-join-btn">JOIN</button>
+                <div class="text-white room-name-text">
+                  <span class="truncate">${
+                    room?.roomInfo?.roomName && room?.roomInfo?.roomName?.trim() !== ""
+                      ? room.roomInfo.roomName
+                      : "Phòng chưa đặt tên"
+                  }</span>
+                </div>
+                <div class="d-flex justify-content-center"><button onclick="joinRoom('${
+                  room?.roomInfo?.roomId
+                }')" class="room-join-btn">JOIN</button></div>
               </div>
               <div class="room-bet">
                 <img class="room-bet-bg" src="./assets/images/bg-cuoc.png" alt="" />
                 <div class="room-bet-info">
-                  <span class="room-bet-text">${room?.roomInfo?.roomBet}</span>
+                  <span class="room-bet-text ">${room?.roomInfo?.roomBet}</span>
                   <img class="room-bet-coin" src="./assets/images/coin.png" alt="" />
                 </div>
               </div>
@@ -201,7 +254,8 @@ const renderCurrentRoomInfo = (roomInfo, roomMembers) => {
 
   const startGameButtonElement = document.querySelector(".btn-start-game");
   const handleStartGame = () => {
-    startGame(user?.userId, roomInfo?.roomInfo?.roomId);
+    startCheckReadyGame(user?.userId, roomInfo?.roomInfo?.roomId, roomInfo?.roomInfo?.roomBet);
+    // startGame(user?.userId, roomInfo?.roomInfo?.roomId);
   };
 
   startGameButtonElement.replaceWith(startGameButtonElement.cloneNode(true));

@@ -1,6 +1,12 @@
 const handleLeaveGame = () => {
-  const modal = bootstrap.Modal.getInstance(modalStartRound);
-  modal.hide();
+  if (modalStartRound && modalStartRound.classList.contains("show")) {
+    const modal = bootstrap.Modal.getInstance(modalStartRound);
+    modal.hide();
+  }
+  if (modalShowGame && modalShowGame.classList.contains("show")) {
+    const modal = bootstrap.Modal.getInstance(modalShowGame);
+    modal.hide();
+  }
   navigateTo("room-content");
   if (listChoice) {
     listChoice.classList.remove("hide");

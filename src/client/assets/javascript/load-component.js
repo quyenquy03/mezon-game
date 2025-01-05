@@ -22,6 +22,9 @@ let d1,
   playerStreamResult,
   headerStreamLeft,
   headerStreamRight,
+  btnReadyGame,
+  countdownReadyGame,
+  betCoinOfGame,
   listMemberStream;
 
 // load modal-create-room.html
@@ -43,6 +46,20 @@ fetch("./components/modal-search-room.html")
   })
   .then((data) => {
     document.getElementById("modal-search-room-root").innerHTML = data;
+  })
+  .catch((error) => console.error("Lỗi:", error));
+
+// load modal-search-room.html
+fetch("./components/modal-ready-game.html")
+  .then((response) => {
+    if (!response.ok) throw new Error("Không thể tải file");
+    return response.text();
+  })
+  .then((data) => {
+    document.getElementById("modal-ready-game-root").innerHTML = data;
+    btnReadyGame = document.getElementById("btn-ready-game");
+    countdownReadyGame = document.getElementById("countdown-ready-game");
+    betCoinOfGame = document.getElementById("bet-coin-game");
   })
   .catch((error) => console.error("Lỗi:", error));
 

@@ -61,3 +61,16 @@ html {
   font-size: 15px;
   color: white;
 }
+.toast-custom.error .toast-header-custom {
+  background-color: #ff0000;
+}
+.toast-custom.error .toast-body-custom {
+  background-color: #ff0000;
+}
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%; /* Đặt độ rộng phù hợp */
+  display: block;
+}
